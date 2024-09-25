@@ -12,6 +12,7 @@ fun NavScreen(){
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = Routes.Login.route ){
+
         composable(route = Routes.SingIn.route){
             SingInScreen(
                 back = { navController.popBackStack()},
@@ -24,6 +25,10 @@ fun NavScreen(){
                 openRegister = { navController.navigate(Routes.SingIn.route)},
                 openApp = {navController.navigate(Routes.MainApp.route)}
             )
+        }
+
+        composable(route=Routes.MainApp.route){
+            MainApp()
         }
     }
 }
