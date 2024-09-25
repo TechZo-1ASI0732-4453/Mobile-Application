@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 
 sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -83,6 +84,7 @@ fun MainApp(){
         ) {
             NavHost(navController = navController, startDestination = Screens.Explorer.route) {
                 composable(route = Screens.Explorer.route) {
+                    ExplorerScreen()
                 }
 
             }
