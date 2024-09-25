@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.techzo.cambiazo.presentation.login.LoginScreen
+import com.techzo.cambiazo.presentation.register.SingInScreen
 
 @Composable
 fun NavScreen(){
@@ -12,6 +13,12 @@ fun NavScreen(){
 
     NavHost(navController = navController, startDestination = Routes.Login.route ){
 
+        composable(route = Routes.SingIn.route){
+            SingInScreen(
+                back = { navController.popBackStack()},
+                openLogin = {navController.navigate(Routes.Login.route)}
+            )
+        }
 
         composable(route = Routes.Login.route){
             LoginScreen(
