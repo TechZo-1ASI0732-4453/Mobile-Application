@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -66,19 +67,14 @@ fun LoginScreen(openRegister: () -> Unit = {},
         TextLink("","Olvidé mi contraseña", clickable = {openForgotPassword()},Arrangement.End)
 
         ButtonApp("Iniciar Sesion", onClick = {
-            try {
-                viewModel.signIn()
-                if (state.data != null) {
-                    openApp()
-                } else {
-                    // Manejar el caso en que la autenticación falle
-                    Log.e("LoginScreen", "Error: ${state.message}")
-                }
-            } catch (e: Exception) {
-                Log.e("LoginScreen", "Exception during sign in", e)
-            }
+            viewModel.signIn()
         })
-
+        state.data?.let {
+            openApp()
+        }
+        if (state.isLoading) {
+            CircularProgressIndicator()
+        }
 
         Row(
             modifier = Modifier
