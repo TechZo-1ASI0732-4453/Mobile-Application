@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -43,30 +44,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.R
+import com.techzo.cambiazo.domain.model.Product
 import com.techzo.cambiazo.presentation.login.MainScaffoldApp
 
 @Composable
-fun ExplorerScreen(){
+fun ExplorerScreen(viewModel: ExplorerListViewModel) {
 
-    val searcher = remember {
-        mutableStateOf("")
-    }
-
-
-    val buttonTexts = listOf("Botón 1", "Botón 2", "Botón 3", "Botón 4", "Botón 5", "Botón 6")
-
-    val itemsList = listOf(
-        Item("Título 1", "Descripción 1"),
-        Item("Título 2", "Descripción 2"),
-        Item("Título 3", "Descripción 3"),
-        Item("Título 4", "Descripción 4"),
-        Item("Título 5", "Descripción 5")
-    )
+    val searcher = viewModel.name.value
+    val categories = viewModel.productCategories.value
+    val state = viewModel.state.value
 
     MainScaffoldApp(
         paddingCard = PaddingValues(0.dp),
         contentsHeader = {
-
             Image(
                 painter = painterResource(R.drawable.cambiazo_logo_name),
                 contentDescription = "logo cambiazo",
@@ -74,19 +64,17 @@ fun ExplorerScreen(){
             )
 
             Row(
-                modifier = Modifier
-                    .padding(bottom = 20.dp),
+                modifier = Modifier.padding(bottom = 20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 OutlinedTextField(
                     modifier = Modifier
                         .shadow(10.dp, RoundedCornerShape(12.dp))
                         .background(Color.White, RoundedCornerShape(12.dp)),
-                    value = searcher.value,
-                    onValueChange = { searcher.value = it },
-                    placeholder =  {
-                        Row{
+                    value = searcher,
+                    onValueChange = { searcher -> viewModel.onNameChanged(searcher) },
+                    placeholder = {
+                        Row {
                             Text("Buscar")
                         }
                     },
@@ -96,8 +84,8 @@ fun ExplorerScreen(){
                         Icon(imageVector = Icons.Default.Search, contentDescription = null)
                     },
                     shape = RoundedCornerShape(12.dp),
+                )
 
-                    )
                 Spacer(modifier = Modifier.width(5.dp))
 
                 IconButton(onClick = {},
@@ -108,37 +96,39 @@ fun ExplorerScreen(){
                         contentDescription = "Filtro",
                         tint = Color.White)
                 }
-
-
             }
         }
-    ){
+    ) {
         LazyRow(
             modifier = Modifier.padding(vertical = 10.dp)
         ) {
-            items(buttonTexts) { text ->
+            items(categories.data ?: emptyList()) { category ->
+                val isSelected = viewModel.selectedCategoryId.value == category.id
+
                 Button(
-                    onClick = {  },
+                    onClick = { viewModel.onProductCategorySelected(category.id) },
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .border(
                             width = 1.dp,
-                            color = Color(0xFFFFD146),
+                            color = if (isSelected) Color(0xFFFFD146) else Color(0xFFFFD146),
                             shape = RoundedCornerShape(14.dp)
                         ),
-                    colors = ButtonDefaults.buttonColors(Color.Transparent)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected) Color.Black else Color.Transparent,
+                        contentColor = if (isSelected) Color(0xFFFFD146) else Color.Black
+                    )
                 ) {
-                    Text(text = text, color = Color.Black)
+                    Text(text = category.name, color = if (isSelected) Color(0xFFFFD146) else Color.Black)
                 }
             }
         }
 
-
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(itemsList) { item ->
-                Products()
+            items(state.data?: emptyList()) { product ->
+                Products(product)
             }
         }
     }
@@ -146,7 +136,7 @@ fun ExplorerScreen(){
 
 
 @Composable
-fun Products(){
+fun Products(product: Product) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -155,14 +145,14 @@ fun Products(){
             .shadow(elevation = 12.dp, RoundedCornerShape(16.dp)),
     ) {
         Column {
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
                     .background(Color.Transparent)
             ) {
-                GlideImage(imageModel = { "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBH3LkjkJRJtrR53ulwmFei7w9bqxXuWruqA&s" },
+                GlideImage(
+                    imageModel = { product.image },
                     modifier = Modifier.fillMaxSize()
                 )
 
@@ -175,10 +165,9 @@ fun Products(){
                         )
                         .padding(horizontal = 14.dp)
                         .padding(vertical = 4.dp),
-
-                    ) {
+                ) {
                     Text(
-                        text = "S/500 valor aprox.",
+                        text = "S/${product.price} valor aprox.",
                         color = Color(0xFFFFD146),
                         fontWeight = FontWeight.Bold,
                     )
@@ -192,7 +181,7 @@ fun Products(){
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Carro",
+                    text = product.name,
                     fontWeight = FontWeight.Bold,
                     fontSize = 27.sp
                 )
@@ -204,14 +193,14 @@ fun Products(){
                         tint = Color(0xFFFFD146)
                     )
                     Text(
-                        text = "La Molina, Callao",
+                        text = "Distrito: ${product.districtId}",
                         color = Color(0xFF9F9C9C),
                         modifier = Modifier.padding(start = 1.dp)
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "De 12 kilometros por hora",
+                    text = product.description,
                     color = Color.Black
                 )
             }
