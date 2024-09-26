@@ -55,6 +55,7 @@ fun ExplorerScreen(
     val state = viewModel.state.value
 
     MainScaffoldApp(
+        bottomBar = bottomBar,
         paddingCard = PaddingValues(0.dp),
         contentsHeader = {
             Image(

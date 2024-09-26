@@ -13,9 +13,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
-import com.techzo.cambiazo.presentation.login.LoginScreen
+import com.techzo.cambiazo.presentation.login.SignInScreen
 import com.techzo.cambiazo.presentation.login.SignInViewModel
-import com.techzo.cambiazo.presentation.register.SingInScreen
+import com.techzo.cambiazo.presentation.register.SignUpScreen
+import com.techzo.cambiazo.presentation.register.SignUpViewModel
 
 sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -52,8 +53,8 @@ sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate
 
 
 sealed class Routes(val route: String){
-    data object Login: Routes("LoginScreen")
-    data object SingIn: Routes("SingInScreen")
+    data object SignUp: Routes("SignUpScreen")
+    data object SignIn: Routes("SignInScreen")
     data object Filter: Routes("FilterScreen")
     data object Explorer: Routes("ExplorerScreen")
     data object Article: Routes("ArticleScreen")
@@ -64,7 +65,7 @@ sealed class Routes(val route: String){
 }
 
 @Composable
-fun NavScreen(viewModelAuth: SignInViewModel, viewModelProduct: ExplorerListViewModel){
+fun NavScreen(viewModelAuth: SignInViewModel, viewModelProduct: ExplorerListViewModel, viewModelSignUp: SignUpViewModel){
     val navController = rememberNavController()
 
     val items = listOf(
@@ -79,18 +80,22 @@ fun NavScreen(viewModelAuth: SignInViewModel, viewModelProduct: ExplorerListView
 
     val viewModelProduct = viewModelProduct
 
-    NavHost(navController = navController, startDestination = Routes.Login.route ){
+    val viewModelSignUp = viewModelSignUp
 
-        composable(route = Routes.SingIn.route){
-            SingInScreen(
+
+    NavHost(navController = navController, startDestination = Routes.SignIn.route ){
+
+        composable(route = Routes.SignUp.route){
+            SignUpScreen(
                 back = { navController.popBackStack()},
-                openLogin = {navController.navigate(Routes.Login.route)}
+                openLogin = {navController.navigate(Routes.SignIn.route)},
+                viewModel = viewModelSignUp
             )
         }
 
-        composable(route = Routes.Login.route){
-            LoginScreen(
-                openRegister = { navController.navigate(Routes.SingIn.route)},
+        composable(route = Routes.SignIn.route){
+            SignInScreen(
+                    openRegister = { navController.navigate(Routes.SignUp.route)},
                 openApp = {navController.navigate(Routes.Explorer.route)},
                 viewModel = viewModelAuth
             )

@@ -38,7 +38,7 @@ import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextLink
 
 @Composable
-fun LoginScreen(openRegister: () -> Unit = {},
+fun SignInScreen(openRegister: () -> Unit = {},
                 openApp: () -> Unit = {},
                 openForgotPassword: () -> Unit = {},
                 viewModel: SignInViewModel = viewModel()){
@@ -145,8 +145,8 @@ fun LoginScreen(openRegister: () -> Unit = {},
 
 @Preview
 @Composable
-fun PreviewLoginScreen(){
-    LoginScreen()
+fun PreviewSignInScreen(){
+    SignInScreen()
 }
 
 
