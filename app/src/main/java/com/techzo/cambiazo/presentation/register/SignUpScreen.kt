@@ -66,7 +66,7 @@ fun SignUpScreen(openLogin: () -> Unit = {},
         FieldTextApp(name,"Nombre",onValueChange = { viewModel.onNameChange(it) })
         FieldTextApp(phoneNumber,"Numero de Telefono",onValueChange = { viewModel.onPhoneNumberChange(it) })
         FieldTextApp(username,"Correo electrónico",onValueChange = { viewModel.onUsernameChange(it) })
-        FieldTextApp(password,"Contrasenia",onValueChange = { viewModel.onPasswordChange(it) })
+        FieldTextApp(password,"Contraseña",onValueChange = { viewModel.onPasswordChange(it) })
         FieldTextApp(repitePassword,"Confirmar contrasenia",onValueChange = { viewModel.onRepitePasswordChange(it) })
 
 
