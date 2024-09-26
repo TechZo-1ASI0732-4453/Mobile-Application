@@ -56,7 +56,6 @@ fun ExplorerScreen(
 
     MainScaffoldApp(
         paddingCard = PaddingValues(0.dp),
-        bottomBar = bottomBar,
         contentsHeader = {
             Image(
                 painter = painterResource(R.drawable.cambiazo_logo_name),
@@ -73,7 +72,7 @@ fun ExplorerScreen(
                         .shadow(10.dp, RoundedCornerShape(12.dp))
                         .background(Color.White, RoundedCornerShape(12.dp)),
                     value = searcher,
-                    onValueChange = { searcher -> viewModel.onNameChanged(searcher) },
+                    onValueChange = { viewModel.onNameChanged(it) },  // Filtro en tiempo real
                     placeholder = {
                         Row {
                             Text("Buscar")
@@ -89,7 +88,7 @@ fun ExplorerScreen(
 
                 Spacer(modifier = Modifier.width(5.dp))
 
-                IconButton(onClick = {onFilter()},
+                IconButton(onClick = {},
                     modifier = Modifier
                         .background(Color.Black, RoundedCornerShape(12.dp))
                         .size(53.dp)) {
@@ -100,6 +99,7 @@ fun ExplorerScreen(
             }
         }
     ) {
+        // LazyRow para los botones de categorías
         LazyRow(
             modifier = Modifier.padding(vertical = 10.dp)
         ) {
@@ -125,10 +125,11 @@ fun ExplorerScreen(
             }
         }
 
+        // Mostrar productos filtrados
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(state.data?: emptyList()) { product ->
+            items(state.data ?: emptyList()) { product ->
                 Products(product)
             }
         }

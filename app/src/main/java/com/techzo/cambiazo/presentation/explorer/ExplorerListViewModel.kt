@@ -16,6 +16,8 @@ class ExplorerListViewModel(
     private val productRepository: ProductRepository,
     private val productCategoryRepository: ProductCategoryRepository) : ViewModel() {
 
+    private val _allProducts = mutableStateOf<List<Product>>(emptyList())
+
     private val _name = mutableStateOf("")
     val name: State<String> get() = _name
 
@@ -39,21 +41,10 @@ class ExplorerListViewModel(
         viewModelScope.launch {
             val result = productRepository.getProducts()
             if(result is Resource.Success){
+                _allProducts.value = result.data ?: emptyList()
                 _state.value = UIState(data = result.data)
             }else{
                 _state.value = UIState(message = result.message?:"Ocurrió un error")
-            }
-        }
-    }
-
-    fun getProductCategories() {
-        _productCategories.value = UIState(isLoading = true)
-        viewModelScope.launch {
-            val result = productCategoryRepository.getProductCategories()
-            if(result is Resource.Success){
-                _productCategories.value = UIState(data = result.data)
-            }else{
-                _productCategories.value = UIState(message = result.message?:"Ocurrió un error")
             }
         }
     }
@@ -64,14 +55,42 @@ class ExplorerListViewModel(
         viewModelScope.launch {
             val result = productRepository.getProductsByCategoryId(id)
             if(result is Resource.Success){
-                _state.value = UIState(data = result.data, message = "Se cargaron los productos")
+                _allProducts.value = result.data ?: emptyList()
+                applyFilter() // Aplicar filtro tras obtener productos
             }else{
                 _state.value = UIState(message = result.message?:"Ocurrió un error")
             }
         }
     }
 
+    // Actualiza el nombre ingresado en el campo de búsqueda
     fun onNameChanged(name: String) {
         _name.value = name
+        applyFilter() // Filtrar productos mientras se escribe en el buscador
+    }
+
+    // Aplica el filtro tanto por nombre como por categoría
+    private fun applyFilter() {
+        val filteredList = _allProducts.value.filter { product ->
+            val matchesName = product.name.contains(_name.value, ignoreCase = true)
+            val matchesCategory = _selectedCategoryId.value?.let { categoryId ->
+                product.productCategoryId == categoryId
+            } ?: true
+            matchesName && matchesCategory
+        }
+        _state.value = UIState(data = filteredList)
+    }
+
+    // Función para obtener las categorías de productos
+    fun getProductCategories() {
+        _productCategories.value = UIState(isLoading = true)
+        viewModelScope.launch {
+            val result = productCategoryRepository.getProductCategories()
+            if(result is Resource.Success){
+                _productCategories.value = UIState(data = result.data)
+            }else{
+                _productCategories.value = UIState(message = result.message?:"Ocurrió un error")
+            }
+        }
     }
 }
