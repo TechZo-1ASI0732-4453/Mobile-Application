@@ -21,6 +21,7 @@ class ExplorerListViewModel(
     private val _name = mutableStateOf("")
     val name: State<String> get() = _name
 
+
     private val _state = mutableStateOf(UIState<List<Product>>())
     val state: State<UIState<List<Product>>> = _state
 
