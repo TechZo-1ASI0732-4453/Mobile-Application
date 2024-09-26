@@ -81,7 +81,7 @@ fun SignInScreen(openRegister: () -> Unit = {},
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = password,
-            placeholder = { Text("Contrasenia")},
+            placeholder = { Text("Contraseña")},
             onValueChange = { viewModel.onPasswordChange(it) },
             visualTransformation =
                 if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
