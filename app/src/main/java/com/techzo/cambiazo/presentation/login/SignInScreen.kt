@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.presentation.login
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.background
@@ -27,8 +28,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,13 +38,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.techzo.cambiazo.R
 
 @Composable
 fun LoginScreen(openRegister: () -> Unit = {},
                 openApp: () -> Unit = {},
-                openForgotPassword: () -> Unit = {}){
+                openForgotPassword: () -> Unit = {},
+                viewModel: SignInViewModel = viewModel()){
 
+
+    val state = viewModel.state.value
+
+    val username = viewModel.username.value
+
+    val password = viewModel.password.value
+
+    /*
     val email = remember {
         mutableStateOf("")
     }
@@ -54,6 +63,7 @@ fun LoginScreen(openRegister: () -> Unit = {},
         mutableStateOf("")
     }
 
+     */
     MainScaffoldApp(
         paddingCard = PaddingValues(40.dp),
         contentsHeader = {
@@ -75,13 +85,25 @@ fun LoginScreen(openRegister: () -> Unit = {},
         )
 
 
-        FieldTextApp(email.value,"Correo electrónico",onValueChange = { email.value = it })
+        FieldTextApp(username,"Correo electrónico",onValueChange = { viewModel.onUsernameChange(it)})
 
-        FieldTextApp(password.value,"Contrasenia",onValueChange = { password.value = it })
+        FieldTextApp(password,"Contrasenia",onValueChange = { viewModel.onPasswordChange(it) })
 
         TextLink("","Olvidé mi contraseña", clickable = {openForgotPassword()},Arrangement.End)
 
-        ButtonApp("Iniciar Sesion", onClick = {openApp()})
+        ButtonApp("Iniciar Sesion", onClick = {
+            try {
+                viewModel.signIn()
+                if (state.data != null) {
+                    openApp()
+                } else {
+                    // Manejar el caso en que la autenticación falle
+                    Log.e("LoginScreen", "Error: ${state.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("LoginScreen", "Exception during sign in", e)
+            }
+        })
 
 
         Row(
