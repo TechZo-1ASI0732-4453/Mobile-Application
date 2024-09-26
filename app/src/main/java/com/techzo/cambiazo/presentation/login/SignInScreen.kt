@@ -8,8 +8,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.components.ButtonApp
@@ -37,6 +47,7 @@ fun LoginScreen(openRegister: () -> Unit = {},
     val state = viewModel.state.value
     val username = viewModel.username.value
     val password = viewModel.password.value
+    val showPassword = viewModel.showPassword.value
 
     MainScaffoldApp(
         paddingCard = PaddingValues(40.dp),
@@ -59,26 +70,44 @@ fun LoginScreen(openRegister: () -> Unit = {},
         )
 
 
-        FieldTextApp(username,"Correo electrónico",onValueChange = { viewModel.onUsernameChange(it)})
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+            value = username,
+            placeholder = {
+                Text("Correo electrónico")},
+            onValueChange = { viewModel.onUsernameChange(it)}
+        )
 
-        FieldTextApp(password,"Contrasenia",onValueChange = { viewModel.onPasswordChange(it) })
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = password,
+            placeholder = { Text("Contrasenia")},
+            onValueChange = { viewModel.onPasswordChange(it) },
+            visualTransformation =
+                if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    viewModel.onShowPasswordChange(!showPassword)
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Visibility,
+                        contentDescription = "Visible"
+                    )
+                }
+            }
+        )
 
         TextLink("","Olvidé mi contraseña", clickable = {openForgotPassword()},Arrangement.End)
 
         ButtonApp("Iniciar Sesion", onClick = {
-            try {
-                viewModel.signIn()
-                if (state.data != null) {
-                    openApp()
-                } else {
-                    // Manejar el caso en que la autenticación falle
-                    Log.e("LoginScreen", "Error: ${state.message}")
-                }
-            } catch (e: Exception) {
-                Log.e("LoginScreen", "Exception during sign in", e)
-            }
+            viewModel.signIn()
         })
-
+        state.data?.let {
+            openApp()
+        }
+        if (state.isLoading) {
+            CircularProgressIndicator()
+        }
 
         Row(
             modifier = Modifier
@@ -114,6 +143,10 @@ fun LoginScreen(openRegister: () -> Unit = {},
     }
 }
 
-
+@Preview
+@Composable
+fun PreviewLoginScreen(){
+    LoginScreen()
+}
 
 

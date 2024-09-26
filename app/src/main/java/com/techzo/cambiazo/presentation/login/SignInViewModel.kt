@@ -22,6 +22,8 @@ class SignInViewModel(private val authRepository: AuthRepository): ViewModel() {
     private val _password = mutableStateOf("")
     val password: State<String> get() = _password
 
+    private val _showPassword = mutableStateOf(false)
+    val showPassword: State<Boolean> get() = _showPassword
 
     fun signIn() {
         _state.value = UIState(isLoading = true)
@@ -41,5 +43,9 @@ class SignInViewModel(private val authRepository: AuthRepository): ViewModel() {
 
     fun onPasswordChange(password: String) {
         _password.value = password
+    }
+
+    fun onShowPasswordChange(showPassword: Boolean) {
+        _showPassword.value = showPassword
     }
 }
