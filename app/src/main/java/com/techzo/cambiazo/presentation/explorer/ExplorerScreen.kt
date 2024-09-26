@@ -1,6 +1,5 @@
 package com.techzo.cambiazo.presentation.explorer
 
-import android.content.ClipData.Item
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,7 +23,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -32,8 +30,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -44,11 +40,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.R
+import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.domain.model.Product
-import com.techzo.cambiazo.presentation.login.MainScaffoldApp
 
 @Composable
-fun ExplorerScreen(viewModel: ExplorerListViewModel) {
+fun ExplorerScreen(
+    viewModel: ExplorerListViewModel,
+    bottomBar: @Composable () -> Unit = {},
+    onFilter: () -> Unit = {}
+) {
 
     val searcher = viewModel.name.value
     val categories = viewModel.productCategories.value
@@ -56,6 +56,7 @@ fun ExplorerScreen(viewModel: ExplorerListViewModel) {
 
     MainScaffoldApp(
         paddingCard = PaddingValues(0.dp),
+        bottomBar = bottomBar,
         contentsHeader = {
             Image(
                 painter = painterResource(R.drawable.cambiazo_logo_name),
@@ -88,7 +89,7 @@ fun ExplorerScreen(viewModel: ExplorerListViewModel) {
 
                 Spacer(modifier = Modifier.width(5.dp))
 
-                IconButton(onClick = {},
+                IconButton(onClick = {onFilter()},
                     modifier = Modifier
                         .background(Color.Black, RoundedCornerShape(12.dp))
                         .size(53.dp)) {
