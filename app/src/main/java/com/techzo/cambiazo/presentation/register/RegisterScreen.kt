@@ -19,13 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.techzo.cambiazo.presentation.login.ButtonApp
-import com.techzo.cambiazo.presentation.login.ButtonIconHeaderApp
-import com.techzo.cambiazo.presentation.login.FieldTextApp
-import com.techzo.cambiazo.presentation.login.LoginGoogleApp
-import com.techzo.cambiazo.presentation.login.MainScaffoldApp
-import com.techzo.cambiazo.presentation.login.TextLink
-import com.techzo.cambiazo.presentation.login.TextTitleHeaderApp
+import com.techzo.cambiazo.common.components.ButtonApp
+import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
+import com.techzo.cambiazo.common.components.FieldTextApp
+import com.techzo.cambiazo.common.components.LoginGoogleApp
+import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.common.components.TextLink
+import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 
 
 @Composable

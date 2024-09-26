@@ -1,6 +1,5 @@
 package com.techzo.cambiazo.presentation.explorer
 
-import android.content.ClipData.Item
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,7 +23,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -32,8 +30,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -44,11 +40,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.R
+import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.domain.model.Product
-import com.techzo.cambiazo.presentation.login.MainScaffoldApp
 
 @Composable
-fun ExplorerScreen(viewModel: ExplorerListViewModel) {
+fun ExplorerScreen(
+    viewModel: ExplorerListViewModel,
+    bottomBar: @Composable () -> Unit = {},
+    onFilter: () -> Unit = {}
+) {
 
     val searcher = viewModel.name.value
     val categories = viewModel.productCategories.value
@@ -72,7 +72,7 @@ fun ExplorerScreen(viewModel: ExplorerListViewModel) {
                         .shadow(10.dp, RoundedCornerShape(12.dp))
                         .background(Color.White, RoundedCornerShape(12.dp)),
                     value = searcher,
-                    onValueChange = { searcher -> viewModel.onNameChanged(searcher) },
+                    onValueChange = { viewModel.onNameChanged(it) },  // Filtro en tiempo real
                     placeholder = {
                         Row {
                             Text("Buscar")
@@ -99,6 +99,7 @@ fun ExplorerScreen(viewModel: ExplorerListViewModel) {
             }
         }
     ) {
+        // LazyRow para los botones de categorías
         LazyRow(
             modifier = Modifier.padding(vertical = 10.dp)
         ) {
@@ -124,10 +125,11 @@ fun ExplorerScreen(viewModel: ExplorerListViewModel) {
             }
         }
 
+        // Mostrar productos filtrados
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(state.data?: emptyList()) { product ->
+            items(state.data ?: emptyList()) { product ->
                 Products(product)
             }
         }
