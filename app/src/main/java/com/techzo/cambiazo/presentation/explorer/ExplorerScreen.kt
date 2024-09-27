@@ -3,11 +3,13 @@ package com.techzo.cambiazo.presentation.explorer
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,14 +29,17 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,42 +61,42 @@ fun ExplorerScreen(
 
     MainScaffoldApp(
         bottomBar = bottomBar,
-        paddingCard = PaddingValues(0.dp),
+        paddingCard = PaddingValues(vertical = 10.dp),
         contentsHeader = {
-            Image(
-                painter = painterResource(R.drawable.cambiazo_logo_name),
-                contentDescription = "logo cambiazo",
-                modifier = Modifier.fillMaxWidth().padding(20.dp)
-            )
-
             Row(
-                modifier = Modifier.padding(bottom = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .padding(bottom = 20.dp, top = 70.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 OutlinedTextField(
                     modifier = Modifier
-                        .shadow(10.dp, RoundedCornerShape(12.dp))
-                        .background(Color.White, RoundedCornerShape(12.dp)),
+                        .shadow(10.dp, RoundedCornerShape(10.dp))
+                        .width(310.dp)
+                        .background(Color.White, RoundedCornerShape(10.dp))
+                        .border(9.dp, Color.Transparent, RoundedCornerShape(10.dp)),
                     value = searcher,
                     onValueChange = { viewModel.onNameChanged(it) },  // Filtro en tiempo real
                     placeholder = {
                         Row {
-                            Text("Buscar")
+                            Text("Buscar",color = Color.Gray,
+                                style= MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Normal, fontSize = 20.sp,
+                                fontFamily = FontFamily.SansSerif))
                         }
                     },
                     maxLines = 1,
                     singleLine = true,
-                    trailingIcon = {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    leadingIcon = {
+                        Icon(imageVector = Icons.Default.Search, tint = Color.Gray , contentDescription = null)
                     },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(10.dp),
                 )
-
-                Spacer(modifier = Modifier.width(5.dp))
 
                 IconButton(onClick = {},
                     modifier = Modifier
-                        .background(Color.Black, RoundedCornerShape(12.dp))
+                        .background(Color.Black, RoundedCornerShape(10.dp))
+                        .shadow(10.dp, RoundedCornerShape(10.dp))
                         .size(53.dp)) {
                     Icon(imageVector = Icons.Filled.Tune,
                         contentDescription = "Filtro",
@@ -102,7 +107,9 @@ fun ExplorerScreen(
     ) {
         // LazyRow para los botones de categorías
         LazyRow(
-            modifier = Modifier.padding(vertical = 10.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 15.dp)
         ) {
             items(categories.data ?: emptyList()) { category ->
                 val isSelected = viewModel.selectedCategoryId.value == category.id
@@ -110,18 +117,20 @@ fun ExplorerScreen(
                 Button(
                     onClick = { viewModel.onProductCategorySelected(category.id) },
                     modifier = Modifier
-                        .padding(end = 8.dp)
-                        .border(
-                            width = 1.dp,
-                            color = if (isSelected) Color(0xFFFFD146) else Color(0xFFFFD146),
-                            shape = RoundedCornerShape(14.dp)
-                        ),
+                        .padding(end = 10.dp)
+                        .background(
+                            if (isSelected) Color(0xFFFFD146) else Color.White,
+                            RoundedCornerShape(10.dp)
+                        )
+                        .border(1.dp, Color(0xFFFFD146), RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(10.dp)),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSelected) Color.Black else Color.Transparent,
-                        contentColor = if (isSelected) Color(0xFFFFD146) else Color.Black
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black
                     )
                 ) {
-                    Text(text = category.name, color = if (isSelected) Color(0xFFFFD146) else Color.Black)
+                    Text(text = category.name, color = Color.Black, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
+                        fontFamily = FontFamily.SansSerif)
                 }
             }
         }
@@ -133,6 +142,10 @@ fun ExplorerScreen(
             items(state.data ?: emptyList()) { product ->
                 Products(product)
             }
+            item {
+                Spacer(modifier = Modifier.height(110.dp))
+            }
+
         }
     }
 }
@@ -144,14 +157,14 @@ fun Products(product: Product) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp)
-            .border(0.dp, Color.Transparent, RoundedCornerShape(16.dp))
-            .shadow(elevation = 12.dp, RoundedCornerShape(16.dp)),
+            .border(0.dp, Color.Transparent, RoundedCornerShape(15.dp))
+            .shadow(elevation = 12.dp, RoundedCornerShape(15.dp)),
     ) {
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(210.dp)
                     .background(Color.Transparent)
             ) {
                 GlideImage(
