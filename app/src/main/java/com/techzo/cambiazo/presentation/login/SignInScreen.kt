@@ -2,12 +2,15 @@ package com.techzo.cambiazo.presentation.login
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.Visibility
@@ -20,6 +23,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -50,28 +54,33 @@ fun SignInScreen(openRegister: () -> Unit = {},
     val showPassword = viewModel.showPassword.value
 
     MainScaffoldApp(
-        paddingCard = PaddingValues(40.dp),
+        paddingCard = PaddingValues(horizontal = 40.dp , vertical = 70.dp),
         contentsHeader = {
             Image(
                 painter = painterResource(R.drawable.cambiazo_logo_name),
                 contentDescription = "logo gmail",
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(65.dp)
             )
         }
     ) {
         Text(
             text = "Iniciar Sesión",
-            fontSize = 38.sp,
+            fontSize = 35.sp,
             modifier = Modifier
                 .padding(bottom =35.dp),
             style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.SansSerif),
+
         )
 
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
+            shape = RoundedCornerShape(10.dp),
             value = username,
             placeholder = {
                 Text("Correo electrónico")},
@@ -79,7 +88,12 @@ fun SignInScreen(openRegister: () -> Unit = {},
         )
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .padding(top = 20.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
+            shape = RoundedCornerShape(10.dp),
             value = password,
             placeholder = { Text("Contraseña")},
             onValueChange = { viewModel.onPasswordChange(it) },
@@ -112,7 +126,7 @@ fun SignInScreen(openRegister: () -> Unit = {},
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 20.dp),
+                .padding(bottom = 20.dp, top = 30.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             HorizontalDivider(
