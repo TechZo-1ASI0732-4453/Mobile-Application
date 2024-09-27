@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -49,16 +50,14 @@ fun SignUpScreen(openLogin: () -> Unit = {},
 
 
     MainScaffoldApp(
-        paddingCard = PaddingValues(40.dp),
+        paddingCard = PaddingValues(horizontal = 40.dp , vertical = 25.dp),
         contentsHeader = {
-
             Column(
                 Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ){
-
-                ButtonIconHeaderApp(Icons.Filled.ArrowBack,onClick = {back()})
+                ButtonIconHeaderApp(Icons.Filled.ArrowBack,onClick = {back()}, iconSize = 35.dp)
                 TextTitleHeaderApp("Registrarse")
             }
         }
@@ -72,13 +71,19 @@ fun SignUpScreen(openLogin: () -> Unit = {},
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
         ) {
-            Checkbox(checked = isChecked.value,
-                onCheckedChange = {},
-                modifier = Modifier.size(20.dp)
+            Checkbox(
+                checked = isChecked.value,
+                onCheckedChange = { isChecked.value = it },
+                modifier = Modifier.size(20.dp),
+                colors = CheckboxDefaults.colors(
+                    uncheckedColor = Color.Gray,
+                    checkedColor = Color(0xFFFFD146)
+                )
             )
-            TextLink(" Aceptar ","terminos y condiciones",clickable = { },Arrangement.Start)
+            TextLink("  Aceptar ", "terminos y condiciones", clickable = { }, Arrangement.Start)
         }
 
         ButtonApp("Registrarse", onClick = {
@@ -94,7 +99,7 @@ fun SignUpScreen(openLogin: () -> Unit = {},
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 12.dp),
+                .padding(bottom = 20.dp, top = 15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             HorizontalDivider(
