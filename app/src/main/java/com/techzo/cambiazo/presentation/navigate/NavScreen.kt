@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
+import com.techzo.cambiazo.presentation.filter.FilterScreen
 import com.techzo.cambiazo.presentation.login.SignInScreen
 import com.techzo.cambiazo.presentation.login.SignInViewModel
 import com.techzo.cambiazo.presentation.register.SignUpScreen
@@ -37,9 +38,9 @@ sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate
         navigate = onNavigate
     )
 
-    data class Favorite(val onNavigate: () -> Unit = {}) : ItemsScreens(
+    data class Donation(val onNavigate: () -> Unit = {}) : ItemsScreens(
         icon = Icons.Filled.FavoriteBorder,
-        title = "Favoritos",
+        title = "Donaciones",
         navigate = onNavigate
     )
 
@@ -58,7 +59,7 @@ sealed class Routes(val route: String){
     data object Filter: Routes("FilterScreen")
     data object Explorer: Routes("ExplorerScreen")
     data object Article: Routes("ArticleScreen")
-    data object Favorite: Routes("FavoriteScreen")
+    data object Donation: Routes("DonationScreen")
     data object Profile: Routes("ProfileScreen")
     data object Exchange: Routes("ExchangeScreen")
 
@@ -72,7 +73,7 @@ fun NavScreen(viewModelAuth: SignInViewModel, viewModelProduct: ExplorerListView
         ItemsScreens.Explorer(onNavigate = { navController.navigate(Routes.Explorer.route) }),
         ItemsScreens.Exchange(onNavigate = { navController.navigate(Routes.Exchange.route) }),
         ItemsScreens.Articles(onNavigate = { navController.navigate(Routes.Article.route) }),
-        ItemsScreens.Favorite(onNavigate = { navController.navigate(Routes.Favorite.route) }),
+        ItemsScreens.Donation(onNavigate = { navController.navigate(Routes.Donation.route) }),
         ItemsScreens.Profile(onNavigate = { navController.navigate(Routes.Profile.route) })
     )
 
@@ -107,6 +108,10 @@ fun NavScreen(viewModelAuth: SignInViewModel, viewModelProduct: ExplorerListView
                 bottomBar = {BottomBarNavigation(items)},
                 onFilter = {navController.navigate(Routes.Filter.route)}
             )
+        }
+
+        composable(route=Routes.Filter.route){
+            FilterScreen(back = {navController.popBackStack()})
         }
 
     }
