@@ -59,30 +59,30 @@ fun ExplorerScreen(
     val categories = viewModel.productCategories.value
     val state = viewModel.state.value
 
+
     MainScaffoldApp(
         bottomBar = bottomBar,
-        paddingCard = PaddingValues(vertical = 10.dp),
+        paddingCard = PaddingValues(top = 10.dp),
         contentsHeader = {
             Row(
                 modifier = Modifier
-                    .padding(bottom = 20.dp, top = 70.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                    .fillMaxWidth().padding(vertical = 10.dp, horizontal = 20.dp),
             ) {
                 OutlinedTextField(
                     modifier = Modifier
                         .shadow(10.dp, RoundedCornerShape(10.dp))
-                        .width(310.dp)
+                        .weight(1f)
+                        .fillMaxWidth()
                         .background(Color.White, RoundedCornerShape(10.dp))
                         .border(9.dp, Color.Transparent, RoundedCornerShape(10.dp)),
                     value = searcher,
-                    onValueChange = { viewModel.onNameChanged(it) },  // Filtro en tiempo real
+                    onValueChange = { viewModel.onNameChanged(it) },
                     placeholder = {
                         Row {
                             Text("Buscar",color = Color.Gray,
                                 style= MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Normal, fontSize = 20.sp,
-                                fontFamily = FontFamily.SansSerif))
+                                    fontWeight = FontWeight.Normal, fontSize = 20.sp,
+                                    fontFamily = FontFamily.SansSerif))
                         }
                     },
                     maxLines = 1,
@@ -93,11 +93,12 @@ fun ExplorerScreen(
                     shape = RoundedCornerShape(10.dp),
                 )
 
-                IconButton(onClick = {},
-                    modifier = Modifier
+                IconButton(onClick = {onFilter()},
+                    modifier = Modifier.padding(start = 10.dp)
                         .background(Color.Black, RoundedCornerShape(10.dp))
                         .shadow(10.dp, RoundedCornerShape(10.dp))
-                        .size(53.dp)) {
+                        .size(53.dp))
+                {
                     Icon(imageVector = Icons.Filled.Tune,
                         contentDescription = "Filtro",
                         tint = Color.White)
@@ -105,7 +106,6 @@ fun ExplorerScreen(
             }
         }
     ) {
-        // LazyRow para los botones de categorías
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -135,10 +135,7 @@ fun ExplorerScreen(
             }
         }
 
-        // Mostrar productos filtrados
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        LazyColumn{
             items(state.data ?: emptyList()) { product ->
                 Products(product)
             }
