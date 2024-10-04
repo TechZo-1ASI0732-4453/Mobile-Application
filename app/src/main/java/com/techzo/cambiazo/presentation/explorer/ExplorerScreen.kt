@@ -1,14 +1,15 @@
 package com.techzo.cambiazo.presentation.explorer
 
-import android.content.ClipData.Item
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,141 +29,146 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.R
-import com.techzo.cambiazo.presentation.login.MainScaffoldApp
+import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.domain.model.Product
 
 @Composable
-fun ExplorerScreen(){
+fun ExplorerScreen(
+    viewModel: ExplorerListViewModel,
+    bottomBar: @Composable () -> Unit = {},
+    onFilter: () -> Unit = {}
+) {
 
-    val searcher = remember {
-        mutableStateOf("")
-    }
-
-
-    val buttonTexts = listOf("Botón 1", "Botón 2", "Botón 3", "Botón 4", "Botón 5", "Botón 6")
-
-    val itemsList = listOf(
-        Item("Título 1", "Descripción 1"),
-        Item("Título 2", "Descripción 2"),
-        Item("Título 3", "Descripción 3"),
-        Item("Título 4", "Descripción 4"),
-        Item("Título 5", "Descripción 5")
-    )
+    val searcher = viewModel.name.value
+    val categories = viewModel.productCategories.value
+    val state = viewModel.state.value
 
     MainScaffoldApp(
-        paddingCard = PaddingValues(0.dp),
+        bottomBar = bottomBar,
+        paddingCard = PaddingValues(vertical = 10.dp),
         contentsHeader = {
-
-            Image(
-                painter = painterResource(R.drawable.cambiazo_logo_name),
-                contentDescription = "logo cambiazo",
-                modifier = Modifier.fillMaxWidth().padding(20.dp)
-            )
-
             Row(
                 modifier = Modifier
-                    .padding(bottom = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(bottom = 20.dp, top = 70.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
-
                 OutlinedTextField(
                     modifier = Modifier
-                        .shadow(10.dp, RoundedCornerShape(12.dp))
-                        .background(Color.White, RoundedCornerShape(12.dp)),
-                    value = searcher.value,
-                    onValueChange = { searcher.value = it },
-                    placeholder =  {
-                        Row{
-                            Text("Buscar")
+                        .shadow(10.dp, RoundedCornerShape(10.dp))
+                        .width(310.dp)
+                        .background(Color.White, RoundedCornerShape(10.dp))
+                        .border(9.dp, Color.Transparent, RoundedCornerShape(10.dp)),
+                    value = searcher,
+                    onValueChange = { viewModel.onNameChanged(it) },  // Filtro en tiempo real
+                    placeholder = {
+                        Row {
+                            Text("Buscar",color = Color.Gray,
+                                style= MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Normal, fontSize = 20.sp,
+                                fontFamily = FontFamily.SansSerif))
                         }
                     },
                     maxLines = 1,
                     singleLine = true,
-                    trailingIcon = {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    leadingIcon = {
+                        Icon(imageVector = Icons.Default.Search, tint = Color.Gray , contentDescription = null)
                     },
-                    shape = RoundedCornerShape(12.dp),
-
-                    )
-                Spacer(modifier = Modifier.width(5.dp))
+                    shape = RoundedCornerShape(10.dp),
+                )
 
                 IconButton(onClick = {},
                     modifier = Modifier
-                        .background(Color.Black, RoundedCornerShape(12.dp))
+                        .background(Color.Black, RoundedCornerShape(10.dp))
+                        .shadow(10.dp, RoundedCornerShape(10.dp))
                         .size(53.dp)) {
                     Icon(imageVector = Icons.Filled.Tune,
                         contentDescription = "Filtro",
                         tint = Color.White)
                 }
-
-
             }
         }
-    ){
+    ) {
+        // LazyRow para los botones de categorías
         LazyRow(
-            modifier = Modifier.padding(vertical = 10.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 15.dp)
         ) {
-            items(buttonTexts) { text ->
+            items(categories.data ?: emptyList()) { category ->
+                val isSelected = viewModel.selectedCategoryId.value == category.id
+
                 Button(
-                    onClick = {  },
+                    onClick = { viewModel.onProductCategorySelected(category.id) },
                     modifier = Modifier
-                        .padding(end = 8.dp)
-                        .border(
-                            width = 1.dp,
-                            color = Color(0xFFFFD146),
-                            shape = RoundedCornerShape(14.dp)
-                        ),
-                    colors = ButtonDefaults.buttonColors(Color.Transparent)
+                        .padding(end = 10.dp)
+                        .background(
+                            if (isSelected) Color(0xFFFFD146) else Color.White,
+                            RoundedCornerShape(10.dp)
+                        )
+                        .border(1.dp, Color(0xFFFFD146), RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(10.dp)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black
+                    )
                 ) {
-                    Text(text = text, color = Color.Black)
+                    Text(text = category.name, color = Color.Black, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
+                        fontFamily = FontFamily.SansSerif)
                 }
             }
         }
 
-
+        // Mostrar productos filtrados
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(itemsList) { item ->
-                Products()
+            items(state.data ?: emptyList()) { product ->
+                Products(product)
             }
+            item {
+                Spacer(modifier = Modifier.height(110.dp))
+            }
+
         }
     }
 }
 
 
 @Composable
-fun Products(){
+fun Products(product: Product) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp)
-            .border(0.dp, Color.Transparent, RoundedCornerShape(16.dp))
-            .shadow(elevation = 12.dp, RoundedCornerShape(16.dp)),
+            .border(0.dp, Color.Transparent, RoundedCornerShape(15.dp))
+            .shadow(elevation = 12.dp, RoundedCornerShape(15.dp)),
     ) {
         Column {
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(210.dp)
                     .background(Color.Transparent)
             ) {
-                GlideImage(imageModel = { "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBH3LkjkJRJtrR53ulwmFei7w9bqxXuWruqA&s" },
+                GlideImage(
+                    imageModel = { product.image },
                     modifier = Modifier.fillMaxSize()
                 )
 
@@ -175,10 +181,9 @@ fun Products(){
                         )
                         .padding(horizontal = 14.dp)
                         .padding(vertical = 4.dp),
-
-                    ) {
+                ) {
                     Text(
-                        text = "S/500 valor aprox.",
+                        text = "S/${product.price} valor aprox.",
                         color = Color(0xFFFFD146),
                         fontWeight = FontWeight.Bold,
                     )
@@ -192,7 +197,7 @@ fun Products(){
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Carro",
+                    text = product.name,
                     fontWeight = FontWeight.Bold,
                     fontSize = 27.sp
                 )
@@ -204,14 +209,14 @@ fun Products(){
                         tint = Color(0xFFFFD146)
                     )
                     Text(
-                        text = "La Molina, Callao",
+                        text = "Distrito: ${product.districtId}",
                         color = Color(0xFF9F9C9C),
                         modifier = Modifier.padding(start = 1.dp)
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "De 12 kilometros por hora",
+                    text = product.description,
                     color = Color.Black
                 )
             }

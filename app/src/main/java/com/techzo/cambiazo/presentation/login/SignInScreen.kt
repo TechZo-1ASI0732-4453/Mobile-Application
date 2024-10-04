@@ -2,114 +2,131 @@ package com.techzo.cambiazo.presentation.login
 
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.runtime.Composable
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.techzo.cambiazo.R
+import com.techzo.cambiazo.common.components.ButtonApp
+import com.techzo.cambiazo.common.components.FieldTextApp
+import com.techzo.cambiazo.common.components.LoginGoogleApp
+import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.common.components.TextLink
 
 @Composable
-fun LoginScreen(openRegister: () -> Unit = {},
+fun SignInScreen(openRegister: () -> Unit = {},
                 openApp: () -> Unit = {},
                 openForgotPassword: () -> Unit = {},
                 viewModel: SignInViewModel = viewModel()){
 
 
     val state = viewModel.state.value
-
     val username = viewModel.username.value
-
     val password = viewModel.password.value
+    val showPassword = viewModel.showPassword.value
 
-    /*
-    val email = remember {
-        mutableStateOf("")
-    }
-
-    val password = remember {
-        mutableStateOf("")
-    }
-
-     */
     MainScaffoldApp(
-        paddingCard = PaddingValues(40.dp),
+        paddingCard = PaddingValues(horizontal = 40.dp , vertical = 70.dp),
         contentsHeader = {
             Image(
                 painter = painterResource(R.drawable.cambiazo_logo_name),
                 contentDescription = "logo gmail",
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(65.dp)
             )
         }
     ) {
         Text(
             text = "Iniciar Sesión",
-            fontSize = 38.sp,
+            fontSize = 35.sp,
             modifier = Modifier
                 .padding(bottom =35.dp),
             style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.SansSerif),
+
         )
 
 
-        FieldTextApp(username,"Correo electrónico",onValueChange = { viewModel.onUsernameChange(it)})
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
+            shape = RoundedCornerShape(10.dp),
+            value = username,
+            placeholder = {
+                Text("Correo electrónico")},
+            onValueChange = { viewModel.onUsernameChange(it)}
+        )
 
-        FieldTextApp(password,"Contrasenia",onValueChange = { viewModel.onPasswordChange(it) })
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(top = 20.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
+            shape = RoundedCornerShape(10.dp),
+            value = password,
+            placeholder = { Text("Contraseña")},
+            onValueChange = { viewModel.onPasswordChange(it) },
+            visualTransformation =
+                if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    viewModel.onShowPasswordChange(!showPassword)
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Visibility,
+                        contentDescription = "Visible"
+                    )
+                }
+            }
+        )
 
         TextLink("","Olvidé mi contraseña", clickable = {openForgotPassword()},Arrangement.End)
 
         ButtonApp("Iniciar Sesion", onClick = {
-            try {
-                viewModel.signIn()
-                if (state.data != null) {
-                    openApp()
-                } else {
-                    // Manejar el caso en que la autenticación falle
-                    Log.e("LoginScreen", "Error: ${state.message}")
-                }
-            } catch (e: Exception) {
-                Log.e("LoginScreen", "Exception during sign in", e)
-            }
+            viewModel.signIn()
         })
-
+        state.data?.let {
+            openApp()
+        }
+        if (state.isLoading) {
+            CircularProgressIndicator()
+        }
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 20.dp),
+                .padding(bottom = 20.dp, top = 30.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             HorizontalDivider(
@@ -140,169 +157,10 @@ fun LoginScreen(openRegister: () -> Unit = {},
     }
 }
 
+@Preview
 @Composable
-fun LoginGoogleApp(){
-    Surface(
-        modifier = Modifier
-            .size(56.dp)
-            .clickable(onClick = {}),
-        shape = CircleShape,
-        shadowElevation = 5.dp
-    ) {
-        Image(
-            painter = painterResource(R.drawable.logo_gmail),
-            contentDescription = "logo gmail",
-
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(15.dp),
-        )
-    }
-}
-
-@Composable
-fun FieldTextApp(valueText:String,text:String,onValueChange: (String) -> Unit){
-
-    OutlinedTextField(
-        value = valueText,
-        placeholder = {
-            Text(text, color = Color.Gray,
-                style= MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = FontFamily.SansSerif))
-        },
-        onValueChange = { onValueChange(it) },
-        modifier = Modifier
-            .padding(bottom = 10.dp, top = 10.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)),
-        shape = RoundedCornerShape(12.dp),
-    )
-}
-
-@Composable
-fun ButtonApp(text:String,onClick: ()-> Unit){
-    Button(
-        onClick = { onClick() },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 10.dp, top = 10.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFFFD146),
-            contentColor = Color.Black
-        ),
-        shape = RoundedCornerShape(10.dp),
-    ) {
-        Text(
-            text = text,
-            fontSize = 17.sp,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif)
-        )
-    }
-
-}
-@Composable
-fun ButtonIconHeaderApp(iconVector: ImageVector,onClick: () -> Unit){
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start
-    ) {
-        IconButton(
-            onClick = { onClick() },
-            modifier = Modifier.align(Alignment.Start)
-        ) {
-            Icon(
-                imageVector = iconVector,
-                contentDescription = "Volver",
-            )
-        }
-    }
-}
-
-@Composable
-fun TextLink(text1:String = "",
-             text2:String = "",
-             clickable: () -> Unit,
-             horizontal: Arrangement.Horizontal = Arrangement.Center){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 12.dp),
-        horizontalArrangement = horizontal,
-
-        ) {
-        Text(
-            text = text1,
-            style= MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif)
-        )
-
-        Text(
-            text = text2,
-            color = Color(0xFFFFD146),
-            modifier = Modifier
-                .clickable {clickable()  },
-            style= MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif)
-        )
-
-    }
-}
-
-@Composable
-fun CardApp(padding: PaddingValues,content: @Composable () -> Unit = {}) {
-    Card(
-        modifier = Modifier
-            .background(Color.White, RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-            .padding(padding)
-    ) {
-        Column(
-            modifier = Modifier.background(Color.White),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            content()
-        }
-    }
+fun PreviewSignInScreen(){
+    SignInScreen()
 }
 
 
-@Composable
-fun MainScaffoldApp( paddingCard: PaddingValues,
-                     contentsHeader: @Composable () -> Unit = {},
-                     content: @Composable () -> Unit = {},
-) {
-    Scaffold { paddingValues ->
-        val p = paddingValues
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFFFD146)),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Spacer(modifier = Modifier.weight(1f))
-            contentsHeader()
-            Spacer(modifier = Modifier.weight(1f))
-            CardApp(paddingCard){
-                content()
-            }
-        }
-    }
-}
-
-@Composable
-fun TextTitleHeaderApp(text: String){
-    Text(
-        text = text,
-        fontSize = 35.sp,
-        style = MaterialTheme.typography.bodyLarge.copy(
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.SansSerif
-        ),
-    )
-}

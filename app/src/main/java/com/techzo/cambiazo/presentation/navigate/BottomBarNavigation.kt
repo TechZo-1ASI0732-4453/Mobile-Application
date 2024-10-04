@@ -1,9 +1,7 @@
 package com.techzo.cambiazo.presentation.navigate
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
@@ -16,6 +14,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun BottomBarNavigation(items: List<ItemsScreens>) {
+
     BottomAppBar(
         modifier = Modifier
             .border(width = 1.dp, color = Color.Gray),
