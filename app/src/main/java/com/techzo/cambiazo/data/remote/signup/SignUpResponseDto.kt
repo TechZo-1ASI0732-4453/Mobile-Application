@@ -1,7 +1,6 @@
-package com.techzo.cambiazo.data.remote
+package com.techzo.cambiazo.data.remote.signup
 
-import com.techzo.cambiazo.domain.model.User
-import com.techzo.cambiazo.domain.model.UserSignUp
+import com.techzo.cambiazo.domain.UserSignUp
 
 /*
 {

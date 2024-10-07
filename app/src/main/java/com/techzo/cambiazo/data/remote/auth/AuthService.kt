@@ -1,5 +1,7 @@
-package com.techzo.cambiazo.data.remote
+package com.techzo.cambiazo.data.remote.auth
 
+import com.techzo.cambiazo.data.remote.signup.SignUpRequestDto
+import com.techzo.cambiazo.data.remote.signup.SignUpResponseDto
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.Headers

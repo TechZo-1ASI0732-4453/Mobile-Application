@@ -44,9 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.skydoves.landscapist.glide.GlideImage
-import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.components.MainScaffoldApp
-import com.techzo.cambiazo.domain.model.Product
+import com.techzo.cambiazo.domain.Product
 
 @Composable
 fun ExplorerScreen(

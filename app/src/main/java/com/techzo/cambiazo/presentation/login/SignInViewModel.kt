@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.AuthRepository
-import com.techzo.cambiazo.domain.model.User
+import com.techzo.cambiazo.domain.User
 import kotlinx.coroutines.launch
 
 class SignInViewModel(private val authRepository: AuthRepository): ViewModel() {

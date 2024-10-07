@@ -1,10 +1,9 @@
 package com.techzo.cambiazo.data.repository
 
 import com.techzo.cambiazo.common.Resource
-import com.techzo.cambiazo.data.remote.ProductCategoryDto
-import com.techzo.cambiazo.data.remote.ProductCategoryService
-import com.techzo.cambiazo.data.remote.toProductCategory
-import com.techzo.cambiazo.domain.model.ProductCategory
+import com.techzo.cambiazo.data.remote.products.ProductCategoryService
+import com.techzo.cambiazo.data.remote.products.toProductCategory
+import com.techzo.cambiazo.domain.ProductCategory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

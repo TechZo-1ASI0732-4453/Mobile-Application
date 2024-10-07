@@ -8,8 +8,8 @@ import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
-import com.techzo.cambiazo.domain.model.Product
-import com.techzo.cambiazo.domain.model.ProductCategory
+import com.techzo.cambiazo.domain.Product
+import com.techzo.cambiazo.domain.ProductCategory
 import kotlinx.coroutines.launch
 
 class ExplorerListViewModel(
