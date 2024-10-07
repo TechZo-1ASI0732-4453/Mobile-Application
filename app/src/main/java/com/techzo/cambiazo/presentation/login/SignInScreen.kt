@@ -5,6 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,9 +45,9 @@ import com.techzo.cambiazo.common.components.TextLink
 
 @Composable
 fun SignInScreen(openRegister: () -> Unit = {},
-                openApp: () -> Unit = {},
-                openForgotPassword: () -> Unit = {},
-                viewModel: SignInViewModel = viewModel()){
+                 openApp: () -> Unit = {},
+                 openForgotPassword: () -> Unit = {},
+                 viewModel: SignInViewModel = viewModel()){
 
 
     val state = viewModel.state.value
@@ -54,15 +56,23 @@ fun SignInScreen(openRegister: () -> Unit = {},
     val showPassword = viewModel.showPassword.value
 
     MainScaffoldApp(
-        paddingCard = PaddingValues(horizontal = 40.dp , vertical = 70.dp),
+        paddingCard = PaddingValues(start = 40.dp , end = 40.dp,top = 70.dp),
         contentsHeader = {
-            Image(
-                painter = painterResource(R.drawable.cambiazo_logo_name),
-                contentDescription = "logo gmail",
-                modifier = Modifier.fillMaxWidth().height(65.dp)
-            )
+            Column(modifier = Modifier
+                .fillMaxWidth().height(150.dp),
+                verticalArrangement = Arrangement.Center) {
+                Image(
+                    painter = painterResource(R.drawable.cambiazo_logo_name),
+                    contentDescription = "logo gmail",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(65.dp)
+                )
+            }
+
         }
     ) {
+
         Text(
             text = "Iniciar Sesión",
             fontSize = 35.sp,
@@ -71,7 +81,6 @@ fun SignInScreen(openRegister: () -> Unit = {},
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.SansSerif),
-
         )
 
 
@@ -98,7 +107,7 @@ fun SignInScreen(openRegister: () -> Unit = {},
             placeholder = { Text("Contraseña")},
             onValueChange = { viewModel.onPasswordChange(it) },
             visualTransformation =
-                if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+            if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = {
                     viewModel.onShowPasswordChange(!showPassword)
@@ -113,14 +122,16 @@ fun SignInScreen(openRegister: () -> Unit = {},
 
         TextLink("","Olvidé mi contraseña", clickable = {openForgotPassword()},Arrangement.End)
 
-        ButtonApp("Iniciar Sesion", onClick = {
-            viewModel.signIn()
-        })
+
         state.data?.let {
             openApp()
         }
         if (state.isLoading) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(modifier = Modifier.height(68.dp))
+        }else{
+            ButtonApp("Iniciar Sesion", onClick = {
+                viewModel.signIn()
+            })
         }
 
         Row(

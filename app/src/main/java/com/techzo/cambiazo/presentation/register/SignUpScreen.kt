@@ -35,7 +35,7 @@ import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 fun SignUpScreen(openLogin: () -> Unit = {},
                  back: () -> Unit = {},
                  viewModel: SignUpViewModel = viewModel()
-                 ){
+){
 
     val state = viewModel.state.value
     val username = viewModel.username.value
@@ -62,6 +62,7 @@ fun SignUpScreen(openLogin: () -> Unit = {},
             }
         }
     ){
+
         FieldTextApp(name,"Nombre",onValueChange = { viewModel.onNameChange(it) })
         FieldTextApp(phoneNumber,"Numero de Telefono",onValueChange = { viewModel.onPhoneNumberChange(it) })
         FieldTextApp(username,"Correo electrónico",onValueChange = { viewModel.onUsernameChange(it) })
@@ -89,6 +90,7 @@ fun SignUpScreen(openLogin: () -> Unit = {},
         ButtonApp("Registrarse", onClick = {
             viewModel.signUp()
         })
+
         state.data?.let {
             openLogin()
         }
@@ -99,7 +101,7 @@ fun SignUpScreen(openLogin: () -> Unit = {},
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 20.dp, top = 15.dp),
+                .padding(bottom = 0.dp, top = 15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             HorizontalDivider(

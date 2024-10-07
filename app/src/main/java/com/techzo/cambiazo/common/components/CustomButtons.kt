@@ -2,6 +2,7 @@ package com.techzo.cambiazo.common.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,15 +54,20 @@ fun LoginGoogleApp(){
 }
 
 @Composable
-fun ButtonApp(text:String,onClick: ()-> Unit){
+fun ButtonApp(text:String,
+              bgColor: Color = Color(0xFFFFD146),
+              fColor: Color = Color.Black,
+              bColor: Color = Color(0xFFFFD146),
+              onClick: ()-> Unit){
     Button(
         onClick = { onClick() },
         modifier = Modifier
             .fillMaxWidth().height(65.dp)
-            .padding(bottom = 10.dp, top = 10.dp),
+            .padding(bottom = 10.dp, top = 10.dp)
+            .border(1.5.dp,color = bColor,RoundedCornerShape(10.dp)),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFFFD146),
-            contentColor = Color.Black
+            containerColor = bgColor,
+            contentColor = fColor
         ),
         shape = RoundedCornerShape(10.dp),
     ) {
