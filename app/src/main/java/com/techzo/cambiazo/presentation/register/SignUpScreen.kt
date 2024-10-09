@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.presentation.register
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,19 +8,27 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.techzo.cambiazo.common.components.ButtonApp
@@ -42,6 +51,8 @@ fun SignUpScreen(openLogin: () -> Unit = {},
     val password = viewModel.password.value
     val name = viewModel.name.value
     val phoneNumber = viewModel.phoneNumber.value
+    val showPassword = viewModel.showPassword.value
+    val showPasswordRepeat = viewModel.showPasswordRepeat.value
     val repitePassword = viewModel.repitePassword.value
 
     val isChecked = remember {
@@ -62,13 +73,55 @@ fun SignUpScreen(openLogin: () -> Unit = {},
             }
         }
     ){
-
         FieldTextApp(name,"Nombre",onValueChange = { viewModel.onNameChange(it) })
         FieldTextApp(phoneNumber,"Numero de Telefono",onValueChange = { viewModel.onPhoneNumberChange(it) })
         FieldTextApp(username,"Correo electrónico",onValueChange = { viewModel.onUsernameChange(it) })
-        FieldTextApp(password,"Contraseña",onValueChange = { viewModel.onPasswordChange(it) })
-        FieldTextApp(repitePassword,"Confirmar contrasenia",onValueChange = { viewModel.onRepitePasswordChange(it) })
-
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(top = 20.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
+            shape = RoundedCornerShape(10.dp),
+            value = password,
+            placeholder = { Text("Contraseña")},
+            onValueChange = { viewModel.onPasswordChange(it) },
+            visualTransformation =
+            if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    viewModel.onShowPasswordChange(!showPassword)
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Visibility,
+                        contentDescription = "Visible"
+                    )
+                }
+            }
+        )
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(top = 20.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
+            shape = RoundedCornerShape(10.dp),
+            value = repitePassword,
+            placeholder = { Text("Confirmar contraseña")},
+            onValueChange = { viewModel.onRepitePasswordChange(it) },
+            visualTransformation =
+            if(showPasswordRepeat) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    viewModel.onShowPasswordRepeatChange(!showPasswordRepeat)
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Visibility,
+                        contentDescription = "Visible"
+                    )
+                }
+            }
+        )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -90,7 +143,6 @@ fun SignUpScreen(openLogin: () -> Unit = {},
         ButtonApp("Registrarse", onClick = {
             viewModel.signUp()
         })
-
         state.data?.let {
             openLogin()
         }
@@ -101,7 +153,7 @@ fun SignUpScreen(openLogin: () -> Unit = {},
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 0.dp, top = 15.dp),
+                .padding(bottom = 20.dp, top = 15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             HorizontalDivider(
