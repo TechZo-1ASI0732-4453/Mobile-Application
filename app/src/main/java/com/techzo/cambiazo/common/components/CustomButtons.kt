@@ -2,10 +2,12 @@ package com.techzo.cambiazo.common.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -25,6 +27,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.techzo.cambiazo.R
@@ -51,21 +54,26 @@ fun LoginGoogleApp(){
 }
 
 @Composable
-fun ButtonApp(text:String,onClick: ()-> Unit){
+fun ButtonApp(text:String,
+              bgColor: Color = Color(0xFFFFD146),
+              fColor: Color = Color.Black,
+              bColor: Color = Color(0xFFFFD146),
+              onClick: ()-> Unit){
     Button(
         onClick = { onClick() },
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 10.dp, top = 10.dp),
+            .fillMaxWidth().height(65.dp)
+            .padding(bottom = 10.dp, top = 10.dp)
+            .border(1.5.dp,color = bColor,RoundedCornerShape(10.dp)),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFFFD146),
-            contentColor = Color.Black
+            containerColor = bgColor,
+            contentColor = fColor
         ),
         shape = RoundedCornerShape(10.dp),
     ) {
         Text(
             text = text,
-            fontSize = 17.sp,
+            fontSize = 18.sp,
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif)
@@ -74,18 +82,19 @@ fun ButtonApp(text:String,onClick: ()-> Unit){
 
 }
 @Composable
-fun ButtonIconHeaderApp(iconVector: ImageVector, onClick: () -> Unit){
+fun ButtonIconHeaderApp(iconVector: ImageVector, onClick: () -> Unit, iconSize: Dp = 35.dp){
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
         IconButton(
             onClick = { onClick() },
-            modifier = Modifier.align(Alignment.Start)
+            modifier = Modifier.align(Alignment.Start).padding(start = 15.dp)
         ) {
             Icon(
                 imageVector = iconVector,
                 contentDescription = "Volver",
+                modifier = Modifier.size(iconSize)
             )
         }
     }

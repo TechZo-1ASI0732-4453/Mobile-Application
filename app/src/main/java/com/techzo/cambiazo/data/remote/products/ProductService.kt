@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.data.remote
+package com.techzo.cambiazo.data.remote.products
 
 import retrofit2.Response
 import retrofit2.http.GET

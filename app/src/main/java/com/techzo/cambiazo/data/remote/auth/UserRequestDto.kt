@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.data.remote
+package com.techzo.cambiazo.data.remote.auth
 
 import com.google.gson.annotations.SerializedName
 

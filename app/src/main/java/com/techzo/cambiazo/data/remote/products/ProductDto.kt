@@ -1,21 +1,7 @@
-package com.techzo.cambiazo.data.remote
+package com.techzo.cambiazo.data.remote.products
 
-import com.techzo.cambiazo.domain.model.Product
+import com.techzo.cambiazo.domain.Product
 
-
-/*
-"id": 1,
-"name": "Lámpara de Mesa",
-"description": "Lámpara de mesa moderna y elegante.",
-"desiredObject": "Busco un juego de sábanas de algodón.",
-"price": 50,
-"image": "https://http2.mlstatic.com/D_NQ_NP_899399-MLA50279736451_062022-O.webp",
-"boost": true,
-"available": true,
-"productCategoryId": 16,
-"userId": 1,
-"districtId": 162
- */
 
 data class ProductDto(
     val id: Int,

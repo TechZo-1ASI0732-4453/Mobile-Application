@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.domain.model
+package com.techzo.cambiazo.domain
 
 data class ProductCategory(
     val id: Int,

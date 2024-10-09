@@ -1,7 +1,7 @@
-package com.techzo.cambiazo.data.remote
+package com.techzo.cambiazo.data.remote.auth
 
 import com.google.gson.annotations.SerializedName
-import com.techzo.cambiazo.domain.model.User
+import com.techzo.cambiazo.domain.User
 
 data class UserResponseDto(
     @SerializedName("id")
