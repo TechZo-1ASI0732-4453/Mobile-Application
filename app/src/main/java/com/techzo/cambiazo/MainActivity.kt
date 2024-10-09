@@ -8,13 +8,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.techzo.cambiazo.common.Constants
-import com.techzo.cambiazo.data.remote.AuthService
-import com.techzo.cambiazo.data.remote.ProductCategoryService
-import com.techzo.cambiazo.data.remote.ProductService
+import com.techzo.cambiazo.data.remote.auth.AuthService
+import com.techzo.cambiazo.data.remote.products.ProductCategoryService
+import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.repository.AuthRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
-import com.techzo.cambiazo.domain.model.ProductCategory
 import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.login.SignInViewModel
 import com.techzo.cambiazo.presentation.navigate.NavScreen

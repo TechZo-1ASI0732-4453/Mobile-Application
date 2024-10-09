@@ -23,9 +23,8 @@ fun TextLink(text1:String = "",
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 12.dp),
+            .padding(top = 20.dp, bottom = 20.dp),
         horizontalArrangement = horizontal,
-
         ) {
         Text(
             text = text1,
@@ -52,7 +51,7 @@ fun TextLink(text1:String = "",
 fun TextTitleHeaderApp(text: String){
     Text(
         text = text,
-        fontSize = 35.sp,
+        fontSize = 40.sp,
         style = MaterialTheme.typography.bodyLarge.copy(
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.SansSerif

@@ -2,13 +2,13 @@ package com.techzo.cambiazo.data.repository
 
 import android.util.Log
 import com.techzo.cambiazo.common.Resource
-import com.techzo.cambiazo.data.remote.AuthService
-import com.techzo.cambiazo.data.remote.SignUpRequestDto
-import com.techzo.cambiazo.data.remote.UserRequestDto
-import com.techzo.cambiazo.data.remote.toUser
-import com.techzo.cambiazo.data.remote.toUserSignUp
-import com.techzo.cambiazo.domain.model.User
-import com.techzo.cambiazo.domain.model.UserSignUp
+import com.techzo.cambiazo.data.remote.auth.AuthService
+import com.techzo.cambiazo.data.remote.signup.SignUpRequestDto
+import com.techzo.cambiazo.data.remote.auth.UserRequestDto
+import com.techzo.cambiazo.data.remote.auth.toUser
+import com.techzo.cambiazo.data.remote.signup.toUserSignUp
+import com.techzo.cambiazo.domain.User
+import com.techzo.cambiazo.domain.UserSignUp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

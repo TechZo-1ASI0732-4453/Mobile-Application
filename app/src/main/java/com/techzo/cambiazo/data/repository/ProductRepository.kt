@@ -1,9 +1,8 @@
 package com.techzo.cambiazo.data.repository
-
 import com.techzo.cambiazo.common.Resource
-import com.techzo.cambiazo.data.remote.ProductService
-import com.techzo.cambiazo.data.remote.toProduct
-import com.techzo.cambiazo.domain.model.Product
+import com.techzo.cambiazo.data.remote.products.ProductService
+import com.techzo.cambiazo.data.remote.products.toProduct
+import com.techzo.cambiazo.domain.Product
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

@@ -1,6 +1,7 @@
-package com.techzo.cambiazo.data.remote
+package com.techzo.cambiazo.data.remote.products
 
-import com.techzo.cambiazo.domain.model.ProductCategory
+import com.techzo.cambiazo.domain.ProductCategory
+
 
 data class ProductCategoryDto(
     val id: Int,

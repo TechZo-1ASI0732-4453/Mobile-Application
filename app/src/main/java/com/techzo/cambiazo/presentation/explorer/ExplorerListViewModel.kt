@@ -8,8 +8,8 @@ import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
-import com.techzo.cambiazo.domain.model.Product
-import com.techzo.cambiazo.domain.model.ProductCategory
+import com.techzo.cambiazo.domain.Product
+import com.techzo.cambiazo.domain.ProductCategory
 import kotlinx.coroutines.launch
 
 class ExplorerListViewModel(
@@ -51,15 +51,19 @@ class ExplorerListViewModel(
     }
 
     fun onProductCategorySelected(id: Int) {
-        _selectedCategoryId.value = id
+        _selectedCategoryId.value = if (_selectedCategoryId.value == id) null else id
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
-            val result = productRepository.getProductsByCategoryId(id)
-            if(result is Resource.Success){
+            val result = if (_selectedCategoryId.value == null) {
+                productRepository.getProducts()
+            } else {
+                productRepository.getProductsByCategoryId(id)
+            }
+            if (result is Resource.Success) {
                 _allProducts.value = result.data ?: emptyList()
-                applyFilter() // Aplicar filtro tras obtener productos
-            }else{
-                _state.value = UIState(message = result.message?:"Ocurrió un error")
+                applyFilter()
+            } else {
+                _state.value = UIState(message = result.message ?: "Ocurrió un error")
             }
         }
     }
