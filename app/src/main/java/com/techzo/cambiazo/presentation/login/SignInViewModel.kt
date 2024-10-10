@@ -1,16 +1,22 @@
 package com.techzo.cambiazo.presentation.login
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.AuthRepository
 import com.techzo.cambiazo.domain.User
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SignInViewModel(private val authRepository: AuthRepository): ViewModel() {
+
+@HiltViewModel
+class SignInViewModel @Inject constructor(private val authRepository: AuthRepository): ViewModel() {
 
 
     private val _state = mutableStateOf(UIState<User>())
@@ -31,6 +37,10 @@ class SignInViewModel(private val authRepository: AuthRepository): ViewModel() {
             val result = authRepository.signIn(_username.value, _password.value)
             if (result is Resource.Success) {
                 _state.value = UIState(data = result.data)
+                result.data?.let{
+                    Constants.token = it.token
+                    Constants.user = it
+                }
             } else {
                 _state.value = UIState(message =result.message?:"Error")
             }

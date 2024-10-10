@@ -10,9 +10,13 @@ import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
 import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.domain.ProductCategory
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ExplorerListViewModel(
+
+@HiltViewModel
+class ExplorerListViewModel @Inject constructor (
     private val productRepository: ProductRepository,
     private val productCategoryRepository: ProductCategoryRepository) : ViewModel() {
 
