@@ -20,6 +20,7 @@ data class UserResponseDto(
 )
 
 fun UserResponseDto.toUser() = User(
+    id = id,
     username = username,
     name = name,
     phoneNumber = phoneNumber,
