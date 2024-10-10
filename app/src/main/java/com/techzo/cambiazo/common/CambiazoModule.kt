@@ -10,6 +10,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -18,31 +19,56 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object CambiazoModule {
 
+    @Provides
+    @Singleton
+    fun provideAuthInterceptor(): AuthInterceptor {
+        return AuthInterceptor{Constants.token?:""}
+    }
 
     @Provides
     @Singleton
-    fun provideAuthService(): AuthService{
-        return Retrofit.Builder().baseUrl(Constants.BASE_URL)
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
+        return OkHttpClient
+            .Builder()
+            .addInterceptor(authInterceptor)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(Constants.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
-            .build().create(AuthService::class.java)
+            .client(okHttpClient)
+            .build()
+    }
+
+
+
+    // AQUI SOLO AGREGAR LOS PROVIDES DE LOS SERVICIOS
+
+    @Provides
+    @Singleton
+    fun provideAuthService(retrofit: Retrofit): AuthService{
+        return retrofit.create(AuthService::class.java)
     }
 
 
     @Provides
     @Singleton
-    fun provideProductService(): ProductService{
-        return Retrofit.Builder().baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build().create(ProductService::class.java)
+    fun provideProductService(retrofit: Retrofit): ProductService{
+        return retrofit.create(ProductService::class.java)
     }
 
     @Provides
     @Singleton
-    fun provideProductCategoryService(): ProductCategoryService {
-        return Retrofit.Builder().baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build().create(ProductCategoryService::class.java)
+    fun provideProductCategoryService(retrofit: Retrofit): ProductCategoryService {
+        return retrofit.create(ProductCategoryService::class.java)
     }
+
+
+    // AQUI SOLO AGREGAR LOS PROVIDES DE LOS REPOSITORIOS
 
     @Provides
     @Singleton
