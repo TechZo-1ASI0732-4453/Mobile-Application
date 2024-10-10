@@ -8,11 +8,21 @@ data class UserResponseDto(
     val id: Int,
     @SerializedName("username")
     val username: String,
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("phoneNumber")
+    val phoneNumber: String,
+    @SerializedName("profilePicture")
+    val profilePicture: String,
     @SerializedName("token")
-    val token: String
+    val token: String,
+
 )
 
 fun UserResponseDto.toUser() = User(
     username = username,
+    name = name,
+    phoneNumber = phoneNumber,
+    profilePicture = profilePicture,
     token = token
 )
