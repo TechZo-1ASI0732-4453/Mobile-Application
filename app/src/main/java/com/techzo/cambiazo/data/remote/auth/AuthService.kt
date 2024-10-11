@@ -15,7 +15,7 @@ interface AuthService {
         ]
     )
     @POST("authentication/sign-in")
-    fun signIn(@Body request: UserRequestDto): Call<UserResponseDto>
+    fun signIn(@Body request: UserSignInRequestDto): Call<UserSignInResponseDto>
 
     @Headers(
         value = [

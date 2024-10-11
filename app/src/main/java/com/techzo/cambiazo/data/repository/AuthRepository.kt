@@ -4,20 +4,21 @@ import android.util.Log
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.remote.auth.AuthService
 import com.techzo.cambiazo.data.remote.signup.SignUpRequestDto
-import com.techzo.cambiazo.data.remote.auth.UserRequestDto
-import com.techzo.cambiazo.data.remote.auth.toUser
+import com.techzo.cambiazo.data.remote.auth.UserSignInRequestDto
+import com.techzo.cambiazo.data.remote.auth.toUserSignIn
 import com.techzo.cambiazo.data.remote.signup.toUserSignUp
 import com.techzo.cambiazo.domain.User
+import com.techzo.cambiazo.domain.UserSignIn
 import com.techzo.cambiazo.domain.UserSignUp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class AuthRepository(private val authService: AuthService) {
-    suspend fun signIn(username: String, password: String): Resource<User> = withContext(Dispatchers.IO){
+    suspend fun signIn(username: String, password: String): Resource<UserSignIn> = withContext(Dispatchers.IO){
         try{
-            val response = authService.signIn(UserRequestDto(username, password)).execute()
+            val response = authService.signIn(UserSignInRequestDto(username, password)).execute()
             if(response.isSuccessful){
-                val user = response.body()?.toUser()
+                val user = response.body()?.toUserSignIn()
                 Log.d("user", "Response: ${response}")
                 if(user != null){
                     return@withContext Resource.Success(user)
