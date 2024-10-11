@@ -6,7 +6,7 @@ import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.repository.AuthRepository
-//import com.techzo.cambiazo.data.repository.ExchangeRepository
+import com.techzo.cambiazo.data.repository.ExchangeRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
 import com.techzo.cambiazo.data.repository.UserRepository
@@ -70,14 +70,12 @@ object CambiazoModule {
     fun provideProductCategoryService(retrofit: Retrofit): ProductCategoryService {
         return retrofit.create(ProductCategoryService::class.java)
     }
-    /*
+
     @Provides
     @Singleton
     fun provideExchangeService(retrofit: Retrofit): ExchangeService {
         return retrofit.create(ExchangeService::class.java)
     }
-
-     */
 
     @Provides
     @Singleton
@@ -107,14 +105,12 @@ object CambiazoModule {
     }
 
 
-    /*
     @Provides
     @Singleton
-    fun provideExchangeRepository(service: ExchangeService, productRepository: ProductRepository): ExchangeRepository {
-        return ExchangeRepository(service, productRepository)
+    fun provideExchangeRepository(service: ExchangeService, productRepository: ProductRepository, userRepository: UserRepository): ExchangeRepository {
+        return ExchangeRepository(service, productRepository, userRepository)
     }
 
-     */
     @Provides
     @Singleton
     fun provideUserRepository(service: UserService): UserRepository {
