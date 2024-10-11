@@ -1,11 +1,15 @@
 package com.techzo.cambiazo.common
 
 import com.techzo.cambiazo.data.remote.auth.AuthService
+import com.techzo.cambiazo.data.remote.auth.UserService
+import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.repository.AuthRepository
+import com.techzo.cambiazo.data.repository.ExchangeRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
+import com.techzo.cambiazo.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -67,6 +71,18 @@ object CambiazoModule {
         return retrofit.create(ProductCategoryService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideExchangeService(retrofit: Retrofit): ExchangeService {
+        return retrofit.create(ExchangeService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserService(retrofit: Retrofit): UserService {
+        return retrofit.create(UserService::class.java)
+    }
+
 
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS REPOSITORIOS
 
@@ -86,6 +102,19 @@ object CambiazoModule {
     @Singleton
     fun provideProductCategoryRepository(service: ProductCategoryService): ProductCategoryRepository {
         return ProductCategoryRepository(service)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideExchangeRepository(service: ExchangeService, productRepository: ProductRepository, userRepository: UserRepository): ExchangeRepository {
+        return ExchangeRepository(service, productRepository, userRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(service: UserService): UserRepository {
+        return UserRepository(service)
     }
 
 }

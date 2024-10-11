@@ -1,9 +1,9 @@
 package com.techzo.cambiazo.data.remote.auth
 
 import com.google.gson.annotations.SerializedName
-import com.techzo.cambiazo.domain.User
+import com.techzo.cambiazo.domain.UserSignIn
 
-data class UserResponseDto(
+data class UserSignInResponseDto(
     @SerializedName("id")
     val id: Int,
     @SerializedName("username")
@@ -19,7 +19,7 @@ data class UserResponseDto(
 
 )
 
-fun UserResponseDto.toUser() = User(
+fun UserSignInResponseDto.toUserSignIn() = UserSignIn(
     id = id,
     username = username,
     name = name,

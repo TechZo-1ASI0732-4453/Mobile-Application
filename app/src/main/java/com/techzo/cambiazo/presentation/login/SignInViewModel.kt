@@ -10,6 +10,7 @@ import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.AuthRepository
 import com.techzo.cambiazo.domain.User
+import com.techzo.cambiazo.domain.UserSignIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,8 +20,8 @@ import javax.inject.Inject
 class SignInViewModel @Inject constructor(private val authRepository: AuthRepository): ViewModel() {
 
 
-    private val _state = mutableStateOf(UIState<User>())
-    val state: State<UIState<User>> get() = _state
+    private val _state = mutableStateOf(UIState<UserSignIn>())
+    val state: State<UIState<UserSignIn>> get() = _state
 
     private val _username = mutableStateOf("")
     val username: State<String> get() = _username
