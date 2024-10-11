@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 import com.techzo.cambiazo.presentation.filter.FilterScreen
@@ -103,6 +104,12 @@ fun NavScreen(){
 
         composable(route=Routes.Filter.route){
             FilterScreen(back = {navController.popBackStack()})
+        }
+
+        composable(route=Routes.Exchange.route){
+            ExchangeScreen(
+                bottomBar = {BottomBarNavigation(items)}
+            )
         }
 
     }
