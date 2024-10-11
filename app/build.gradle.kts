@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.ksp)
+    id("com.google.dagger.hilt.android") version "2.52"
+    kotlin("kapt")
 }
 
 android {
@@ -65,6 +68,10 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.coroutines)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

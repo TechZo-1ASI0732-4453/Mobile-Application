@@ -4,13 +4,18 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.AuthRepository
 import com.techzo.cambiazo.domain.UserSignUp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SignUpViewModel(private val authRepository: AuthRepository): ViewModel() {
+
+@HiltViewModel
+class SignUpViewModel @Inject constructor (private val authRepository: AuthRepository): ViewModel() {
 
     private val _state = mutableStateOf(UIState<UserSignUp>())
     val state: State<UIState<UserSignUp>> get() = _state
@@ -24,16 +29,21 @@ class SignUpViewModel(private val authRepository: AuthRepository): ViewModel() {
     private val _repitePassword = mutableStateOf("")
     val repitePassword: State<String> get() = _repitePassword
 
+    private val _showPassword = mutableStateOf(false)
+    val showPassword: State<Boolean> get() = _showPassword
+
+    private val _showPasswordRepeat = mutableStateOf(false)
+    val showPasswordRepeat: State<Boolean> get() = _showPasswordRepeat
+
     private val _name = mutableStateOf("")
     val name: State<String> get() = _name
 
     private val _phoneNumber = mutableStateOf("")
     val phoneNumber: State<String> get() = _phoneNumber
 
-    private val profilePicture = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6lqpQj3oAmc1gtyM78oJCbTaDrD7Fj9NRlceOPDZiHA&s"
+    private val profilePicture = Constants.DEFAULT_PROFILE_PICTURE
 
-
-    private val roles = listOf("ROLE_USER")
+    private val roles = listOf(Constants.DEFAULT_ROLE)
 
     fun signUp() {
         _state.value = UIState(isLoading = true)
@@ -74,5 +84,13 @@ class SignUpViewModel(private val authRepository: AuthRepository): ViewModel() {
 
     fun onRepitePasswordChange(repitePassword: String) {
         _repitePassword.value = repitePassword
+    }
+
+    fun onShowPasswordChange(showPassword: Boolean) {
+        _showPassword.value = showPassword
+    }
+
+    fun onShowPasswordRepeatChange(showPasswordRepeat: Boolean) {
+        _showPasswordRepeat.value = showPasswordRepeat
     }
 }

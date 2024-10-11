@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 import com.techzo.cambiazo.presentation.filter.FilterScreen
@@ -66,7 +67,7 @@ sealed class Routes(val route: String){
 }
 
 @Composable
-fun NavScreen(viewModelAuth: SignInViewModel, viewModelProduct: ExplorerListViewModel, viewModelSignUp: SignUpViewModel){
+fun NavScreen(){
     val navController = rememberNavController()
 
     val items = listOf(
@@ -77,34 +78,25 @@ fun NavScreen(viewModelAuth: SignInViewModel, viewModelProduct: ExplorerListView
         ItemsScreens.Profile(onNavigate = { navController.navigate(Routes.Profile.route) })
     )
 
-    val viewModelAuth = viewModelAuth
-
-    val viewModelProduct = viewModelProduct
-
-    val viewModelSignUp = viewModelSignUp
-
 
     NavHost(navController = navController, startDestination = Routes.SignIn.route ){
 
         composable(route = Routes.SignUp.route){
             SignUpScreen(
                 back = { navController.popBackStack()},
-                openLogin = {navController.navigate(Routes.SignIn.route)},
-                viewModel = viewModelSignUp
+                openLogin = {navController.navigate(Routes.SignIn.route)}
             )
         }
 
         composable(route = Routes.SignIn.route){
             SignInScreen(
                     openRegister = { navController.navigate(Routes.SignUp.route)},
-                openApp = {navController.navigate(Routes.Explorer.route)},
-                viewModel = viewModelAuth
+                openApp = {navController.navigate(Routes.Explorer.route)}
             )
         }
 
         composable(route=Routes.Explorer.route){
             ExplorerScreen(
-                viewModel= viewModelProduct,
                 bottomBar = {BottomBarNavigation(items)},
                 onFilter = {navController.navigate(Routes.Filter.route)}
             )
@@ -112,6 +104,12 @@ fun NavScreen(viewModelAuth: SignInViewModel, viewModelProduct: ExplorerListView
 
         composable(route=Routes.Filter.route){
             FilterScreen(back = {navController.popBackStack()})
+        }
+
+        composable(route=Routes.Exchange.route){
+            ExchangeScreen(
+                bottomBar = {BottomBarNavigation(items)}
+            )
         }
 
     }

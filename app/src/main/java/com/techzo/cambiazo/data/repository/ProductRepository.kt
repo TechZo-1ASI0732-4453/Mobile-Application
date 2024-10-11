@@ -44,4 +44,19 @@ class ProductRepository(private val productService: ProductService) {
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
         }
     }
+
+    suspend fun getProductById(id: Int): Resource<Product> = withContext(Dispatchers.IO) {
+        try {
+            val response = productService.getProductById(id)
+            if (response.isSuccessful) {
+                response.body()?.let{ productDto->
+                    return@withContext Resource.Success(data = productDto.toProduct())
+                }
+                return@withContext Resource.Error("No se encontró el producto")
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+        }
+    }
 }

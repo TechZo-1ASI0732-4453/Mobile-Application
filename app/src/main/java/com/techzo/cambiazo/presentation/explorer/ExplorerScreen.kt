@@ -43,13 +43,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.domain.Product
 
 @Composable
 fun ExplorerScreen(
-    viewModel: ExplorerListViewModel,
+    viewModel: ExplorerListViewModel = hiltViewModel(),
     bottomBar: @Composable () -> Unit = {},
     onFilter: () -> Unit = {}
 ) {
