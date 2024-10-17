@@ -8,9 +8,11 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
@@ -90,12 +92,13 @@ fun NavScreen(){
 
         composable(route = Routes.SignIn.route){
             SignInScreen(
-                    openRegister = { navController.navigate(Routes.SignUp.route)},
-                openApp = {navController.navigate(Routes.Explorer.route)}
+                openRegister = { navController.navigate(Routes.SignUp.route)},
+                openApp = { navController.navigate(Routes.Explorer.route) }
             )
         }
 
         composable(route=Routes.Explorer.route){
+
             ExplorerScreen(
                 bottomBar = {BottomBarNavigation(items)},
                 onFilter = {navController.navigate(Routes.Filter.route)}
@@ -103,7 +106,10 @@ fun NavScreen(){
         }
 
         composable(route=Routes.Filter.route){
-            FilterScreen(back = {navController.popBackStack()})
+            FilterScreen(
+                back = {navController.popBackStack()},
+                openExplorer = { navController.navigate(Routes.Explorer.route)}
+            )
         }
 
         composable(route=Routes.Exchange.route){
