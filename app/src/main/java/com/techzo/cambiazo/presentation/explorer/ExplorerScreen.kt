@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.skydoves.landscapist.glide.GlideImage
+import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.domain.Product
 
@@ -66,7 +68,8 @@ fun ExplorerScreen(
         contentsHeader = {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth().padding(vertical = 10.dp, horizontal = 20.dp),
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp, horizontal = 20.dp),
             ) {
                 OutlinedTextField(
                     modifier = Modifier
@@ -94,7 +97,8 @@ fun ExplorerScreen(
                 )
 
                 IconButton(onClick = {onFilter()},
-                    modifier = Modifier.padding(start = 10.dp)
+                    modifier = Modifier
+                        .padding(start = 10.dp)
                         .background(Color.Black, RoundedCornerShape(10.dp))
                         .shadow(10.dp, RoundedCornerShape(10.dp))
                         .size(53.dp))
@@ -112,14 +116,15 @@ fun ExplorerScreen(
                 .padding(horizontal = 20.dp, vertical = 15.dp)
         ) {
             items(categories.data ?: emptyList()) { category ->
-                val isSelected = viewModel.selectedCategoryId.value == category.id
+                val isSelected = Constants.filterValues.categoryId == category.id
 
                 Button(
                     onClick = { viewModel.onProductCategorySelected(category.id) },
                     modifier = Modifier
                         .padding(end = 10.dp)
                         .background(
-                            if (isSelected) Color(0xFFFFD146) else Color.White,
+                            if (isSelected) Color(0xFFFFD146)
+                            else Color.White,
                             RoundedCornerShape(10.dp)
                         )
                         .border(1.dp, Color(0xFFFFD146), RoundedCornerShape(10.dp))
@@ -206,7 +211,7 @@ fun Products(product: Product) {
                         tint = Color(0xFFFFD146)
                     )
                     Text(
-                        text = "Distrito: ${product.districtId}",
+                        text = "${product.district?.name}, ${product.department?.name}",
                         color = Color(0xFF9F9C9C),
                         modifier = Modifier.padding(start = 1.dp)
                     )
