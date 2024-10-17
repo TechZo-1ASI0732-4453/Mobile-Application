@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.common
 
+import com.techzo.cambiazo.domain.FilterValues
 import com.techzo.cambiazo.domain.UserSignIn
 
 object Constants {
@@ -8,4 +9,6 @@ object Constants {
     const val DEFAULT_ROLE = "ROLE_USER"
     var token: String? = null
     var user: UserSignIn? = null
+
+    val filterValues = FilterValues()
 }
