@@ -3,10 +3,14 @@ package com.techzo.cambiazo.common
 import com.techzo.cambiazo.data.remote.auth.AuthService
 import com.techzo.cambiazo.data.remote.auth.UserService
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
+import com.techzo.cambiazo.data.remote.location.CountryService
+import com.techzo.cambiazo.data.remote.location.DepartmentService
+import com.techzo.cambiazo.data.remote.location.DistrictService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.repository.AuthRepository
 import com.techzo.cambiazo.data.repository.ExchangeRepository
+import com.techzo.cambiazo.data.repository.LocationRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
 import com.techzo.cambiazo.data.repository.UserRepository
@@ -83,6 +87,24 @@ object CambiazoModule {
         return retrofit.create(UserService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideCountryService(retrofit: Retrofit): CountryService {
+        return retrofit.create(CountryService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDepartmentService(retrofit: Retrofit): DepartmentService {
+        return retrofit.create(DepartmentService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDistrictService(retrofit: Retrofit): DistrictService {
+        return retrofit.create(DistrictService::class.java)
+    }
+
 
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS REPOSITORIOS
 
@@ -116,5 +138,20 @@ object CambiazoModule {
     fun provideUserRepository(service: UserService): UserRepository {
         return UserRepository(service)
     }
+
+    @Provides
+    @Singleton
+    fun provideLocationRepository(countryService: CountryService,
+                                 departmentService: DepartmentService,
+                                 districtService: DistrictService): LocationRepository {
+        return LocationRepository(countryService,departmentService,districtService)
+    }
+
+
+
+
+
+
+
 
 }
