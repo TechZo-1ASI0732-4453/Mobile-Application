@@ -11,5 +11,8 @@ data class Product(
     val available: Boolean,
     val productCategoryId: Int,
     val userId: Int,
-    val districtId: Int
+    val districtId: Int,
+    var district: District? = null,
+    var country: Country? = null,
+    var department: Department? = null,
 )
