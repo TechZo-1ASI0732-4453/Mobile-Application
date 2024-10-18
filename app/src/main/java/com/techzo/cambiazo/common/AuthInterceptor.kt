@@ -1,6 +1,5 @@
 package com.techzo.cambiazo.common
 
-import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -14,7 +13,7 @@ class AuthInterceptor(private val tokenProvider: () -> String) : Interceptor {
         val originalRequest = chain.request()
         val requestBuilder = originalRequest.newBuilder()
 
-        if (shouldAuthenticate(originalRequest.url().encodedPath())) {
+        if (shouldAuthenticate(originalRequest.url.encodedPath)) {
             val token = tokenProvider()
             if (token.isNotEmpty()) {
                 requestBuilder.addHeader("Authorization", "Bearer $token")

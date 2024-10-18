@@ -3,9 +3,14 @@ package com.techzo.cambiazo.common
 import com.techzo.cambiazo.data.remote.auth.AuthService
 import com.techzo.cambiazo.data.remote.auth.UserService
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
+import com.techzo.cambiazo.data.remote.location.DepartmentService
+import com.techzo.cambiazo.data.remote.location.DistrictService
+import com.techzo.cambiazo.data.remote.products.FavoriteProductService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
+import com.techzo.cambiazo.data.remote.reviews.ReviewService
 import com.techzo.cambiazo.data.repository.AuthRepository
+import com.techzo.cambiazo.data.repository.DetailsRepository
 import com.techzo.cambiazo.data.repository.ExchangeRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
@@ -83,6 +88,30 @@ object CambiazoModule {
         return retrofit.create(UserService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideReviewService(retrofit: Retrofit): ReviewService {
+        return retrofit.create(ReviewService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDistrictService(retrofit: Retrofit): DistrictService {
+        return retrofit.create(DistrictService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDepartmentService(retrofit: Retrofit): DepartmentService {
+        return retrofit.create(DepartmentService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFavoriteProductService(retrofit: Retrofit): FavoriteProductService {
+        return retrofit.create(FavoriteProductService::class.java)
+    }
+
 
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS REPOSITORIOS
 
@@ -116,5 +145,12 @@ object CambiazoModule {
     fun provideUserRepository(service: UserService): UserRepository {
         return UserRepository(service)
     }
+
+    @Provides
+    @Singleton
+    fun provideDetailsRepository(productService: ProductService, userService: UserService, reviewService: ReviewService, categoryService: ProductCategoryService, districtService: DistrictService, departmentService: DepartmentService, favoriteProductService: FavoriteProductService): DetailsRepository {
+        return DetailsRepository(productService, userService, reviewService, categoryService, districtService, departmentService, favoriteProductService)
+    }
+
 
 }
