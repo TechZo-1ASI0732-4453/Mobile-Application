@@ -1,7 +1,5 @@
 package com.techzo.cambiazo.domain
 
-import com.google.gson.annotations.SerializedName
-
 data class User(
     val id: Int,
     val username: String,
