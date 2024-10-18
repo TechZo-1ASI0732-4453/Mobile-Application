@@ -30,6 +30,10 @@
         private val _name = mutableStateOf("")
         val name: State<String> get() = _name
 
+        //category id
+        private val _categoryId = mutableStateOf<Int?>(Constants.filterValues.categoryId)
+        val categoryId: State<Int?> get() = _categoryId
+
         private val _productCategories = mutableStateOf(UIState<List<ProductCategory>>())
         val productCategories: State<UIState<List<ProductCategory>>> = _productCategories
 
@@ -58,7 +62,7 @@
                         product.country = countries.find { it.id == product.department?.countryId }
                     }
                     _allProducts.value = products
-                    _state.value = UIState(data = products)
+                    _state.value = UIState(data = products, isLoading = false)
                 }else{
                     _state.value = UIState(message = result.message?:"Ocurrió un error")
                 }
@@ -67,7 +71,8 @@
         }
 
         fun onProductCategorySelected(id: Int) {
-            Constants.filterValues.categoryId = if (Constants.filterValues.categoryId==id) null else id
+            _categoryId.value = if(_categoryId.value == id) null else id
+            Constants.filterValues.categoryId = _categoryId.value
             applyFilter()
         }
 
@@ -78,36 +83,36 @@
         }
 
         private fun applyFilter() {
+            _state.value = UIState(isLoading = true)
+            val filteredList = _allProducts.value.filter { product ->
+                val matchesName = product.name.contains(_name.value, ignoreCase = true)
 
-                val filteredList = _allProducts.value.filter { product ->
-                    val matchesName = product.name.contains(_name.value, ignoreCase = true)
+                val matchesCategory = Constants.filterValues.categoryId?.let { categoryId ->
+                    product.productCategoryId == categoryId
+                } ?: true
 
-                    val matchesCategory = Constants.filterValues.categoryId?.let { categoryId ->
-                        product.productCategoryId == categoryId
-                    } ?: true
+                val matchesCountry = Constants.filterValues.countryId?.let { countryId ->
+                    product.department?.countryId == countryId
+                } ?: true
 
-                    val matchesCountry = Constants.filterValues.countryId?.let { countryId ->
-                        product.department?.countryId == countryId
-                    } ?: true
+                val matchesDepartment = Constants.filterValues.departmentId?.let { departmentId ->
+                    product.district?.departmentId == departmentId
+                } ?: true
 
-                    val matchesDepartment = Constants.filterValues.departmentId?.let { departmentId ->
-                        product.district?.departmentId == departmentId
-                    } ?: true
+                val matchesDistrictId = Constants.filterValues.districtId?.let { districtId ->
+                    product.districtId == districtId
+                } ?: true
 
-                    val matchesDistrictId = Constants.filterValues.districtId?.let { districtId ->
-                        product.districtId == districtId
-                    } ?: true
+                val matchesMinPrice = Constants.filterValues.minPrice?.let { minPrice ->
+                    product.price >= minPrice
+                } ?: true
 
-                    val matchesMinPrice = Constants.filterValues.minPrice?.let { minPrice ->
-                        product.price >= minPrice
-                    } ?: true
+                val matchesMaxPrice = Constants.filterValues.maxPrice?.let { maxPrice ->
+                    product.price <= maxPrice
+                } ?: true
 
-                    val matchesMaxPrice = Constants.filterValues.maxPrice?.let { maxPrice ->
-                        product.price <= maxPrice
-                    } ?: true
-
-                    matchesName && matchesCategory && matchesCountry && matchesDepartment && matchesDistrictId && matchesMinPrice && matchesMaxPrice
-                }
+                matchesName && matchesCategory && matchesCountry && matchesDepartment && matchesDistrictId && matchesMinPrice && matchesMaxPrice
+            }
                 _state.value = UIState(data = filteredList)
         }
 

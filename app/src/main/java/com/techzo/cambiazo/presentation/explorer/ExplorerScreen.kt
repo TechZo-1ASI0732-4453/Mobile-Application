@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -116,7 +117,7 @@ fun ExplorerScreen(
                 .padding(horizontal = 20.dp, vertical = 15.dp)
         ) {
             items(categories.data ?: emptyList()) { category ->
-                val isSelected = Constants.filterValues.categoryId == category.id
+                val isSelected = viewModel.categoryId.value == category.id
 
                 Button(
                     onClick = { viewModel.onProductCategorySelected(category.id) },
@@ -141,12 +142,14 @@ fun ExplorerScreen(
         }
 
         LazyColumn{
+
             items(state.data ?: emptyList()) { product ->
                 Products(product)
             }
             item {
                 Spacer(modifier = Modifier.height(110.dp))
             }
+
 
         }
     }
