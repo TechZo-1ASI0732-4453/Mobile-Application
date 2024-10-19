@@ -20,4 +20,7 @@ interface ProductService {
         "Accept: application/json")
     @GET("products/{id}")
     suspend fun getProductById(@Path("id") id: Int): Response<ProductDto>
+
+    @GET("products/user/{id}")
+    suspend fun getProductsByUserId(@Path("id") id: Int): Response<List<ProductDto>>
 }
