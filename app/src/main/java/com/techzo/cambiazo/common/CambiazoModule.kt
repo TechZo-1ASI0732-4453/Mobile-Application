@@ -14,6 +14,7 @@ import com.techzo.cambiazo.data.repository.DetailsRepository
 import com.techzo.cambiazo.data.repository.ExchangeRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
+import com.techzo.cambiazo.data.repository.ReviewRepository
 import com.techzo.cambiazo.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -152,5 +153,10 @@ object CambiazoModule {
         return DetailsRepository(productService, userService, reviewService, categoryService, districtService, departmentService, favoriteProductService)
     }
 
+    @Provides
+    @Singleton
+    fun provideReviewRepository(service: ReviewService): ReviewRepository {
+        return ReviewRepository(service)
+    }
 
 }
