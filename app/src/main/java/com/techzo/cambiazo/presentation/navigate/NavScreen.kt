@@ -114,7 +114,11 @@ fun NavScreen() {
         composable(route = Routes.Details.route) { backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull()
             val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
-            ProductDetailsScreen(productId = productId, userId = userId, )
+            ProductDetailsScreen(
+                productId = productId,
+                userId = userId,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

@@ -150,7 +150,6 @@ class ProductDetailsRepository(
             }
         }
 
-    // Agregar a favoritos
     suspend fun addFavoriteProduct(productId: Int): Resource<FavoriteProduct> =
         withContext(Dispatchers.IO) {
             try {
@@ -172,7 +171,6 @@ class ProductDetailsRepository(
             }
         }
 
-    // Eliminar de favoritos
     suspend fun deleteFavoriteProduct(productId: Int): Resource<Unit> =
         withContext(Dispatchers.IO) {
             try {

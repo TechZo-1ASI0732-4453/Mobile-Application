@@ -9,7 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
@@ -34,7 +33,8 @@ import com.techzo.cambiazo.domain.*
 fun ProductDetailsScreen(
     viewModel: ProductDetailsViewModel = hiltViewModel(),
     productId: Int?,
-    userId: Int?
+    userId: Int?,
+    onBack: () -> Unit
 ) {
     LaunchedEffect(productId, userId) {
         if (productId != null && userId != null) {
@@ -51,14 +51,12 @@ fun ProductDetailsScreen(
     val isFavoriteState = viewModel.isFavorite.value
 
     Scaffold(
-        topBar = {},
         content = { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
                 if (productState.isLoading || userState.isLoading || reviewsState.isLoading) {
-                    CircularProgressIndicator()
                 } else if (productState.data != null) {
                     Column(modifier = Modifier.fillMaxSize()) {
-                        ProductHeader(product = productState.data!!)
+                        ProductHeader(product = productState.data!!, onBack = onBack)
                         ProductDetails(
                             product = productState.data!!,
                             userState = userState,
@@ -84,7 +82,7 @@ fun ProductDetailsScreen(
 }
 
 @Composable
-fun ProductHeader(product: Product) {
+fun ProductHeader(product: Product, onBack: () -> Unit) {
     Box(modifier = Modifier.fillMaxWidth()) {
         Image(
             painter = rememberAsyncImagePainter(product.image),
@@ -95,7 +93,7 @@ fun ProductHeader(product: Product) {
             contentScale = ContentScale.Crop
         )
         IconButton(
-            onClick = { /* Handle back action */ },
+            onClick = { onBack() },
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(16.dp)
@@ -209,25 +207,30 @@ fun ProductDetails(
                     }
                 }
 
-                // Toggle botón de favoritos
                 IconButton(
-                    onClick = { onFavoriteToggle(isFavoriteState.data == true) }
+                    onClick = { onFavoriteToggle(isFavoriteState.data == true) },
+                    modifier = Modifier
+                        .background(
+                            color = if (isFavoriteState.data == true) Color(0xFFFFD146) else Color(0xFFD1D1D1),
+                            shape = CircleShape
+                        )
+                        .padding(8.dp)
                 ) {
                     Icon(
-                        imageVector = if (isFavoriteState.data == true) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        imageVector = Icons.Default.FavoriteBorder,
                         contentDescription = "Favorite",
-                        tint = if (isFavoriteState.data == true) Color.Yellow else Color.Gray
+                        tint = Color.Black,
+                        modifier = Modifier.size(30.dp)
                     )
                 }
+
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Nombre del producto
             Text(text = product.name, fontWeight = FontWeight.Bold, fontSize = 26.sp)
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Categoría del producto
             if (productCategoryState.data != null) {
                 Text(
                     text = productCategoryState.data!!.name,
@@ -240,8 +243,10 @@ fun ProductDetails(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Descripción del producto
-            Text(text = product.description, fontSize = 18.sp)
+            Text(
+                text = product.description, fontSize = 18.sp,
+                color = Color.Gray
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -261,7 +266,7 @@ fun ProductDetails(
                             imageVector = Icons.Filled.LocationOn,
                             contentDescription = "Ubicación",
                             tint = Color(0xFFFFD146),
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
