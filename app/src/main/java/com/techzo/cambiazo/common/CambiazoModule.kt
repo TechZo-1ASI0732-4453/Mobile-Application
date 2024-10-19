@@ -10,14 +10,17 @@ import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
 import com.techzo.cambiazo.data.remote.location.DepartmentService
 import com.techzo.cambiazo.data.remote.location.DistrictService
 import com.techzo.cambiazo.data.remote.products.FavoriteProductService
+import com.techzo.cambiazo.data.remote.location.CountryService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.remote.reviews.ReviewService
 import com.techzo.cambiazo.data.repository.AuthRepository
 import com.techzo.cambiazo.data.repository.ProductDetailsRepository
 import com.techzo.cambiazo.data.repository.ExchangeRepository
+import com.techzo.cambiazo.data.repository.LocationRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
+import com.techzo.cambiazo.data.repository.ReviewRepository
 import com.techzo.cambiazo.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -121,6 +124,12 @@ object CambiazoModule {
 
     @Provides
     @Singleton
+    fun provideCountryService(retrofit: Retrofit): CountryService {
+        return retrofit.create(CountryService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideDepartmentService(retrofit: Retrofit): DepartmentService {
         return retrofit.create(DepartmentService::class.java)
     }
@@ -171,5 +180,18 @@ object CambiazoModule {
         return ProductDetailsRepository(productService, userService, reviewService, categoryService, districtService, departmentService, favoriteProductService, favoriteProductDao)
     }
 
+    @Provides
+    @Singleton
+    fun provideReviewRepository(service: ReviewService): ReviewRepository {
+        return ReviewRepository(service)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideLocationRepository(countryService: CountryService,
+                                 departmentService: DepartmentService,
+                                 districtService: DistrictService): LocationRepository {
+        return LocationRepository(countryService,departmentService,districtService)
+    }
 
 }

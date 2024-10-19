@@ -8,14 +8,17 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.techzo.cambiazo.presentation.details.ProductDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 import com.techzo.cambiazo.presentation.filter.FilterScreen
 import com.techzo.cambiazo.presentation.login.SignInScreen
+import com.techzo.cambiazo.presentation.profile.ProfileScreen
 import com.techzo.cambiazo.presentation.register.SignUpScreen
 
 sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate: () -> Unit = {}) {
@@ -101,12 +104,27 @@ fun NavScreen() {
             )
         }
 
-        composable(route = Routes.Filter.route) {
-            FilterScreen(back = { navController.popBackStack() })
+
+        composable(route=Routes.Filter.route){
+            FilterScreen(
+                back = {navController.popBackStack()},
+                openExplorer = { navController.navigate(Routes.Explorer.route)}
+            )
         }
 
         composable(route = Routes.Exchange.route) {
             ExchangeScreen(
+                bottomBar = { BottomBarNavigation(items) }
+            )
+        }
+
+        composable(route = Routes.Profile.route) {
+            ProfileScreen(
+                logOut = {
+                    navController.navigate(Routes.SignIn.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
                 bottomBar = { BottomBarNavigation(items) }
             )
         }

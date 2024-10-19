@@ -84,7 +84,7 @@ fun MainScaffoldApp(paddingCard: PaddingValues,
 
 
 @Composable
-fun ProfileImage(url:String,shape: Shape,size:Dp){
+fun ProfileImage(url:String, shape: Shape, size: Dp){
     Surface(
         modifier= Modifier
             .size(size)

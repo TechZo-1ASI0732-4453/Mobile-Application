@@ -14,6 +14,11 @@ interface ReviewService {
     suspend fun getReviewsByUserId(@Path("userId") userId: Int): Response<List<ReviewDto>>
 
     @Headers("Content-Type: application/json", "Accept: application/json")
+    @GET("reviews/average-rating/{userId}")
+    suspend fun getAverageRatingByUserId(@Path("userId") userId: Int): Response<ReviewAverageUserDto>
+
+
+    @Headers("Content-Type: application/json", "Accept: application/json")
     @POST("reviews")
     suspend fun addReview(@Body reviewDto: ReviewDto): Response<ReviewDto>
 
