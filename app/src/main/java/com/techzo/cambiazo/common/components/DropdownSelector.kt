@@ -40,9 +40,13 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 
 @Composable
-fun DropdownList(label: String,itemList: List<String>, onItemClick: (String) -> Unit) {
-
-    var selectedOption by remember { mutableStateOf("") }
+fun  <T> DropdownList(
+    selectedOption: T?,
+    label: String,
+    itemList: List<T>,
+    onItemClick: (T?) -> Unit,
+    itemToString: (T) -> String
+) {
     var textFilledSize by remember { mutableStateOf(Size.Zero) }
     var showDropdown by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -50,19 +54,14 @@ fun DropdownList(label: String,itemList: List<String>, onItemClick: (String) -> 
     Column(
         modifier = Modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
-
+        verticalArrangement = Arrangement.Center
+    ) {
         OutlinedTextField(
-
-            value = selectedOption,
-            label = {
-                Text(text = label)
-            },
+            value = selectedOption?.let(itemToString) ?: "",
+            label = { Text(text = label) },
             trailingIcon = {
                 IconButton(
-                    onClick = {
-                          showDropdown= !showDropdown
-                    },
+                    onClick = { showDropdown = !showDropdown },
                 ) {
                     Icon(
                         imageVector = if (showDropdown) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
@@ -89,46 +88,58 @@ fun DropdownList(label: String,itemList: List<String>, onItemClick: (String) -> 
             if (showDropdown) {
                 Popup(
                     alignment = Alignment.TopCenter,
-                    properties = PopupProperties(
-                        excludeFromSystemGesture = true,
-                    ),
-                    onDismissRequest = { },
-                    ) {
-
+                    properties = PopupProperties(excludeFromSystemGesture = true),
+                    onDismissRequest = {  }
+                ) {
                     Column(
                         modifier = Modifier
                             .width(with(LocalDensity.current) { textFilledSize.width.toDp() })
                             .heightIn(max = 170.dp)
-                            .shadow( elevation = 5.dp,
+                            .shadow(
+                                elevation = 5.dp,
                                 shape = RoundedCornerShape(5.dp),
-                                clip = true,
-                                )
+                                clip = true
+                            )
                             .verticalScroll(state = scrollState),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-
-                        itemList.forEach{ item ->
-
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White)
+                                .clickable {
+                                    showDropdown = false
+                                    onItemClick(null)
+                                },
+                        ) {
+                            Text(
+                                text = "Ninguno",
+                                color = Color.Gray,
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(vertical = 5.dp, horizontal = 10.dp)
+                            )
+                        }
+                        itemList.forEach { item ->
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(Color.White)
                                     .clickable {
-                                        selectedOption = item
                                         showDropdown = false
+                                        onItemClick(item)
                                     },
                             ) {
-                                Text(text = item,
+                                Text(
+                                    text = item.let(itemToString),
                                     color = Color.Gray,
                                     fontSize = 14.sp,
-                                    modifier = Modifier.padding(vertical = 5.dp, horizontal = 10.dp))
+                                    modifier = Modifier.padding(vertical = 5.dp, horizontal = 10.dp)
+                                )
                             }
+                                }
                         }
-
-                    }
                 }
             }
         }
     }
-
 }
