@@ -17,4 +17,6 @@ interface DepartmentService {
         "Accept: application/json")
     @GET("departments/{id}")
     suspend fun getDepartmentById(@Path("id") id: Int): Response<DepartmentDto>
+
 }
+
