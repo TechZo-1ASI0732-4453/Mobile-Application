@@ -16,6 +16,7 @@ import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 import com.techzo.cambiazo.presentation.filter.FilterScreen
 import com.techzo.cambiazo.presentation.login.SignInScreen
+import com.techzo.cambiazo.presentation.profile.ProfileScreen
 import com.techzo.cambiazo.presentation.register.SignUpScreen
 
 sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate: () -> Unit = {}) {
@@ -107,6 +108,17 @@ fun NavScreen() {
 
         composable(route = Routes.Exchange.route) {
             ExchangeScreen(
+                bottomBar = { BottomBarNavigation(items) }
+            )
+        }
+
+        composable(route = Routes.Profile.route) {
+            ProfileScreen(
+                logOut = {
+                    navController.navigate(Routes.SignIn.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
                 bottomBar = { BottomBarNavigation(items) }
             )
         }
