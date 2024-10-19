@@ -8,3 +8,9 @@ data class Review (
     val userAuthorId: Int,
     val userReceptorId: Int
 )
+
+data class ReviewAverageUser (
+    val averageRating: Double,
+    val countReviews: Int,
+)
+
