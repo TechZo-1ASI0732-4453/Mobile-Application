@@ -1,105 +1,130 @@
-package com.techzo.cambiazo.presentation.explorer
+    package com.techzo.cambiazo.presentation.explorer
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.techzo.cambiazo.common.Resource
-import com.techzo.cambiazo.common.UIState
-import com.techzo.cambiazo.data.repository.ProductCategoryRepository
-import com.techzo.cambiazo.data.repository.ProductRepository
-import com.techzo.cambiazo.domain.Product
-import com.techzo.cambiazo.domain.ProductCategory
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-
-@HiltViewModel
-class ExplorerListViewModel @Inject constructor (
-    private val productRepository: ProductRepository,
-    private val productCategoryRepository: ProductCategoryRepository) : ViewModel() {
-
-    private val _allProducts = mutableStateOf<List<Product>>(emptyList())
-
-    private val _name = mutableStateOf("")
-    val name: State<String> get() = _name
+    import androidx.compose.runtime.State
+    import androidx.compose.runtime.mutableStateOf
+    import androidx.lifecycle.ViewModel
+    import androidx.lifecycle.viewModelScope
+    import com.techzo.cambiazo.common.Constants
+    import com.techzo.cambiazo.common.Resource
+    import com.techzo.cambiazo.common.UIState
+    import com.techzo.cambiazo.data.repository.LocationRepository
+    import com.techzo.cambiazo.data.repository.ProductCategoryRepository
+    import com.techzo.cambiazo.data.repository.ProductRepository
+    import com.techzo.cambiazo.domain.Product
+    import com.techzo.cambiazo.domain.ProductCategory
+    import dagger.hilt.android.lifecycle.HiltViewModel
+    import kotlinx.coroutines.launch
+    import javax.inject.Inject
 
 
-    private val _state = mutableStateOf(UIState<List<Product>>())
-    val state: State<UIState<List<Product>>> = _state
+    @HiltViewModel
+    class ExplorerListViewModel @Inject constructor (
+        private val productRepository: ProductRepository,
+        private val productCategoryRepository: ProductCategoryRepository,
+        private val locationRepository: LocationRepository) : ViewModel() {
 
-    private val _productCategories = mutableStateOf(UIState<List<ProductCategory>>())
-    val productCategories: State<UIState<List<ProductCategory>>> = _productCategories
+        private val _allProducts = mutableStateOf<List<Product>>(emptyList())
+        private val _state = mutableStateOf(UIState<List<Product>>())
+        val state: State<UIState<List<Product>>> = _state
 
-    private val _selectedCategoryId = mutableStateOf<Int?>(null)
-    val selectedCategoryId: State<Int?> get() = _selectedCategoryId
+        private val _name = mutableStateOf("")
+        val name: State<String> get() = _name
 
-    init {
-        getProducts()
-        getProductCategories()
-    }
+        //category id
+        private val _categoryId = mutableStateOf<Int?>(Constants.filterValues.categoryId)
+        val categoryId: State<Int?> get() = _categoryId
 
+        private val _productCategories = mutableStateOf(UIState<List<ProductCategory>>())
+        val productCategories: State<UIState<List<ProductCategory>>> = _productCategories
 
-    fun getProducts() {
-        _state.value = UIState(isLoading = true)
-        viewModelScope.launch {
-            val result = productRepository.getProducts()
-            if(result is Resource.Success){
-                _allProducts.value = result.data ?: emptyList()
-                _state.value = UIState(data = result.data)
-            }else{
-                _state.value = UIState(message = result.message?:"Ocurrió un error")
-            }
+        init {
+            getProducts()
+            getProductCategories()
+            applyFilter()
         }
-    }
 
-    fun onProductCategorySelected(id: Int) {
-        _selectedCategoryId.value = if (_selectedCategoryId.value == id) null else id
-        _state.value = UIState(isLoading = true)
-        viewModelScope.launch {
-            val result = if (_selectedCategoryId.value == null) {
-                productRepository.getProducts()
-            } else {
-                productRepository.getProductsByCategoryId(id)
-            }
-            if (result is Resource.Success) {
-                _allProducts.value = result.data ?: emptyList()
+        fun getProducts() {
+            _state.value = UIState(isLoading = true)
+            viewModelScope.launch {
+                val districtResources = locationRepository.getDistricts()
+                val districts = districtResources.data?: emptyList()
+                val departmentResources = locationRepository.getDepartments()
+                val departments = departmentResources.data?: emptyList()
+                val countryResources = locationRepository.getCountries()
+                val countries = countryResources.data?: emptyList()
+
+                val result = productRepository.getProducts()
+                if(result is Resource.Success){
+                    val products = result.data?: emptyList()
+                    products.forEach { product ->
+                        product.district = districts.find { it.id == product.districtId }
+                        product.department = departments.find { it.id == product.district?.departmentId }
+                        product.country = countries.find { it.id == product.department?.countryId }
+                    }
+                    _allProducts.value = products
+                    _state.value = UIState(data = products, isLoading = false)
+                }else{
+                    _state.value = UIState(message = result.message?:"Ocurrió un error")
+                }
                 applyFilter()
-            } else {
-                _state.value = UIState(message = result.message ?: "Ocurrió un error")
+            }
+        }
+
+        fun onProductCategorySelected(id: Int) {
+            _categoryId.value = if(_categoryId.value == id) null else id
+            Constants.filterValues.categoryId = _categoryId.value
+            applyFilter()
+        }
+
+
+        fun onNameChanged(name: String) {
+            _name.value = name
+            applyFilter()
+        }
+
+        private fun applyFilter() {
+            _state.value = UIState(isLoading = true)
+            val filteredList = _allProducts.value.filter { product ->
+                val matchesName = product.name.contains(_name.value, ignoreCase = true)
+
+                val matchesCategory = Constants.filterValues.categoryId?.let { categoryId ->
+                    product.productCategoryId == categoryId
+                } ?: true
+
+                val matchesCountry = Constants.filterValues.countryId?.let { countryId ->
+                    product.department?.countryId == countryId
+                } ?: true
+
+                val matchesDepartment = Constants.filterValues.departmentId?.let { departmentId ->
+                    product.district?.departmentId == departmentId
+                } ?: true
+
+                val matchesDistrictId = Constants.filterValues.districtId?.let { districtId ->
+                    product.districtId == districtId
+                } ?: true
+
+                val matchesMinPrice = Constants.filterValues.minPrice?.let { minPrice ->
+                    product.price >= minPrice
+                } ?: true
+
+                val matchesMaxPrice = Constants.filterValues.maxPrice?.let { maxPrice ->
+                    product.price <= maxPrice
+                } ?: true
+
+                matchesName && matchesCategory && matchesCountry && matchesDepartment && matchesDistrictId && matchesMinPrice && matchesMaxPrice
+            }
+                _state.value = UIState(data = filteredList)
+        }
+
+        fun getProductCategories() {
+            _productCategories.value = UIState(isLoading = true)
+            viewModelScope.launch {
+                val result = productCategoryRepository.getProductCategories()
+                if(result is Resource.Success){
+                    _productCategories.value = UIState(data = result.data)
+                }else{
+                    _productCategories.value = UIState(message = result.message?:"Ocurrió un error")
+                }
             }
         }
     }
-
-    // Actualiza el nombre ingresado en el campo de búsqueda
-    fun onNameChanged(name: String) {
-        _name.value = name
-        applyFilter() // Filtrar productos mientras se escribe en el buscador
-    }
-
-    // Aplica el filtro tanto por nombre como por categoría
-    private fun applyFilter() {
-        val filteredList = _allProducts.value.filter { product ->
-            val matchesName = product.name.contains(_name.value, ignoreCase = true)
-            val matchesCategory = _selectedCategoryId.value?.let { categoryId ->
-                product.productCategoryId == categoryId
-            } ?: true
-            matchesName && matchesCategory
-        }
-        _state.value = UIState(data = filteredList)
-    }
-
-    // Función para obtener las categorías de productos
-    fun getProductCategories() {
-        _productCategories.value = UIState(isLoading = true)
-        viewModelScope.launch {
-            val result = productCategoryRepository.getProductCategories()
-            if(result is Resource.Success){
-                _productCategories.value = UIState(data = result.data)
-            }else{
-                _productCategories.value = UIState(message = result.message?:"Ocurrió un error")
-            }
-        }
-    }
-}
