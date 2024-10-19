@@ -55,18 +55,20 @@ sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate
 }
 
 sealed class Routes(val route: String) {
-    object SignUp : Routes("SignUpScreen")
-    object SignIn : Routes("SignInScreen")
-    object Filter : Routes("FilterScreen")
-    object Explorer : Routes("ExplorerScreen")
-    object Article : Routes("ArticleScreen")
-    object Donation : Routes("DonationScreen")
-    object Profile : Routes("ProfileScreen")
-    object Exchange : Routes("ExchangeScreen")
-    object Details : Routes("DetailsScreen/{productId}/{userId}") {
+    data object SignUp : Routes("SignUpScreen")
+    data object SignIn : Routes("SignInScreen")
+    data object Filter : Routes("FilterScreen")
+    data object Explorer : Routes("ExplorerScreen")
+    data object Article : Routes("ArticleScreen")
+    data object Donation : Routes("DonationScreen")
+    data object Profile : Routes("ProfileScreen")
+    data object Exchange : Routes("ExchangeScreen")
+    data object Details : Routes("DetailsScreen/{productId}/{userId}") {
         fun createRoute(productId: String, userId: String) = "DetailsScreen/$productId/$userId"
-    object ExchangeDetails: Routes("ExchangeDetailsScreen/{exchangeId}/{page}"){
+    }
+    data object ExchangeDetails: Routes("ExchangeDetailsScreen/{exchangeId}/{page}"){
         fun createExchangeDetailsRoute(exchangeId:String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
+    }
 }
 
 @Composable
