@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.ProductDetailsRepository
+import com.techzo.cambiazo.data.repository.ReviewRepository
 import com.techzo.cambiazo.domain.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -15,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProductDetailsViewModel @Inject constructor(
-    private val repository: ProductDetailsRepository
+    private val repository: ProductDetailsRepository,
+    private val reviewRepository: ReviewRepository // Agregar el ReviewRepository
 ) : ViewModel() {
 
     private val _product = mutableStateOf(UIState<Product>())
@@ -39,6 +41,9 @@ class ProductDetailsViewModel @Inject constructor(
     private val _isFavorite = mutableStateOf(UIState<Boolean>(data = false))
     val isFavorite: State<UIState<Boolean>> = _isFavorite
 
+    private val _averageRating = mutableStateOf(UIState<Double>())
+    val averageRating: State<UIState<Double>> = _averageRating
+
     fun loadProductDetails(productId: Int, userId: Int) {
         _product.value = UIState(isLoading = true)
         _user.value = UIState(isLoading = true)
@@ -47,17 +52,18 @@ class ProductDetailsViewModel @Inject constructor(
         _district.value = UIState(isLoading = true)
         _department.value = UIState(isLoading = true)
         _isFavorite.value = UIState(isLoading = true)
+        _averageRating.value = UIState(isLoading = true)
 
         viewModelScope.launch {
             val productDeferred = async { repository.getProductById(productId) }
             val userDeferred = async { repository.getUserById(userId) }
             val reviewsDeferred = async { repository.getReviewsByUserId(userId) }
-            val isFavoriteDeferred = async { repository.isProductFavorite(productId) }
+            val averageRatingDeferred = async { reviewRepository.getAverageRatingByUserId(userId) }
 
             val productResult = productDeferred.await()
             val userResult = userDeferred.await()
             val reviewsResult = reviewsDeferred.await()
-            val isFavoriteResult = isFavoriteDeferred.await()
+            val averageRatingResult = averageRatingDeferred.await()
 
             if (productResult is Resource.Success) {
                 _product.value = UIState(data = productResult.data)
@@ -85,7 +91,8 @@ class ProductDetailsViewModel @Inject constructor(
 
             _user.value = UIState(data = userResult.data)
             _reviews.value = UIState(data = reviewsResult.data)
-            _isFavorite.value = UIState(data = isFavoriteResult.data ?: false)
+            _averageRating.value = UIState(data = averageRatingResult.data?.averageRating)
+            _isFavorite.value = UIState(data = false)
         }
     }
 
