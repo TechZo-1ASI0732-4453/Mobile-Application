@@ -169,10 +169,5 @@ fun SignInScreen(openRegister: () -> Unit = {},
     }
 }
 
-@Preview
-@Composable
-fun PreviewSignInScreen(){
-    SignInScreen()
-}
 
 
