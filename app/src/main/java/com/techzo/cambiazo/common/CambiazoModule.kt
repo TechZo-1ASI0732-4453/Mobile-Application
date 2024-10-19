@@ -167,8 +167,8 @@ object CambiazoModule {
 
     @Provides
     @Singleton
-    fun provideProductDetailsRepository(productService: ProductService, userService: UserService, reviewService: ReviewService, categoryService: ProductCategoryService, districtService: DistrictService, departmentService: DepartmentService, favoriteProductService: FavoriteProductService): ProductDetailsRepository {
-        return ProductDetailsRepository(productService, userService, reviewService, categoryService, districtService, departmentService, favoriteProductService)
+    fun provideProductDetailsRepository(productService: ProductService, userService: UserService, reviewService: ReviewService, categoryService: ProductCategoryService, districtService: DistrictService, departmentService: DepartmentService, favoriteProductService: FavoriteProductService, favoriteProductDao: FavoriteProductDao): ProductDetailsRepository {
+        return ProductDetailsRepository(productService, userService, reviewService, categoryService, districtService, departmentService, favoriteProductService, favoriteProductDao)
     }
 
 

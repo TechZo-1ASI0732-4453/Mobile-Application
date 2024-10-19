@@ -11,7 +11,7 @@ import retrofit2.http.Path
 interface FavoriteProductService {
 
     @Headers("Content-Type: application/json", "Accept: application/json")
-    @GET("favorite-products/user/{userId}")
+    @GET("favorite-products/{userId}")
     suspend fun getFavoriteProductsByUserId(@Path("userId") userId: Int): Response<List<FavoriteProductDto>>
 
     @Headers("Content-Type: application/json", "Accept: application/json")
@@ -19,6 +19,6 @@ interface FavoriteProductService {
     suspend fun addFavoriteProduct(@Body favoriteProductDto: FavoriteProductDto): Response<FavoriteProductDto>
 
     @Headers("Content-Type: application/json", "Accept: application/json")
-    @DELETE("favorite-products/{userId}/{favoriteProductId}")
+    @DELETE("favorite-products/delete/{userId}/{favoriteProductId}")
     suspend fun removeFavoriteProduct(@Path("userId") userId: Int, @Path("favoriteProductId") favoriteProductId: Int): Response<Unit>
 }

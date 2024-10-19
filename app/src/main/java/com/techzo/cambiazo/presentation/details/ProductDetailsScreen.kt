@@ -211,7 +211,9 @@ fun ProductDetails(
                     onClick = { onFavoriteToggle(isFavoriteState.data == true) },
                     modifier = Modifier
                         .background(
-                            color = if (isFavoriteState.data == true) Color(0xFFFFD146) else Color(0xFFD1D1D1),
+                            color = if (isFavoriteState.data == true) Color(0xFFFFD146) else Color(
+                                0xFFDFDFDF
+                            ),
                             shape = CircleShape
                         )
                         .padding(8.dp)
@@ -250,7 +252,6 @@ fun ProductDetails(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Ubicación del intercambio
             if (districtState.data != null) {
                 val district = districtState.data!!
                 if (departmentState.data != null) {

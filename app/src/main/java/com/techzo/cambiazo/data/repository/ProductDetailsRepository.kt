@@ -3,6 +3,7 @@ package com.techzo.cambiazo.data.repository
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.local.FavoriteProductDao
+import com.techzo.cambiazo.data.local.FavoriteProductEntity
 import com.techzo.cambiazo.data.remote.auth.UserService
 import com.techzo.cambiazo.data.remote.auth.toUser
 import com.techzo.cambiazo.data.remote.location.DepartmentService
@@ -14,7 +15,6 @@ import com.techzo.cambiazo.data.remote.products.FavoriteProductService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.remote.products.toFavoriteProduct
-import com.techzo.cambiazo.data.remote.products.toFavoriteProductDto
 import com.techzo.cambiazo.data.remote.products.toProduct
 import com.techzo.cambiazo.data.remote.products.toProductCategory
 import com.techzo.cambiazo.data.remote.reviews.ReviewService
@@ -36,7 +36,8 @@ class ProductDetailsRepository(
     private val categoryService: ProductCategoryService,
     private val districtService: DistrictService,
     private val departmentService: DepartmentService,
-    private val favoriteProductService: FavoriteProductService
+    private val favoriteProductService: FavoriteProductService,
+    private val favoriteProductDao: FavoriteProductDao
 ) {
     suspend fun getReviewsByUserId(userId: Int): Resource<List<Review>> =
         withContext(Dispatchers.IO) {
@@ -137,16 +138,10 @@ class ProductDetailsRepository(
     suspend fun isProductFavorite(productId: Int): Resource<Boolean> =
         withContext(Dispatchers.IO) {
             try {
-                val response = favoriteProductService.getFavoriteProductsByUserId(Constants.user!!.id)
-                if (response.isSuccessful) {
-                    val favoriteProducts = response.body() ?: emptyList()
-                    val isFavorite = favoriteProducts.any { it.productId == productId }
-                    return@withContext Resource.Success(data = isFavorite)
-                } else {
-                    return@withContext Resource.Error(response.message())
-                }
+                val favoriteProduct = favoriteProductDao.getFavoriteProductByUserAndProduct(Constants.user!!.id, productId)
+                Resource.Success(data = favoriteProduct != null)
             } catch (e: Exception) {
-                return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+                Resource.Error(e.message ?: "Ocurrió un error")
             }
         }
 
@@ -161,30 +156,30 @@ class ProductDetailsRepository(
                 val response = favoriteProductService.addFavoriteProduct(favoriteProductDto)
                 if (response.isSuccessful) {
                     response.body()?.let {
-                        return@withContext Resource.Success(data = it.toFavoriteProduct())
+                        val favoriteProduct = it.toFavoriteProduct()
+                        favoriteProductDao.insertFavoriteProduct(FavoriteProductEntity(favoriteProduct.id, favoriteProduct.productId, favoriteProduct.userId))
+                        return@withContext Resource.Success(data = favoriteProduct)
                     }
                     return@withContext Resource.Error("Error al agregar a favoritos")
                 }
                 return@withContext Resource.Error(response.message())
             } catch (e: Exception) {
-                return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+                Resource.Error(e.message ?: "Ocurrió un error")
             }
         }
 
     suspend fun deleteFavoriteProduct(productId: Int): Resource<Unit> =
         withContext(Dispatchers.IO) {
             try {
-                val deleteResponse = favoriteProductService.removeFavoriteProduct(
-                    userId = Constants.user!!.id,
-                    favoriteProductId = productId
-                )
+                val deleteResponse = favoriteProductService.removeFavoriteProduct(Constants.user!!.id, productId)
                 if (deleteResponse.isSuccessful) {
+                    favoriteProductDao.deleteFavoriteProductByUserAndProduct(Constants.user!!.id, productId)
                     return@withContext Resource.Success(Unit)
                 } else {
                     return@withContext Resource.Error(deleteResponse.message())
                 }
             } catch (e: Exception) {
-                return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+                Resource.Error(e.message ?: "Ocurrió un error")
             }
         }
 }
