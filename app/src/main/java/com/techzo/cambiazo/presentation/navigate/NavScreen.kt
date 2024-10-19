@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.techzo.cambiazo.presentation.exchanges.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
@@ -63,7 +64,9 @@ sealed class Routes(val route: String){
     data object Donation: Routes("DonationScreen")
     data object Profile: Routes("ProfileScreen")
     data object Exchange: Routes("ExchangeScreen")
-
+    data object ExchangeDetails: Routes("ExchangeDetailsScreen/{exchangeId}/{page}"){
+        fun createExchangeDetailsRoute(exchangeId:String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
+    }
 }
 
 @Composable
@@ -75,7 +78,7 @@ fun NavScreen(){
         ItemsScreens.Exchange(onNavigate = { navController.navigate(Routes.Exchange.route) }),
         ItemsScreens.Articles(onNavigate = { navController.navigate(Routes.Article.route) }),
         ItemsScreens.Donation(onNavigate = { navController.navigate(Routes.Donation.route) }),
-        ItemsScreens.Profile(onNavigate = { navController.navigate(Routes.Profile.route) })
+        ItemsScreens.Profile(onNavigate = { navController.navigate(Routes.Profile.route) }),
     )
 
 
@@ -108,7 +111,20 @@ fun NavScreen(){
 
         composable(route=Routes.Exchange.route){
             ExchangeScreen(
-                bottomBar = {BottomBarNavigation(items)}
+                bottomBar = {BottomBarNavigation(items)},
+                goToDetailsScreen = { exchangeId, page ->
+                    navController.navigate(Routes.ExchangeDetails.createExchangeDetailsRoute(exchangeId, page))
+                }
+            )
+        }
+
+        composable(route=Routes.ExchangeDetails.route){ backStackEntry ->
+            val exchange = backStackEntry.arguments?.getString("exchangeId")?.toIntOrNull()
+            val page = backStackEntry.arguments?.getString("page")?.toIntOrNull()
+            ExchangeDetailsScreen(
+                goBack = {navController.popBackStack()},
+                exchangeId = exchange!!,
+                page = page!!
             )
         }
 
