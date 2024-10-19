@@ -7,8 +7,6 @@ import com.techzo.cambiazo.data.remote.location.DepartmentService
 import com.techzo.cambiazo.data.remote.location.DistrictService
 import com.techzo.cambiazo.data.remote.products.FavoriteProductService
 import com.techzo.cambiazo.data.remote.location.CountryService
-import com.techzo.cambiazo.data.remote.location.DepartmentService
-import com.techzo.cambiazo.data.remote.location.DistrictService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.remote.reviews.ReviewService
@@ -103,6 +101,7 @@ object CambiazoModule {
     @Singleton
     fun provideDistrictService(retrofit: Retrofit): DistrictService {
         return retrofit.create(DistrictService::class.java)
+    }
 
     @Provides
     @Singleton
@@ -120,11 +119,6 @@ object CambiazoModule {
     @Singleton
     fun provideFavoriteProductService(retrofit: Retrofit): FavoriteProductService {
         return retrofit.create(FavoriteProductService::class.java)
-        
-    @Provides
-    @Singleton    
-    fun provideDistrictService(retrofit: Retrofit): DistrictService {
-        return retrofit.create(DistrictService::class.java)
     }
 
 
@@ -180,11 +174,5 @@ object CambiazoModule {
                                  districtService: DistrictService): LocationRepository {
         return LocationRepository(countryService,departmentService,districtService)
     }
-
-
-
-
-
-
 
 }
