@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.data.remote.reviews
 
 import com.techzo.cambiazo.domain.Review
+import com.techzo.cambiazo.domain.ReviewAverageUser
 
 data class ReviewDto(
     val message: String,
@@ -19,5 +20,17 @@ fun ReviewDto.toReview(): Review {
         exchangeId = exchangeId,
         userAuthorId = userAuthorId,
         userReceptorId = userReceptorId
+    )
+}
+
+data class ReviewAverageUserDto(
+    val averageRating: Double,
+    val countReviews: Int,
+)
+
+fun ReviewAverageUserDto.toReviewAverageUser(): ReviewAverageUser {
+    return ReviewAverageUser(
+        averageRating = averageRating,
+        countReviews = countReviews
     )
 }
