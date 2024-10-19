@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -27,6 +26,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.components.ButtonApp
+import com.techzo.cambiazo.common.components.StarRating
 import com.techzo.cambiazo.domain.*
 
 @Composable
@@ -49,13 +49,14 @@ fun ProductDetailsScreen(
     val districtState = viewModel.district.value
     val departmentState = viewModel.department.value
     val isFavoriteState = viewModel.isFavorite.value
+    val averageRatingState = viewModel.averageRating.value
 
     Scaffold(
         content = { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
-                if (productState.isLoading || userState.isLoading || reviewsState.isLoading) {
+                if (productState.isLoading || userState.isLoading || reviewsState.isLoading || averageRatingState.isLoading) {
                 } else if (productState.data != null) {
-                    Column(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.fillMaxSize()) {
                         ProductHeader(product = productState.data!!, onBack = onBack)
                         ProductDetails(
                             product = productState.data!!,
@@ -65,12 +66,15 @@ fun ProductDetailsScreen(
                             districtState = districtState,
                             departmentState = departmentState,
                             isFavoriteState = isFavoriteState,
+                            averageRating = averageRatingState.data ?: 0.0,
                             onFavoriteToggle = { isCurrentlyFavorite ->
-                                viewModel.toggleFavoriteStatus(
-                                    productId!!,
-                                    isCurrentlyFavorite
-                                )
-                            }
+                                viewModel.toggleFavoriteStatus(productId!!, isCurrentlyFavorite)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 360.dp)
+                                .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 40.dp))
+                                .background(Color.White)
                         )
                     }
                 } else if (productState.message != null) {
@@ -83,13 +87,18 @@ fun ProductDetailsScreen(
 
 @Composable
 fun ProductHeader(product: Product, onBack: () -> Unit) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(390.dp)
+    ) {
         Image(
             painter = rememberAsyncImagePainter(product.image),
             contentDescription = "Product Image",
             modifier = Modifier
                 .fillMaxWidth()
-                .height(350.dp),
+                .height(400.dp)
+                .clip(RoundedCornerShape(0.dp))
+                .offset(y = (0).dp),
             contentScale = ContentScale.Crop
         )
         IconButton(
@@ -113,7 +122,8 @@ fun ProductHeader(product: Product, onBack: () -> Unit) {
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(8.dp)
+                .padding(24.dp)
+                .padding(bottom = 20.dp)
                 .background(
                     Color.Black.copy(alpha = 0.7f), RoundedCornerShape(12.dp)
                 )
@@ -123,7 +133,7 @@ fun ProductHeader(product: Product, onBack: () -> Unit) {
                 text = "S/${product.price} valor aprox.",
                 color = Color(0xFFFFD146),
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                fontSize = 19.sp
             )
         }
     }
@@ -138,14 +148,14 @@ fun ProductDetails(
     districtState: UIState<District>,
     departmentState: UIState<Department>,
     isFavoriteState: UIState<Boolean>,
-    onFavoriteToggle: (Boolean) -> Unit
+    averageRating: Double,
+    onFavoriteToggle: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .padding(20.dp)
     ) {
-
         if (userState.data != null) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -176,26 +186,14 @@ fun ProductDetails(
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        repeat(5) { index ->
-                            val tint =
-                                if (index < (reviewsState.data?.firstOrNull()?.rating ?: 0)) {
-                                    Color(0xFFFFD700)
-                                } else {
-                                    Color.Gray
-                                }
-                            Icon(
-                                Icons.Default.Star,
-                                contentDescription = "Star",
-                                tint = tint,
-                                modifier = Modifier.size(26.dp)
-                            )
-                        }
+                        StarRating(rating = averageRating, size = 26.dp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
-                                .background(Color.Black, shape = CircleShape)
-                                .padding(horizontal = 10.dp, vertical = 2.dp)
+                                .background(Color.Black, shape = RoundedCornerShape(50))
+                                .padding(horizontal = 13.dp, vertical = 1.5.dp)
                         ) {
                             Text(
                                 text = "${reviewsState.data?.size ?: 0}",
@@ -225,7 +223,6 @@ fun ProductDetails(
                         modifier = Modifier.size(30.dp)
                     )
                 }
-
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -285,13 +282,11 @@ fun ProductDetails(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Intereses del usuario
             Text(text = "Le interesa:", fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Text(text = product.desiredObject, fontSize = 18.sp)
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botón de intercambio
             ButtonApp(
                 text = "Intercambiar",
                 onClick = { /* Handle exchange action */ },
