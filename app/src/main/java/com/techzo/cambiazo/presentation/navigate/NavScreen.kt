@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
@@ -61,7 +62,7 @@ sealed class Routes(val route: String){
     data object SignIn: Routes("SignInScreen")
     data object Filter: Routes("FilterScreen")
     data object Explorer: Routes("ExplorerScreen")
-    data object Article: Routes("ArticleScreen")
+    data object Article: Routes("ArticlesScreen")
     data object Donation: Routes("DonationScreen")
     data object Profile: Routes("ProfileScreen")
     data object Exchange: Routes("ExchangeScreen")
@@ -114,6 +115,12 @@ fun NavScreen(){
 
         composable(route=Routes.Exchange.route){
             ExchangeScreen(
+                bottomBar = {BottomBarNavigation(items)}
+            )
+        }
+
+        composable(route=Routes.Article.route){
+            ArticlesScreen(
                 bottomBar = {BottomBarNavigation(items)}
             )
         }
