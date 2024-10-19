@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
-import com.techzo.cambiazo.data.repository.DetailsRepository
+import com.techzo.cambiazo.data.repository.ProductDetailsRepository
 import com.techzo.cambiazo.domain.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -15,8 +15,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DetailsViewModel @Inject constructor(
-    private val repository: DetailsRepository
+class ProductDetailsViewModel @Inject constructor(
+    private val repository: ProductDetailsRepository
 ) : ViewModel() {
 
     private val _product = mutableStateOf(UIState<Product>())
@@ -40,8 +40,6 @@ class DetailsViewModel @Inject constructor(
     private val _isFavorite = mutableStateOf(UIState<Boolean>(data = false))
     val isFavorite: State<UIState<Boolean>> = _isFavorite
 
-    private var currentFavoriteProductId: Int? = null
-
     fun loadProductDetails(productId: Int, userId: Int) {
         _product.value = UIState(isLoading = true)
         _user.value = UIState(isLoading = true)
@@ -55,7 +53,7 @@ class DetailsViewModel @Inject constructor(
             val productDeferred = async { repository.getProductById(productId) }
             val userDeferred = async { repository.getUserById(userId) }
             val reviewsDeferred = async { repository.getReviewsByUserId(userId) }
-            val isFavoriteDeferred = async { repository.isProductFavorite(userId, productId) }
+            val isFavoriteDeferred = async { repository.isProductFavorite(productId) }
 
             val productResult = productDeferred.await()
             val userResult = userDeferred.await()
@@ -65,8 +63,10 @@ class DetailsViewModel @Inject constructor(
             if (productResult is Resource.Success) {
                 _product.value = UIState(data = productResult.data)
 
-                val categoryDeferred = async { repository.getProductCategoryById(productResult.data!!.productCategoryId) }
-                val districtDeferred = async { repository.getDistrictById(productResult.data!!.districtId) }
+                val categoryDeferred =
+                    async { repository.getProductCategoryById(productResult.data!!.productCategoryId) }
+                val districtDeferred =
+                    async { repository.getDistrictById(productResult.data!!.districtId) }
 
                 val categoryResult = categoryDeferred.await()
                 val districtResult = districtDeferred.await()
@@ -75,43 +75,54 @@ class DetailsViewModel @Inject constructor(
                 _district.value = UIState(data = districtResult.data)
 
                 if (districtResult is Resource.Success) {
-                    _department.value = repository.getDepartmentById(districtResult.data!!.departmentId).let {
-                        UIState(data = it.data)
-                    }
+                    val departmentResult =
+                        repository.getDepartmentById(districtResult.data!!.departmentId)
+                    _department.value = UIState(data = departmentResult.data)
                 }
             } else {
-                _product.value = UIState(message = productResult.message ?: "Error al cargar el producto")
+                _product.value =
+                    UIState(message = productResult.message ?: "Error al cargar el producto")
             }
 
             _user.value = UIState(data = userResult.data)
             _reviews.value = UIState(data = reviewsResult.data)
-            _isFavorite.value = UIState(data = isFavoriteResult.data)
-
-            if (isFavoriteResult is Resource.Success && isFavoriteResult.data == true) {
-                currentFavoriteProductId = productId
-            }
+            _isFavorite.value = UIState(data = isFavoriteResult.data ?: false)
         }
     }
 
     fun addProductToFavorites(productId: Int) {
         viewModelScope.launch {
-            val result = repository.addFavoriteProduct(Constants.user!!.id, productId)
+            val result = repository.addFavoriteProduct(productId)
             if (result is Resource.Success) {
                 _isFavorite.value = UIState(data = true)
-                currentFavoriteProductId = result.data?.id
+            } else {
+                _isFavorite.value = UIState(
+                    data = false,
+                    message = result.message ?: "Error al agregar a favoritos"
+                )
             }
         }
     }
 
-    fun removeProductFromFavorites() {
+    fun removeProductFromFavorites(productId: Int) {
         viewModelScope.launch {
-            currentFavoriteProductId?.let { productId ->
-                val result = repository.removeFavoriteProduct(productId)
-                if (result is Resource.Success) {
-                    _isFavorite.value = UIState(data = false)
-                    currentFavoriteProductId = null
-                }
+            val result = repository.deleteFavoriteProduct(productId)
+            if (result is Resource.Success) {
+                _isFavorite.value = UIState(data = false)
+            } else {
+                _isFavorite.value = UIState(
+                    data = true,
+                    message = result.message ?: "Error al eliminar de favoritos"
+                )
             }
+        }
+    }
+
+    fun toggleFavoriteStatus(productId: Int, isCurrentlyFavorite: Boolean) {
+        if (isCurrentlyFavorite) {
+            removeProductFromFavorites(productId)
+        } else {
+            addProductToFavorites(productId)
         }
     }
 }
