@@ -1,5 +1,9 @@
 package com.techzo.cambiazo.common
 
+import android.content.Context
+import androidx.room.Room
+import com.techzo.cambiazo.data.local.AppDatabase
+import com.techzo.cambiazo.data.local.FavoriteProductDao
 import com.techzo.cambiazo.data.remote.auth.AuthService
 import com.techzo.cambiazo.data.remote.auth.UserService
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
@@ -11,7 +15,7 @@ import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.remote.reviews.ReviewService
 import com.techzo.cambiazo.data.repository.AuthRepository
-import com.techzo.cambiazo.data.repository.DetailsRepository
+import com.techzo.cambiazo.data.repository.ProductDetailsRepository
 import com.techzo.cambiazo.data.repository.ExchangeRepository
 import com.techzo.cambiazo.data.repository.LocationRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
@@ -21,6 +25,7 @@ import com.techzo.cambiazo.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -56,7 +61,21 @@ object CambiazoModule {
             .build()
     }
 
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            AppDatabase::class.java,
+            "cambiazo_database"
+        ).build()
+    }
 
+    @Provides
+    @Singleton
+    fun provideFavoriteProductDao(appDatabase: AppDatabase): FavoriteProductDao {
+        return appDatabase.favoriteProductDao()
+    }
 
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS SERVICIOS
 
@@ -157,8 +176,8 @@ object CambiazoModule {
 
     @Provides
     @Singleton
-    fun provideDetailsRepository(productService: ProductService, userService: UserService, reviewService: ReviewService, categoryService: ProductCategoryService, districtService: DistrictService, departmentService: DepartmentService, favoriteProductService: FavoriteProductService): DetailsRepository {
-        return DetailsRepository(productService, userService, reviewService, categoryService, districtService, departmentService, favoriteProductService)
+    fun provideProductDetailsRepository(productService: ProductService, userService: UserService, reviewService: ReviewService, categoryService: ProductCategoryService, districtService: DistrictService, departmentService: DepartmentService, favoriteProductService: FavoriteProductService, favoriteProductDao: FavoriteProductDao): ProductDetailsRepository {
+        return ProductDetailsRepository(productService, userService, reviewService, categoryService, districtService, departmentService, favoriteProductService, favoriteProductDao)
     }
 
     @Provides

@@ -28,7 +28,8 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun CardApp(padding: PaddingValues, content: @Composable () -> Unit = {}) {
     Card(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(Color.White, RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
             .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
 
@@ -36,10 +37,11 @@ fun CardApp(padding: PaddingValues, content: @Composable () -> Unit = {}) {
     ) {
         Column(
             modifier = Modifier
-                .background(Color.White,RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                .background(Color.White, RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                 .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
 
-                .fillMaxSize().padding(padding),
+                .fillMaxSize()
+                .padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             content()
