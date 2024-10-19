@@ -5,18 +5,16 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Path
 
-interface DepartmentService {
+interface CountryService {
+
     @Headers("Content-Type: application/json",
         "Accept: application/json")
-    @GET("departments")
-    suspend fun getDepartments(): Response<List<DepartmentDto>>
-
+    @GET("countries")
+    suspend fun getCountries(): Response<List<CountryDto>>
 
     //by id
     @Headers("Content-Type: application/json",
         "Accept: application/json")
-    @GET("departments/{id}")
-    suspend fun getDepartmentById(@Path("id") id: Int): Response<DepartmentDto>
-
+    @GET("countries/{id}")
+    suspend fun getCountryById(@Path("id") id: Int): Response<CountryDto>
 }
-

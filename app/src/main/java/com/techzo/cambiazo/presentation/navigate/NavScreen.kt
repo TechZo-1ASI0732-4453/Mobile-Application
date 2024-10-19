@@ -8,10 +8,12 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.techzo.cambiazo.presentation.details.DetailsScreen
+import androidx.navigation.navArgument
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 import com.techzo.cambiazo.presentation.filter.FilterScreen
@@ -102,8 +104,12 @@ fun NavScreen() {
             )
         }
 
-        composable(route = Routes.Filter.route) {
-            FilterScreen(back = { navController.popBackStack() })
+
+        composable(route=Routes.Filter.route){
+            FilterScreen(
+                back = {navController.popBackStack()},
+                openExplorer = { navController.navigate(Routes.Explorer.route)}
+            )
         }
 
         composable(route = Routes.Exchange.route) {

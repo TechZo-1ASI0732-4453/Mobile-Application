@@ -6,12 +6,16 @@ import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
 import com.techzo.cambiazo.data.remote.location.DepartmentService
 import com.techzo.cambiazo.data.remote.location.DistrictService
 import com.techzo.cambiazo.data.remote.products.FavoriteProductService
+import com.techzo.cambiazo.data.remote.location.CountryService
+import com.techzo.cambiazo.data.remote.location.DepartmentService
+import com.techzo.cambiazo.data.remote.location.DistrictService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.remote.reviews.ReviewService
 import com.techzo.cambiazo.data.repository.AuthRepository
 import com.techzo.cambiazo.data.repository.DetailsRepository
 import com.techzo.cambiazo.data.repository.ExchangeRepository
+import com.techzo.cambiazo.data.repository.LocationRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
 import com.techzo.cambiazo.data.repository.ReviewRepository
@@ -99,6 +103,11 @@ object CambiazoModule {
     @Singleton
     fun provideDistrictService(retrofit: Retrofit): DistrictService {
         return retrofit.create(DistrictService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideCountryService(retrofit: Retrofit): CountryService {
+        return retrofit.create(CountryService::class.java)
     }
 
     @Provides
@@ -111,6 +120,11 @@ object CambiazoModule {
     @Singleton
     fun provideFavoriteProductService(retrofit: Retrofit): FavoriteProductService {
         return retrofit.create(FavoriteProductService::class.java)
+        
+    @Provides
+    @Singleton    
+    fun provideDistrictService(retrofit: Retrofit): DistrictService {
+        return retrofit.create(DistrictService::class.java)
     }
 
 
@@ -158,5 +172,19 @@ object CambiazoModule {
     fun provideReviewRepository(service: ReviewService): ReviewRepository {
         return ReviewRepository(service)
     }
+    
+    @Provides
+    @Singleton
+    fun provideLocationRepository(countryService: CountryService,
+                                 departmentService: DepartmentService,
+                                 districtService: DistrictService): LocationRepository {
+        return LocationRepository(countryService,departmentService,districtService)
+    }
+
+
+
+
+
+
 
 }
