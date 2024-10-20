@@ -2,7 +2,6 @@ package com.techzo.cambiazo.presentation.exchanges
 
 import android.util.Log
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +9,9 @@ import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.ExchangeRepository
+import com.techzo.cambiazo.data.repository.LocationRepository
+import com.techzo.cambiazo.domain.Department
+import com.techzo.cambiazo.domain.District
 import com.techzo.cambiazo.domain.Exchange
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -18,16 +20,18 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class ExchangeViewModel @Inject constructor(private val exchangeRepository: ExchangeRepository) : ViewModel() {
+class ExchangeViewModel @Inject constructor(private val exchangeRepository: ExchangeRepository,
+    private val locationRepository: LocationRepository
+) : ViewModel() {
 
     private val _exchangesSend = mutableStateOf(UIState<List<Exchange>>())
-    val exchangesSend: State<UIState<List<Exchange>>> get() = _exchangesSend
+    //val exchangesSend: State<UIState<List<Exchange>>> get() = _exchangesSend
 
     private val _exchangesReceived = mutableStateOf(UIState<List<Exchange>>())
-    val exchangesReceived: State<UIState<List<Exchange>>> get() = _exchangesReceived
+    //val exchangesReceived: State<UIState<List<Exchange>>> get() = _exchangesReceived
 
     private val _finishedExchanges = mutableStateOf(UIState<List<Exchange>>())
-    val finishedExchanges: State<UIState<List<Exchange>>> get() = _finishedExchanges
+    //val finishedExchanges: State<UIState<List<Exchange>>> get() = _finishedExchanges
 
     private val _state = mutableStateOf(UIState<List<Exchange>>())
     val state: State<UIState<List<Exchange>>> get() = _state
@@ -35,8 +39,23 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
     private val _exchange = mutableStateOf(UIState<Exchange>())
     val exchange: State<UIState<Exchange>> get() = _exchange
 
+    private val _districts = mutableStateOf<List<District>>(emptyList())
+    //val districts: State<List<District>> get() = _districts
+
+    private val _departments = mutableStateOf<List<Department>>(emptyList())
+    //val departments: State<List<Department>> get() = _departments
+
+
     init{
         getExchangesByUserOwnId()
+        getLocations()
+    }
+
+    private fun getLocations(){
+        viewModelScope.launch {
+            _districts.value = locationRepository.getDistricts().data?: emptyList()
+            _departments.value = locationRepository.getDepartments().data?: emptyList()
+        }
     }
 
     fun getExchangesByUserOwnId() {
@@ -77,6 +96,7 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
             }else{
                 _state.value = UIState(message = result.message?:"Ocurrió un error")
             }
+            Log.d("ExchangeViewModel", "getFinishedExchanges: ${result.data}")
         }
     }
 
@@ -90,6 +110,12 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
                 _exchange.value = UIState(message = result.message?:"Ocurrió un error")
             }
         }
+    }
+
+    fun getLocationString(districtId: Int): String {
+        val district = _districts.value.find { it.id == districtId }
+        val department = _departments.value.find { it.id == district?.departmentId }
+        return "${district?.name}, ${department?.name}"
     }
 
 }
