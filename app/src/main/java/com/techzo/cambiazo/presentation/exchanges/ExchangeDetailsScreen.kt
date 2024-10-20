@@ -1,7 +1,6 @@
 package com.techzo.cambiazo.presentation.exchanges
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,11 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.skydoves.landscapist.glide.GlideImage
-import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 
 @Composable
@@ -58,7 +56,7 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 0.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -68,7 +66,7 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
 
                 Text(
                     text = "Detalle del\nIntercambio",
-                    fontSize = 30.sp,
+                    fontSize = 27.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -116,7 +114,9 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                 else -> exchange.productOwn.price
             }
 
-            val status= if (page == 0 && exchange.status == "Pendiente") "Enviado" else exchange.status
+            val status= if (page == 0 && exchange.status == "Pendiente") "Enviado"
+            else if(page==1) exchange.status
+            else "WhatsApp"
 
             val description= when (page) {
                 0 -> exchange.productChange.description
@@ -125,9 +125,9 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
             }
 
             val location= when (page) {
-                0 -> exchange.productChange.districtId
-                1 -> exchange.productOwn.districtId
-                else -> exchange.productChange.districtId
+                0 -> viewModel.getLocationString(exchange.productChange.districtId)
+                1 -> viewModel.getLocationString(exchange.productOwn.districtId)
+                else -> viewModel.getLocationString(exchange.productChange.districtId)
             }
 
             val productImage= when (page) {
@@ -154,7 +154,8 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                 else -> "Hiciste cambio por:"
             }
 
-            Column(){
+
+            Column{
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -176,14 +177,21 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                             fontWeight = FontWeight.Bold
                         )
                     }
-
                     Text(
                         text = status,
-                        color = Color.Gray,
+                        color =
+                        if (page == 0 && exchange.status == "Pendiente") Color.Gray
+                        else if(page==1) Color(0xFFFFD146)
+                        else Color.White,
                         modifier = Modifier
                             .clip(RoundedCornerShape(50.dp))
-                            .background(Color(0xFFE8E8E8))
-                            .padding(horizontal = 20.dp, vertical = 4.dp)
+                            .background(
+                                if (page == 0 && exchange.status == "Pendiente") Color(0xFFE8E8E8)
+                                else if(page==1) Color.Black
+                                else Color(0xFF38B000)
+                            )
+                            .padding(horizontal = 20.dp, vertical = 4.dp),
+                        fontWeight = FontWeight.Bold
                     )
                 }
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -213,13 +221,24 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                         )
                     }
                 }
-                Box(modifier=Modifier.fillMaxWidth().padding(horizontal = 10.dp)){
-                    Column {
+                Box(modifier=Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp)){
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)){
                         if(textUnderImage!=null){
                             Text(textUnderImage)
                         }
                         Text(productName, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                        Text(location.toString())
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Filled.LocationOn,
+                                contentDescription = "Ubicación",
+                                tint = Color(0xFFFFD146)
+                            )
+                            Text(
+                                text = location,
+                                color = Color(0xFF9F9C9C),
+                                modifier = Modifier.padding(start = 1.dp)
+                            )
+                        }
                         Text(description)
                     }
                 }
@@ -241,7 +260,7 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                 .clip(RoundedCornerShape(10.dp))
                 .padding(10.dp)
         ) {
-            Column {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(textUnderImage)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -253,12 +272,13 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                         imageModel = { image },
                         modifier = Modifier
                             .fillMaxWidth(0.5f)
+                            .height(150.dp)
                             .clip(RoundedCornerShape(10.dp))
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text(productName)
-                        Text("S/${price} valor aprox.")
+                    Column(modifier = Modifier.fillMaxWidth(1f).padding(horizontal = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(productName, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text("S/${price} valor aprox.", textAlign = TextAlign.Center, fontSize = 16.sp, color = Color(0xFFFFD146), fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -273,7 +293,7 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                 .clip(RoundedCornerShape(10.dp))
 
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(textUnderImage, modifier = Modifier.padding(5.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -288,9 +308,9 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                             .clip(RoundedCornerShape(10.dp))
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text(productName)
-                        Text("S/${price} valor aprox.")
+                    Column(modifier = Modifier.padding(8.dp),horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(productName, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text("S/${price} valor aprox.", textAlign = TextAlign.Center, fontSize = 16.sp, color = Color(0xFFFFD146), fontWeight = FontWeight.Bold)
                     }
                 }
                 Row(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)){
@@ -340,26 +360,53 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                 .clip(RoundedCornerShape(10.dp))
                 .padding(10.dp)
         ) {
-            Column {
-                Text(textUnderImage)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(textUnderImage, modifier = Modifier.padding(5.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     GlideImage(
                         imageModel = { image },
                         modifier = Modifier
-                            .fillMaxWidth(0.5f)
+                            .fillMaxWidth(0.4f)
+                            .height(100.dp)
                             .clip(RoundedCornerShape(10.dp))
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text(productName)
-                        Text("S/${price} valor aprox.")
-                        Button(onClick = {}) {
-                            Text(text = "Dejar Reseña")
+                    Column(
+                        modifier = Modifier.padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            productName,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            "S/${price} valor aprox.",
+                            textAlign = TextAlign.Center,
+                            fontSize = 16.sp,
+                            color = Color(0xFFFFD146),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Button(onClick = { },
+                            modifier = Modifier.fillMaxWidth()
+                                .height(40.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFFD146),
+                                contentColor = Color.Black
+                            ),
+                            shape = RoundedCornerShape(10.dp))
+                        {
+                            Text(text = "Dejar Reseña",
+                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.SansSerif)
+                            )
                         }
                     }
                 }
