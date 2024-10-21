@@ -16,14 +16,12 @@ import androidx.compose.material3.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.skydoves.landscapist.glide.GlideImage
-import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.domain.Product
 
@@ -198,7 +195,7 @@ fun Products(product: Product, onProductClick: (String, String) -> Unit) {
                         tint = Color(0xFFFFD146)
                     )
                     Text(
-                        text = "${product.district?.name}, ${product.department?.name}",
+                        text = "${product.location.districtName}, ${product.location.departmentName}",
                         color = Color(0xFF9F9C9C),
                         modifier = Modifier.padding(start = 1.dp)
                     )

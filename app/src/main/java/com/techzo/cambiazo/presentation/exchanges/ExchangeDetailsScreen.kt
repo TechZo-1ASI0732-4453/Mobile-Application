@@ -125,9 +125,9 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
             }
 
             val location= when (page) {
-                0 -> viewModel.getLocationString(exchange.productChange.districtId)
-                1 -> viewModel.getLocationString(exchange.productOwn.districtId)
-                else -> viewModel.getLocationString(exchange.productChange.districtId)
+                0 -> viewModel.getLocationString(exchange.productChange.location.districtId)
+                1 -> viewModel.getLocationString(exchange.productOwn.location.districtId)
+                else -> viewModel.getLocationString(exchange.productChange.location.districtId)
             }
 
             val productImage= when (page) {
