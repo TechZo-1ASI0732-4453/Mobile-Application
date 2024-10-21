@@ -20,6 +20,7 @@ import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 import com.techzo.cambiazo.presentation.filter.FilterScreen
 import com.techzo.cambiazo.presentation.login.SignInScreen
 import com.techzo.cambiazo.presentation.profile.ProfileScreen
+import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.register.SignUpScreen
 
 sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate: () -> Unit = {}) {
@@ -71,6 +72,7 @@ sealed class Routes(val route: String) {
     data object ExchangeDetails: Routes("ExchangeDetailsScreen/{exchangeId}/{page}"){
         fun createExchangeDetailsRoute(exchangeId:String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
     }
+    data object MyReviews : Routes("MyReviewsScreen")
 }
 
 @Composable
@@ -150,7 +152,14 @@ fun NavScreen() {
                         popUpTo(0) { inclusive = true }
                     }
                 },
+                openMyReviews = { navController.navigate(Routes.MyReviews.route) },
                 bottomBar = { BottomBarNavigation(items) }
+            )
+        }
+
+        composable(route = Routes.MyReviews.route) {
+            MyReviewsScreen(
+                back = { navController.popBackStack() }
             )
         }
 
