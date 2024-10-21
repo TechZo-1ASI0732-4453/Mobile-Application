@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,7 +47,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import androidx.compose.ui.zIndex
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
@@ -86,7 +84,9 @@ fun ArticlesScreen(
                         horizontalArrangement = Arrangement.SpaceBetween){
 
                             rowItems.forEach {
-                                ArticlesOwn(product = it,Modifier.weight(1f))
+                                ArticlesOwn(product = it,Modifier.weight(1f)){productId->
+                                    viewModel.deleteProduct(productId)
+                                }
                             }
                             if (rowItems.size == 1) {
                                 Spacer(
@@ -109,7 +109,7 @@ fun ArticlesScreen(
 }
 
 @Composable
-fun ArticlesOwn(product:Product, modifier: Modifier = Modifier){
+fun ArticlesOwn(product: Product, modifier: Modifier = Modifier,deleteProduct : (Int)->Unit = {}){
     var showDialog by remember { mutableStateOf(false) }
     var showActions by remember { mutableStateOf(false) }
 
@@ -132,7 +132,7 @@ fun ArticlesOwn(product:Product, modifier: Modifier = Modifier){
 
             ) {
                 GlideImage(
-                    imageModel = { product.image },
+                    imageModel = { product.image},
                     modifier = Modifier.fillMaxSize()
                 )
 
@@ -163,7 +163,7 @@ fun ArticlesOwn(product:Product, modifier: Modifier = Modifier){
                                         labelButton1 = "Eliminar",
                                         labelButton2 = "Cancelar",
                                         onDismissRequest = { showDialog = false;showActions = false },
-                                        onClickButton1 = {  },
+                                        onClickButton1 = { deleteProduct(product.id); showDialog = false;showActions = false },
                                         onClickButton2 = { showDialog = false;showActions = false }
                                     )
                                 }
