@@ -3,6 +3,7 @@ package com.techzo.cambiazo.presentation.details
 import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,7 +35,8 @@ fun ProductDetailsScreen(
     viewModel: ProductDetailsViewModel = hiltViewModel(),
     productId: Int?,
     userId: Int?,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onShowReviews: (Int) -> Unit
 ) {
     LaunchedEffect(productId, userId) {
         if (productId != null && userId != null) {
@@ -54,8 +56,12 @@ fun ProductDetailsScreen(
     Scaffold(
         content = { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
-                if (productState.isLoading || userState.isLoading || reviewsState.isLoading || averageRatingState.isLoading) {
-                } else if (productState.data != null) {
+                if (productState.isLoading ||
+                    userState.isLoading ||
+                    reviewsState.isLoading ||
+                    averageRatingState.isLoading
+                ) {
+                } else if (productState.data != null && userState.data != null) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         ProductHeader(product = productState.data!!, onBack = onBack)
                         ProductDetails(
@@ -68,7 +74,13 @@ fun ProductDetailsScreen(
                             isFavoriteState = isFavoriteState,
                             averageRating = averageRatingState.data ?: 0.0,
                             onFavoriteToggle = { isCurrentlyFavorite ->
-                                viewModel.toggleFavoriteStatus(productId!!, isCurrentlyFavorite)
+                                viewModel.toggleFavoriteStatus(
+                                    productId!!,
+                                    isCurrentlyFavorite
+                                )
+                            },
+                            onShowReviews = { userId ->
+                                onShowReviews(userId)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -87,9 +99,10 @@ fun ProductDetailsScreen(
 
 @Composable
 fun ProductHeader(product: Product, onBack: () -> Unit) {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .height(390.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(390.dp)
     ) {
         Image(
             painter = rememberAsyncImagePainter(product.image),
@@ -98,7 +111,7 @@ fun ProductHeader(product: Product, onBack: () -> Unit) {
                 .fillMaxWidth()
                 .height(400.dp)
                 .clip(RoundedCornerShape(0.dp))
-                .offset(y = (0).dp),
+                .offset(y = 0.dp),
             contentScale = ContentScale.Crop
         )
         IconButton(
@@ -125,7 +138,8 @@ fun ProductHeader(product: Product, onBack: () -> Unit) {
                 .padding(24.dp)
                 .padding(bottom = 20.dp)
                 .background(
-                    Color.Black.copy(alpha = 0.7f), RoundedCornerShape(12.dp)
+                    Color.Black.copy(alpha = 0.7f),
+                    RoundedCornerShape(12.dp)
                 )
                 .padding(horizontal = 14.dp, vertical = 6.dp)
         ) {
@@ -150,6 +164,7 @@ fun ProductDetails(
     isFavoriteState: UIState<Boolean>,
     averageRating: Double,
     onFavoriteToggle: (Boolean) -> Unit,
+    onShowReviews: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -157,13 +172,17 @@ fun ProductDetails(
             .padding(20.dp)
     ) {
         if (userState.data != null) {
+            val userId = userState.data!!.id
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val imageUrl = userState.data!!.profilePicture
                 val painter =
-                    if (imageUrl.isNullOrEmpty() || !Patterns.WEB_URL.matcher(imageUrl).matches()) {
+                    if (imageUrl.isNullOrEmpty() ||
+                        !Patterns.WEB_URL.matcher(imageUrl).matches()
+                    ) {
                         rememberAsyncImagePainter(R.drawable.default_user_image)
                     } else {
                         rememberAsyncImagePainter(imageUrl)
@@ -176,6 +195,7 @@ fun ProductDetails(
                         .size(60.dp)
                         .clip(CircleShape)
                         .background(Color.LightGray)
+                        .clickable { onShowReviews(userId) }
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -184,10 +204,14 @@ fun ProductDetails(
                     Text(
                         text = userState.data!!.name,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+                        fontSize = 20.sp,
+                        modifier = Modifier.clickable { onShowReviews(userId) }
                     )
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { onShowReviews(userId) }
+                    ) {
                         StarRating(rating = averageRating, size = 26.dp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Box(
@@ -206,12 +230,14 @@ fun ProductDetails(
                 }
 
                 IconButton(
-                    onClick = { onFavoriteToggle(isFavoriteState.data == true) },
+                    onClick = {
+                        onFavoriteToggle(isFavoriteState.data == true)
+                    },
                     modifier = Modifier
                         .background(
-                            color = if (isFavoriteState.data == true) Color(0xFFFFD146) else Color(
-                                0xFFDFDFDF
-                            ),
+                            color = if (isFavoriteState.data == true)
+                                Color(0xFFFFD146)
+                            else Color(0xFFDFDFDF),
                             shape = CircleShape
                         )
                         .padding(8.dp)
@@ -243,7 +269,8 @@ fun ProductDetails(
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = product.description, fontSize = 18.sp,
+                text = product.description,
+                fontSize = 18.sp,
                 color = Color.Gray
             )
 
@@ -282,7 +309,11 @@ fun ProductDetails(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(text = "Le interesa:", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = "Le interesa:",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
             Text(text = product.desiredObject, fontSize = 18.sp)
 
             Spacer(modifier = Modifier.weight(1f))

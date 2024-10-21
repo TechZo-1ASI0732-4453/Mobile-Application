@@ -8,11 +8,9 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.techzo.cambiazo.presentation.details.ProductDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
@@ -21,6 +19,7 @@ import com.techzo.cambiazo.presentation.filter.FilterScreen
 import com.techzo.cambiazo.presentation.login.SignInScreen
 import com.techzo.cambiazo.presentation.profile.ProfileScreen
 import com.techzo.cambiazo.presentation.register.SignUpScreen
+import com.techzo.cambiazo.presentation.reviews.ReviewScreen
 
 sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -68,6 +67,9 @@ sealed class Routes(val route: String) {
     }
     data object ExchangeDetails: Routes("ExchangeDetailsScreen/{exchangeId}/{page}"){
         fun createExchangeDetailsRoute(exchangeId:String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
+    }
+    data object Reviews : Routes("ReviewsScreen/{userId}") {
+        fun createRoute(userId: String) = "ReviewsScreen/$userId"
     }
 }
 
@@ -147,13 +149,31 @@ fun NavScreen() {
         }
 
         composable(route = Routes.Details.route) { backStackEntry ->
-            val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull()
-            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
-            ProductDetailsScreen(
-                productId = productId,
-                userId = userId,
-                onBack = { navController.popBackStack() }
-            )
+            val productId = backStackEntry.arguments
+                ?.getString("productId")?.toIntOrNull()
+            val userId = backStackEntry.arguments
+                ?.getString("userId")?.toIntOrNull()
+            if (productId != null && userId != null) {
+                ProductDetailsScreen(
+                    productId = productId,
+                    userId = userId,
+                    onBack = { navController.popBackStack() },
+                    onShowReviews = { userId ->
+                        navController.navigate(Routes.Reviews.createRoute(userId.toString()))
+                    }
+                )
+            }
+        }
+
+        composable(route = Routes.Reviews.route) { backStackEntry ->
+            val userId = backStackEntry.arguments
+                ?.getString("userId")?.toIntOrNull()
+            if (userId != null) {
+                ReviewScreen(
+                    userId = userId,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
