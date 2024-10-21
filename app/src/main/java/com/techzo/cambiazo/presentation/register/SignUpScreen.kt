@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.FieldTextApp
@@ -45,6 +45,7 @@ fun SignUpScreen(openLogin: () -> Unit = {},
                  back: () -> Unit = {},
                  viewModel: SignUpViewModel = viewModel(),
                  navigateToTermsAndConditions: () -> Unit
+                 viewModel: SignUpViewModel = hiltViewModel()
 ){
 
     val state = viewModel.state.value

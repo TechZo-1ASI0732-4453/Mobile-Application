@@ -1,21 +1,9 @@
 package com.techzo.cambiazo.presentation.explorer
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -24,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -38,26 +27,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.domain.Product
 
 @Composable
 fun ExplorerScreen(
-    viewModel: ExplorerListViewModel,
+    viewModel: ExplorerListViewModel = hiltViewModel(),
     bottomBar: @Composable () -> Unit = {},
-    onFilter: () -> Unit = {}
-) {
-
+    onFilter: () -> Unit = {},
+    onProductClick: (String, String) -> Unit) {
     val searcher = viewModel.name.value
     val categories = viewModel.productCategories.value
     val state = viewModel.state.value
-
 
     MainScaffoldApp(
         bottomBar = bottomBar,
@@ -65,7 +52,8 @@ fun ExplorerScreen(
         contentsHeader = {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth().padding(vertical = 10.dp, horizontal = 20.dp),
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp, horizontal = 20.dp),
             ) {
                 OutlinedTextField(
                     modifier = Modifier
@@ -93,7 +81,8 @@ fun ExplorerScreen(
                 )
 
                 IconButton(onClick = {onFilter()},
-                    modifier = Modifier.padding(start = 10.dp)
+                    modifier = Modifier
+                        .padding(start = 10.dp)
                         .background(Color.Black, RoundedCornerShape(10.dp))
                         .shadow(10.dp, RoundedCornerShape(10.dp))
                         .size(53.dp))
@@ -111,14 +100,15 @@ fun ExplorerScreen(
                 .padding(horizontal = 20.dp, vertical = 15.dp)
         ) {
             items(categories.data ?: emptyList()) { category ->
-                val isSelected = viewModel.selectedCategoryId.value == category.id
+                val isSelected = viewModel.categoryId.value == category.id
 
                 Button(
                     onClick = { viewModel.onProductCategorySelected(category.id) },
                     modifier = Modifier
                         .padding(end = 10.dp)
                         .background(
-                            if (isSelected) Color(0xFFFFD146) else Color.White,
+                            if (isSelected) Color(0xFFFFD146)
+                            else Color.White,
                             RoundedCornerShape(10.dp)
                         )
                         .border(1.dp, Color(0xFFFFD146), RoundedCornerShape(10.dp))
@@ -135,26 +125,26 @@ fun ExplorerScreen(
         }
 
         LazyColumn{
+
             items(state.data ?: emptyList()) { product ->
-                Products(product)
+                Products(product, onProductClick)
             }
             item {
                 Spacer(modifier = Modifier.height(110.dp))
             }
-
         }
     }
 }
 
-
 @Composable
-fun Products(product: Product) {
+fun Products(product: Product, onProductClick: (String, String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp)
             .border(0.dp, Color.Transparent, RoundedCornerShape(15.dp))
-            .shadow(elevation = 12.dp, RoundedCornerShape(15.dp)),
+            .shadow(elevation = 12.dp, RoundedCornerShape(15.dp))
+            .clickable { onProductClick(product.id.toString(), product.userId.toString()) },
     ) {
         Column {
             Box(
@@ -205,7 +195,7 @@ fun Products(product: Product) {
                         tint = Color(0xFFFFD146)
                     )
                     Text(
-                        text = "Distrito: ${product.districtId}",
+                        text = "${product.location.districtName}, ${product.location.departmentName}",
                         color = Color(0xFF9F9C9C),
                         modifier = Modifier.padding(start = 1.dp)
                     )

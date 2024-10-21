@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Text
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -18,34 +16,43 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.DropdownList
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.MoneyFieldApp
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
-import com.techzo.cambiazo.common.components.TextToggleButton
+import dagger.hilt.android.scopes.ViewModelScoped
 
 @Preview(showBackground = true, widthDp = 393, heightDp = 851)
 @Composable
 fun FilterScreen(
-    back: () -> Unit = {}
+    viewModel: FilterViewModel = hiltViewModel(),
+    back: () -> Unit = {},
+    openExplorer: () -> Unit = {}
 ){
-    var countrySelected by remember { mutableStateOf("Seleccione un País") }
-    var departmentSelected by remember { mutableStateOf("Seleccione un Departamento") }
-    var districtSelected by remember { mutableStateOf("Seleccione un Distrito") }
 
-    var minPrice by remember { mutableStateOf("") }
-    var maxPrice by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        viewModel.getLocations()
+    }
 
-    var boostActive by remember { mutableStateOf(false) }
+    val countries = viewModel.stateCountries.value
+    val departments = viewModel.stateDepartments.value
+    val districts = viewModel.stateDistricts.value
 
-    val itemList = listOf<String>("Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6")
-    var selectedIndex by rememberSaveable { mutableStateOf(0) }
+    val minPrice = viewModel.minPriceText.value.data?:""
+    val maxPrice = viewModel.maxPriceText.value.data?:""
+
+    val countrySelected = viewModel.countrySelected.value.data
+    val departmentSelected = viewModel.departmentSelected.value.data
+    val districtSelected = viewModel.districtSelected.value.data
+
+
+
 
     MainScaffoldApp(
         paddingCard = PaddingValues(start=20.dp,end=20.dp,top=25.dp),
@@ -67,19 +74,25 @@ fun FilterScreen(
         }
 
         DropdownList(
-            label = countrySelected,
-            itemList = itemList,
-            onItemClick = {countrySelected = it}
+            label = "selecciona un pais",
+            selectedOption = countrySelected ,
+            itemList = countries.data?: emptyList(),
+            itemToString = { it.name},
+            onItemClick = { viewModel.onChangeCountry(it)}
         )
         DropdownList(
-            label = departmentSelected,
-            itemList = itemList,
-            onItemClick = {departmentSelected = it}
+            label = "selecciona un departamento",
+            selectedOption = departmentSelected,
+            itemList = departments.data?: emptyList(),
+            itemToString = { it.name},
+            onItemClick = {viewModel.onChangeDepartment(it)}
         )
         DropdownList(
-            label = districtSelected,
-            itemList = itemList,
-            onItemClick = {districtSelected = it}
+            label = "selecciona un distrito",
+            selectedOption = districtSelected,
+            itemList = districts.data?: emptyList(),
+            itemToString = { it.name},
+            onItemClick = {viewModel.onChangeDistrict(it)}
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -94,28 +107,26 @@ fun FilterScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
 
-            MoneyFieldApp(minPrice,"Min", Modifier.weight(1f)){minPrice=it}
+            MoneyFieldApp(minPrice,"Min", Modifier.weight(1f)){
+                viewModel.onChangeMinPrice(it)
+            }
             Text("a",modifier = Modifier.padding(horizontal = 20.dp))
-            MoneyFieldApp(maxPrice,"Max", Modifier.weight(1f)){maxPrice=it}
+            MoneyFieldApp(maxPrice,"Max", Modifier.weight(1f)){
+                viewModel.onChangeMaxPrice(it)
+            }
 
         }
-        Spacer(modifier = Modifier.height(20.dp))
 
-        Box( modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 15.dp, bottom = 10.dp)) {
-            Text(text = "Boost")
-        }
-        TextToggleButton(
-            selected = boostActive,
-            onToggle = {  boostActive = !boostActive},
-            labelOff = "Activado",
-            labelOn = "Desactivado"
-        )
         Spacer(modifier = Modifier.height(50.dp))
-        ButtonApp(text = "Aplicar filtro", onClick = {})
+        ButtonApp(text = "Aplicar filtro"){
+            viewModel.applyFilter()
+            openExplorer()
+        }
 
-        ButtonApp(text = "Borrar filtro", bgColor = Color.White, fColor = Color(0xFFFFD146), onClick = {})
+        ButtonApp(text = "Borrar filtro", bgColor = Color.White, fColor = Color(0xFFFFD146)){
+            viewModel.clearFilters()
+            openExplorer()
+        }
 
     }
 }

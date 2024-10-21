@@ -35,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.components.ButtonApp
@@ -47,7 +48,7 @@ import com.techzo.cambiazo.common.components.TextLink
 fun SignInScreen(openRegister: () -> Unit = {},
                  openApp: () -> Unit = {},
                  openForgotPassword: () -> Unit = {},
-                 viewModel: SignInViewModel = viewModel()){
+                 viewModel: SignInViewModel = hiltViewModel()){
 
 
     val state = viewModel.state.value
@@ -168,10 +169,5 @@ fun SignInScreen(openRegister: () -> Unit = {},
     }
 }
 
-@Preview
-@Composable
-fun PreviewSignInScreen(){
-    SignInScreen()
-}
 
 
