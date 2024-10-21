@@ -17,4 +17,14 @@ interface ExchangeService {
     @GET("exchanges/userChange/{userId}")
     suspend fun getExchangesByUserChangeId(@Path("userId") userId: Int): Response<List<ExchangeDto>>
 
+    @Headers("Content-Type: application/json",
+        "Accept: application/json")
+    @GET("exchanges/finished/{userId}")
+    suspend fun getFinishedExchangesByUserId(@Path("userId") userId: Int): Response<List<ExchangeDto>>
+
+    @Headers("Content-Type: application/json",
+        "Accept: application/json")
+    @GET("exchanges/{exchangeId}")
+    suspend fun getExchangeById(@Path("exchangeId") exchangeId: Int): Response<ExchangeDto>
+
 }

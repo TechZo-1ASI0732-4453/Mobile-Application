@@ -2,19 +2,18 @@ package com.techzo.cambiazo.data.remote.products
 
 import com.techzo.cambiazo.domain.Product
 
-
 data class ProductDto(
     val id: Int,
-    val name: String,
+    val available: Boolean,
+    val boost: Boolean,
     val description: String,
     val desiredObject: String,
-    val price: Int,
     val image: String,
-    val boost: Boolean,
-    val available: Boolean,
-    val productCategoryId: Int,
     val userId: Int,
-    val districtId: Int
+    val location: Location,
+    val name: String,
+    val price: Int,
+    val productCategory: ProductCategory
 )
 
 fun ProductDto.toProduct(): Product {
@@ -27,8 +26,8 @@ fun ProductDto.toProduct(): Product {
         image = image,
         boost = boost,
         available = available,
-        productCategoryId = productCategoryId,
+        productCategory = productCategory,
         userId = userId,
-        districtId = districtId
+        location = location
     )
 }
