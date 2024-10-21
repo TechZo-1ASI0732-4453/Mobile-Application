@@ -1,5 +1,8 @@
 package com.techzo.cambiazo.domain
 
+import com.techzo.cambiazo.data.remote.products.Location
+import com.techzo.cambiazo.data.remote.products.ProductCategory
+
 data class Product(
     val id: Int,
     val name: String,
@@ -9,10 +12,7 @@ data class Product(
     val image: String,
     val boost: Boolean,
     val available: Boolean,
-    val productCategoryId: Int,
+    val productCategory: ProductCategory,
     val userId: Int,
-    val districtId: Int,
-    var district: District? = null,
-    var country: Country? = null,
-    var department: Department? = null,
+    val location: Location,
 )
