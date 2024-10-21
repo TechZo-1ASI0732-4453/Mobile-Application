@@ -43,8 +43,7 @@ import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 @Composable
 fun SignUpScreen(openLogin: () -> Unit = {},
                  back: () -> Unit = {},
-                 viewModel: SignUpViewModel = viewModel(),
-                 navigateToTermsAndConditions: () -> Unit
+                 navigateToTermsAndConditions: () -> Unit,
                  viewModel: SignUpViewModel = hiltViewModel()
 ){
 
