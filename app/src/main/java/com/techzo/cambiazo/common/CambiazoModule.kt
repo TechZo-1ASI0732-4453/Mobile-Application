@@ -1,22 +1,31 @@
 package com.techzo.cambiazo.common
 
+import android.content.Context
+import androidx.room.Room
+import com.techzo.cambiazo.data.local.AppDatabase
+import com.techzo.cambiazo.data.local.FavoriteProductDao
 import com.techzo.cambiazo.data.remote.auth.AuthService
 import com.techzo.cambiazo.data.remote.auth.UserService
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
-import com.techzo.cambiazo.data.remote.location.CountryService
 import com.techzo.cambiazo.data.remote.location.DepartmentService
 import com.techzo.cambiazo.data.remote.location.DistrictService
+import com.techzo.cambiazo.data.remote.products.FavoriteProductService
+import com.techzo.cambiazo.data.remote.location.CountryService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
+import com.techzo.cambiazo.data.remote.reviews.ReviewService
 import com.techzo.cambiazo.data.repository.AuthRepository
+import com.techzo.cambiazo.data.repository.ProductDetailsRepository
 import com.techzo.cambiazo.data.repository.ExchangeRepository
 import com.techzo.cambiazo.data.repository.LocationRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
+import com.techzo.cambiazo.data.repository.ReviewRepository
 import com.techzo.cambiazo.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -52,7 +61,21 @@ object CambiazoModule {
             .build()
     }
 
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            AppDatabase::class.java,
+            "cambiazo_database"
+        ).build()
+    }
 
+    @Provides
+    @Singleton
+    fun provideFavoriteProductDao(appDatabase: AppDatabase): FavoriteProductDao {
+        return appDatabase.favoriteProductDao()
+    }
 
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS SERVICIOS
 
@@ -89,6 +112,18 @@ object CambiazoModule {
 
     @Provides
     @Singleton
+    fun provideReviewService(retrofit: Retrofit): ReviewService {
+        return retrofit.create(ReviewService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDistrictService(retrofit: Retrofit): DistrictService {
+        return retrofit.create(DistrictService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideCountryService(retrofit: Retrofit): CountryService {
         return retrofit.create(CountryService::class.java)
     }
@@ -101,8 +136,8 @@ object CambiazoModule {
 
     @Provides
     @Singleton
-    fun provideDistrictService(retrofit: Retrofit): DistrictService {
-        return retrofit.create(DistrictService::class.java)
+    fun provideFavoriteProductService(retrofit: Retrofit): FavoriteProductService {
+        return retrofit.create(FavoriteProductService::class.java)
     }
 
 
@@ -141,17 +176,22 @@ object CambiazoModule {
 
     @Provides
     @Singleton
+    fun provideProductDetailsRepository(productService: ProductService, userService: UserService, reviewService: ReviewService, categoryService: ProductCategoryService, districtService: DistrictService, departmentService: DepartmentService, favoriteProductService: FavoriteProductService, favoriteProductDao: FavoriteProductDao): ProductDetailsRepository {
+        return ProductDetailsRepository(productService, userService, reviewService, categoryService, districtService, departmentService, favoriteProductService, favoriteProductDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideReviewRepository(service: ReviewService): ReviewRepository {
+        return ReviewRepository(service)
+    }
+    
+    @Provides
+    @Singleton
     fun provideLocationRepository(countryService: CountryService,
                                  departmentService: DepartmentService,
                                  districtService: DistrictService): LocationRepository {
         return LocationRepository(countryService,departmentService,districtService)
     }
-
-
-
-
-
-
-
 
 }

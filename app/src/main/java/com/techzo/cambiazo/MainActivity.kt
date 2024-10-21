@@ -7,22 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.techzo.cambiazo.common.Constants
-import com.techzo.cambiazo.data.remote.auth.AuthService
-import com.techzo.cambiazo.data.remote.products.ProductCategoryService
-import com.techzo.cambiazo.data.remote.products.ProductService
-import com.techzo.cambiazo.data.repository.AuthRepository
-import com.techzo.cambiazo.data.repository.ProductCategoryRepository
-import com.techzo.cambiazo.data.repository.ProductRepository
-import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
-import com.techzo.cambiazo.presentation.login.SignInViewModel
 import com.techzo.cambiazo.presentation.navigate.NavScreen
-import com.techzo.cambiazo.presentation.register.SignUpViewModel
 import com.techzo.cambiazo.ui.theme.CambiazoTheme
 import com.techzo.cambiazo.ui.theme.ScreenBackground
 import dagger.hilt.android.AndroidEntryPoint
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 
 @AndroidEntryPoint
