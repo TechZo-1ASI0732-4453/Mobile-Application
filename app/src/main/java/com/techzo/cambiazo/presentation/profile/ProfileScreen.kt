@@ -42,6 +42,7 @@ import com.techzo.cambiazo.common.components.StarRating
 @Composable
 fun ProfileScreen(
     logOut: () -> Unit = {},
+    openMyReviews: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()) {
 
@@ -119,7 +120,11 @@ fun ProfileScreen(
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
                     ProfileOption(icon = Icons.Outlined.FavoriteBorder, text = "Favoritos")
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
-                    ProfileOption(icon = Icons.Outlined.StarOutline, text = "Mis Reseñas")
+                    ProfileOption(
+                        icon = Icons.Outlined.StarOutline,
+                        text = "Mis Reseñas",
+                        onClick = { openMyReviews()}
+                    )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
                     ProfileOption(icon = Icons.Outlined.Diamond, text = "Mi Suscripción")
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)

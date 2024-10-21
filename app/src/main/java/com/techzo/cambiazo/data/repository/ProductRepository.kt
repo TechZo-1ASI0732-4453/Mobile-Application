@@ -59,4 +59,34 @@ class ProductRepository(private val productService: ProductService) {
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
         }
     }
+    suspend fun getProductsByUserId(userId:Int): Resource<List<Product>> = withContext(Dispatchers.IO) {
+        try {
+            val response = productService.getProductsByUserId(userId)
+            if (response.isSuccessful) {
+                response.body()?.let{ productsDto->
+                    val products = mutableListOf<Product>()
+                    productsDto.forEach{ productDto->
+                        products.add(productDto.toProduct())
+                    }
+                    return@withContext Resource.Success(data = products)
+                }
+                return@withContext Resource.Error("No se encontraron productos")
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+        }
+    }
+
+    suspend fun deleteProduct(productId: Int): Resource<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val response = productService.deleteProduct(productId)
+            if (response.isSuccessful) {
+                return@withContext Resource.Success(data = Unit)
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+        }
+    }
 }

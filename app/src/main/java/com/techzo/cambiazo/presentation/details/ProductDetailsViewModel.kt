@@ -69,9 +69,9 @@ class ProductDetailsViewModel @Inject constructor(
                 _product.value = UIState(data = productResult.data)
 
                 val categoryDeferred =
-                    async { repository.getProductCategoryById(productResult.data!!.productCategoryId) }
+                    async { repository.getProductCategoryById(productResult.data!!.productCategory.id) }
                 val districtDeferred =
-                    async { repository.getDistrictById(productResult.data!!.districtId) }
+                    async { repository.getDistrictById(productResult.data!!.location.districtId) }
 
                 val categoryResult = categoryDeferred.await()
                 val districtResult = districtDeferred.await()
