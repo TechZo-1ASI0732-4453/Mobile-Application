@@ -22,6 +22,9 @@ import com.techzo.cambiazo.presentation.login.SignInScreen
 import com.techzo.cambiazo.presentation.profile.ProfileScreen
 import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.register.SignUpScreen
+import com.techzo.cambiazo.presentation.register.SignUpViewModel
+import com.techzo.cambiazo.presentation.register.TermsAndConditionsScreen
+
 
 sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -55,8 +58,6 @@ sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate
     )
 }
 
-
-
 sealed class Routes(val route: String) {
     data object SignUp : Routes("SignUpScreen")
     data object SignIn : Routes("SignInScreen")
@@ -66,6 +67,7 @@ sealed class Routes(val route: String) {
     data object Donation : Routes("DonationScreen")
     data object Profile : Routes("ProfileScreen")
     data object Exchange : Routes("ExchangeScreen")
+    data object TermsAndConditions: Routes("TermsAndConditionsScreen")
     data object Details : Routes("DetailsScreen/{productId}/{userId}") {
         fun createRoute(productId: String, userId: String) = "DetailsScreen/$productId/$userId"
     }
@@ -113,6 +115,15 @@ fun NavScreen() {
         }
 
 
+    NavHost(navController = navController, startDestination = Routes.SignIn.route){
+
+        composable(route = Routes.SignUp.route){
+            SignUpScreen(
+                back = { navController.popBackStack() },
+                openLogin = { navController.navigate(Routes.SignIn.route) },
+                viewModel = viewModelSignUp,
+                navigateToTermsAndConditions = { navController.navigate(Routes.TermsAndConditions.route) }
+
         composable(route=Routes.Filter.route){
             FilterScreen(
                 back = {navController.popBackStack()},
@@ -157,6 +168,12 @@ fun NavScreen() {
             )
         }
 
+        composable(route = Routes.TermsAndConditions.route) {  
+            TermsAndConditionsScreen(back = { navController.popBackStack() })
+        }
+
+    }
+}
         composable(route = Routes.MyReviews.route) {
             MyReviewsScreen(
                 back = { navController.popBackStack() }
