@@ -18,6 +18,7 @@ import com.techzo.cambiazo.presentation.login.SignInScreen
 import com.techzo.cambiazo.presentation.login.SignInViewModel
 import com.techzo.cambiazo.presentation.register.SignUpScreen
 import com.techzo.cambiazo.presentation.register.SignUpViewModel
+import com.techzo.cambiazo.presentation.register.TermsAndConditionsScreen
 
 sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -62,7 +63,7 @@ sealed class Routes(val route: String){
     data object Donation: Routes("DonationScreen")
     data object Profile: Routes("ProfileScreen")
     data object Exchange: Routes("ExchangeScreen")
-
+    data object TermsAndConditions: Routes("TermsAndConditionsScreen")
 }
 
 @Composable
@@ -84,13 +85,14 @@ fun NavScreen(viewModelAuth: SignInViewModel, viewModelProduct: ExplorerListView
     val viewModelSignUp = viewModelSignUp
 
 
-    NavHost(navController = navController, startDestination = Routes.SignIn.route ){
+    NavHost(navController = navController, startDestination = Routes.SignIn.route){
 
         composable(route = Routes.SignUp.route){
             SignUpScreen(
-                back = { navController.popBackStack()},
-                openLogin = {navController.navigate(Routes.SignIn.route)},
-                viewModel = viewModelSignUp
+                back = { navController.popBackStack() },
+                openLogin = { navController.navigate(Routes.SignIn.route) },
+                viewModel = viewModelSignUp,
+                navigateToTermsAndConditions = { navController.navigate(Routes.TermsAndConditions.route) }
             )
         }
 
@@ -112,6 +114,10 @@ fun NavScreen(viewModelAuth: SignInViewModel, viewModelProduct: ExplorerListView
 
         composable(route=Routes.Filter.route){
             FilterScreen(back = {navController.popBackStack()})
+        }
+
+        composable(route = Routes.TermsAndConditions.route) {  // Agregamos la pantalla de términos y condiciones
+            TermsAndConditionsScreen(back = { navController.popBackStack() })
         }
 
     }
