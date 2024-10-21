@@ -11,6 +11,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.details.ProductDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
@@ -51,6 +53,8 @@ sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate
         navigate = onNavigate
     )
 }
+
+
 
 sealed class Routes(val route: String) {
     data object SignUp : Routes("SignUpScreen")
@@ -120,6 +124,12 @@ fun NavScreen() {
                 goToDetailsScreen = { exchangeId, page ->
                     navController.navigate(Routes.ExchangeDetails.createExchangeDetailsRoute(exchangeId, page))
                 }
+            )
+        }
+
+        composable(route=Routes.Article.route){
+            ArticlesScreen(
+                bottomBar = {BottomBarNavigation(items)}
             )
         }
 
