@@ -153,7 +153,8 @@ fun ArticlesOwn(product:Product, modifier: Modifier = Modifier){
                                 IconsAction(icon = Icons.Filled.Edit,onclick = {  })
                                 Spacer(modifier = Modifier.size(15.dp))
                                 IconsAction(icon = Icons.Filled.Delete,
-                                    onclick = {showDialog = true
+                                    onclick = {
+                                        showDialog = true
                                     })
                                 if(showDialog){
                                     DialogApp(
@@ -161,9 +162,9 @@ fun ArticlesOwn(product:Product, modifier: Modifier = Modifier){
                                         description = "Recuerda que una vez eliminada la publicación, no se podrá deshacer.",
                                         labelButton1 = "Eliminar",
                                         labelButton2 = "Cancelar",
-                                        onDismissRequest = { showDialog = false },
+                                        onDismissRequest = { showDialog = false;showActions = false },
                                         onClickButton1 = {  },
-                                        onClickButton2 = { showDialog = false }
+                                        onClickButton2 = { showDialog = false;showActions = false }
                                     )
                                 }
                                 Spacer(modifier = Modifier.size(15.dp))
