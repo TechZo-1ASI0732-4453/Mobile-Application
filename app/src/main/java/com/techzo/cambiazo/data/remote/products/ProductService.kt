@@ -20,4 +20,9 @@ interface ProductService {
         "Accept: application/json")
     @GET("products/{id}")
     suspend fun getProductById(@Path("id") id: Int): Response<ProductDto>
+
+    @Headers("Content-Type: application/json",
+        "Accept: application/json")
+    @GET("products/user/{id}")
+    suspend fun getProductsByUserId(@Path("id") userId: Int): Response<List<ProductDto>>
 }

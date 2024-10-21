@@ -2,6 +2,7 @@ package com.techzo.cambiazo.data.remote.auth
 
 import com.google.gson.annotations.SerializedName
 import com.techzo.cambiazo.domain.User
+import java.util.Date
 
 data class UserDto(
     @SerializedName("id")
@@ -14,6 +15,8 @@ data class UserDto(
     val phoneNumber: String,
     @SerializedName("profilePicture")
     val profilePicture: String,
+    @SerializedName ("createdAt")
+    val createdAt: Date,
     @SerializedName("roles")
     val roles: List<String>
 )
@@ -24,5 +27,6 @@ fun UserDto.toUser() = User(
     name = name,
     phoneNumber = phoneNumber,
     profilePicture = profilePicture,
+    createdAt = createdAt,
     roles = roles
 )
