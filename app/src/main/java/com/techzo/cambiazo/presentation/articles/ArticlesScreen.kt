@@ -56,7 +56,8 @@ import com.techzo.cambiazo.domain.Product
 @Composable
 fun ArticlesScreen(
     viewModel: ArticlesViewModel = hiltViewModel(),
-    bottomBar : @Composable () -> Unit = {}
+    bottomBar : @Composable () -> Unit = {},
+    onPublish: () -> Unit = {}
 ){
 
     val products = viewModel.products.value
@@ -101,7 +102,7 @@ fun ArticlesScreen(
             }
 
             FloatingButtonApp( modifier = Modifier.align(Alignment.BottomCenter)){
-
+                onPublish()
             }
 
         }
