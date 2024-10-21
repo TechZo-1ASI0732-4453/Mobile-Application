@@ -43,7 +43,7 @@ class ArticlesViewModel  @Inject constructor(
         viewModelScope.launch {
             val result = productRepository.deleteProduct(productId)
             if (result is Resource.Success) {
-                fetchProducts()
+                _products.value = UIState(data = _products.value.data?.filter { it.id != productId })
             }
         }
     }
