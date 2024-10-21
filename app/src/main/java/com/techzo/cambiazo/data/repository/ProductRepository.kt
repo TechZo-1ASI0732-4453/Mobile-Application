@@ -77,4 +77,16 @@ class ProductRepository(private val productService: ProductService) {
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
         }
     }
+
+    suspend fun deleteProduct(productId: Int): Resource<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val response = productService.deleteProduct(productId)
+            if (response.isSuccessful) {
+                return@withContext Resource.Success(data = Unit)
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+        }
+    }
 }

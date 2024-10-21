@@ -26,24 +26,26 @@ class ArticlesViewModel  @Inject constructor(
     }
 
     private fun fetchProducts() {
-        val userId = Constants.user?.id
-        if (userId != null) {
+        _products.value = UIState(isLoading = true)
+        viewModelScope.launch {
+            val result = productRepository.getProductsByUserId(Constants.user!!.id)
 
-            _products.value = UIState(isLoading = true)
-
-            viewModelScope.launch {
-                val result = productRepository.getProductsByUserId(userId)
-
-                if (result is Resource.Success) {
-                    _products.value = UIState(data = result.data)
-                } else {
-                    _products.value = UIState(message = result.message ?: "Ocurrió un error")
-                }
-
+            if (result is Resource.Success) {
+                _products.value = UIState(data = result.data)
+            } else {
+                _products.value = UIState(message = result.message ?: "Ocurrió un error")
             }
+
         }
     }
 
-
+    fun deleteProduct(productId: Int) {
+        viewModelScope.launch {
+            val result = productRepository.deleteProduct(productId)
+            if (result is Resource.Success) {
+                _products.value = UIState(data = _products.value.data?.filter { it.id != productId })
+            }
+        }
+    }
 
 }
