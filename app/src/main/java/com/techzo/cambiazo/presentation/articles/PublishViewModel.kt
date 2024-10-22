@@ -68,43 +68,113 @@ class PublishViewModel @Inject constructor(
     private val _boost = mutableStateOf(false)
     val boost: State<Boolean> get() = _boost
 
+    //errors
+    private val _errorName = mutableStateOf(false)
+    val errorName: State<Boolean> get() = _errorName
+
+    private val _errorDescription = mutableStateOf(false)
+    val errorDescription: State<Boolean> get() = _errorDescription
+
+    private val _errorPrice = mutableStateOf(false)
+    val errorPrice: State<Boolean> get() = _errorPrice
+
+    private val _errorObjectChange = mutableStateOf(false)
+    val errorObjectChange: State<Boolean> get() = _errorObjectChange
+
+    private val _errorCategory = mutableStateOf(false)
+    val errorCategory: State<Boolean> get() = _errorCategory
+
+    private val _errorCountry = mutableStateOf(false)
+    val errorCountry: State<Boolean> get() = _errorCountry
+
+    private val _errorDepartment = mutableStateOf(false)
+    val errorDepartment: State<Boolean> get() = _errorDepartment
+
+    private val _errorDistrict = mutableStateOf(false)
+    val errorDistrict: State<Boolean> get() = _errorDistrict
+
+    private val _errorImage = mutableStateOf(false)
+    val errorImage: State<Boolean> get() = _errorImage
+
+
+
 
     fun onChangeName(name: String) {
+        _errorName.value = false
         _name.value = name
     }
 
     fun onChangeDescription(description: String) {
+        _errorDescription.value = false
         _description.value = description
     }
 
     fun onChangePrice(price: String) {
+        _errorPrice.value = false
         _price.value = price
     }
 
     fun onChangeObjectChange(objectChange: String) {
+        _errorObjectChange.value = false
         _objectChange.value = objectChange
     }
 
     fun onChangeBoost(boost: Boolean) {
+        _errorObjectChange.value = false
         _boost.value = boost
     }
 
     fun selectCategory(category: ProductCategory?) {
+        _errorCategory.value = false
         _categorySelected.value = category
     }
 
     fun selectCountry(country: Country?) {
+        _errorCountry.value = false
         _countrySelected.value = country
         _departments.value = UIState(data = _allDepartments.filter { it.id == country?.id })
     }
 
     fun selectDepartment(department: Department?) {
+        _errorDepartment.value = false
         _departmentSelected.value = department
         _districts.value = UIState(data = _allDistricts.filter { it.id == department?.id })
     }
 
     fun selectDistrict(district: District?) {
+        _errorDistrict.value = false
         _districtSelected.value = district
+    }
+
+    fun onPublish(){
+        if(_name.value.isEmpty()){
+            _errorName.value = true
+        }
+        if(_description.value.isEmpty()){
+            _errorDescription.value = true
+        }
+        if(_price.value.isEmpty()){
+            _errorPrice.value = true
+        }
+        if(_objectChange.value.isEmpty()){
+            _errorObjectChange.value = true
+        }
+        if(_categorySelected.value == null){
+            _errorCategory.value = true
+        }
+        if(_countrySelected.value == null){
+            _errorCountry.value = true
+        }
+        if(_departmentSelected.value == null){
+            _errorDepartment.value = true
+        }
+        if(_districtSelected.value == null){
+            _errorDistrict.value = true
+        }
+        if(_image.value.isEmpty()){
+            _errorImage.value = true
+            return
+        }
     }
 
 
