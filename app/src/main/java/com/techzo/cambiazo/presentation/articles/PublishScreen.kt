@@ -1,6 +1,13 @@
 package com.techzo.cambiazo.presentation.articles
 
 
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.transition.Transition
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,16 +18,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberImagePainter
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.CustomDropDownSelect
@@ -58,6 +77,12 @@ fun PublishScreen(
     val errorDistrict = viewModel.errorDistrict.value
     val errorObjectChange = viewModel.errorObjectChange.value
 
+    val image = viewModel.image.value
+
+    val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent(),) { uri ->
+        viewModel.selectImage(uri?: Uri.EMPTY)
+    }
+
     val spaceHeight = 20.dp
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
@@ -73,9 +98,24 @@ fun PublishScreen(
                 TextTitleHeaderApp("Publicar")
             }
         },
-    ){
+    ) {
 
         LazyColumn {
+            item {
+                // Mostrar la imagen si está disponible
+                image?.let { uri ->
+                    Image(
+                        painter = rememberImagePainter(uri),
+                        contentDescription = null,
+                        modifier = Modifier.size(100.dp) // Ajusta el tamaño según lo necesites
+                    )
+                }
+
+                // Botón para seleccionar una imagen
+                Button(onClick = { selectedImageLauncher.launch("image/*") }) {
+                    Text(text = "Subir Imagen")
+                }
+            }
 
             //----------------TITULO------------------//
             item{
