@@ -68,94 +68,112 @@ fun TermsAndConditionsScreen(back: () -> Unit) {
                 Text(
                     "Última actualización: 21/10/2024",
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    textAlign = TextAlign.Justify
                 )
                 Text(
                     "Bienvenido a TechZo y su aplicación CambiaZo. Al usar nuestra aplicación, usted acepta cumplir con los siguientes términos y condiciones. Estos términos son importantes tanto para usted como para nosotros, ya que están diseñados para crear un entorno seguro, justo y legal.",
                     color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    textAlign = TextAlign.Justify
                 )
             }
 
             item {
                 Text(
                     "1. Uso de la Aplicación",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Justify
                 )
                 AnnotatedText(
                     boldText = "1.1. Objetivo:",
-                    normalText = " La Aplicación está diseñada para ayudarte a intercambiar y donar objetos que ya no utilizas y deseas darle una segunda vida."
+                    normalText = " La Aplicación está diseñada para ayudarte a intercambiar y donar objetos que ya no utilizas y deseas darle una segunda vida.",
+                    textAlign = TextAlign.Justify
                 )
                 AnnotatedText(
                     boldText = "1.2. Uso Apropiado:",
-                    normalText = " Te comprometes a utilizar la Aplicación de manera legal, ética y apropiada. No debes utilizar la Aplicación de manera que viole la ley o los derechos de terceros."
+                    normalText = " Te comprometes a utilizar la Aplicación de manera legal, ética y apropiada. No debes utilizar la Aplicación de manera que viole la ley o los derechos de terceros.",
+                    textAlign = TextAlign.Justify
                 )
             }
 
             item {
                 Text(
                     "2. Privacidad y Datos",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Justify
                 )
                 AnnotatedText(
                     boldText = "2.1. Privacidad del Usuario:",
-                    normalText = " Respetamos tu privacidad. La información personal que proporciones a la aplicación se regirá por nuestra Política de Privacidad. Al utilizar la aplicación, consientes la recopilación y el uso de datos de acuerdo con nuestra Política de Privacidad."
+                    normalText = " Respetamos tu privacidad. La información personal que proporciones a la aplicación se regirá por nuestra Política de Privacidad. Al utilizar la aplicación, consientes la recopilación y el uso de datos de acuerdo con nuestra Política de Privacidad.",
+                    textAlign = TextAlign.Justify
                 )
                 AnnotatedText(
                     boldText = "2.2. Control de Datos:",
-                    normalText = " Tienes el control de tus datos personales y la capacidad de configurar la privacidad en la Aplicación, incluyendo la revocación de permisos para acceder a la cámara y la ubicación."
+                    normalText = " Tienes el control de tus datos personales y la capacidad de configurar la privacidad en la Aplicación, incluyendo la revocación de permisos para acceder a la cámara y la ubicación.",
+                    textAlign = TextAlign.Justify
                 )
             }
 
             item {
                 Text(
                     "3. Propiedad Intelectual",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Justify
                 )
                 AnnotatedText(
                     boldText = "3.1. Derechos de Autor:",
-                    normalText = " La aplicación y su contenido, incluyendo pero no limitado a texto, imágenes, logotipos y marcas registradas, están protegidos por derechos de autor y otras leyes de propiedad intelectual. No tienes permiso para copiar, modificar, distribuir o reproducir dicho contenido sin autorización."
+                    normalText = " La aplicación y su contenido, incluyendo pero no limitado a texto, imágenes, logotipos y marcas registradas, están protegidos por derechos de autor y otras leyes de propiedad intelectual. No tienes permiso para copiar, modificar, distribuir o reproducir dicho contenido sin autorización.",
+                    textAlign = TextAlign.Justify
                 )
             }
 
             item {
                 Text(
                     "4. Actualizaciones y Cambios",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Justify
                 )
                 AnnotatedText(
                     boldText = "4.1. Actualizaciones:",
-                    normalText = " Podemos realizar actualizaciones y cambios en la aplicación de vez en cuando. Es responsabilidad del usuario mantener la aplicación actualizada para disfrutar de las últimas características y correcciones."
+                    normalText = " Podemos realizar actualizaciones y cambios en la aplicación de vez en cuando. Es responsabilidad del usuario mantener la aplicación actualizada para disfrutar de las últimas características y correcciones.",
+                    textAlign = TextAlign.Justify
                 )
             }
 
             item {
                 Text(
                     "5. Terminación",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Justify
                 )
                 AnnotatedText(
                     boldText = "5.1. Terminación por el Usuario:",
-                    normalText = " Puedes dejar de utilizar la aplicación en cualquier momento."
+                    normalText = " Puedes dejar de utilizar la aplicación en cualquier momento.",
+                    textAlign = TextAlign.Justify
                 )
                 AnnotatedText(
                     boldText = "5.2. Terminación por Nosotros:",
-                    normalText = " Nos reservamos el derecho de suspender o cancelar tu acceso a la aplicación en caso de incumplimiento de estos términos."
+                    normalText = " Nos reservamos el derecho de suspender o cancelar tu acceso a la aplicación en caso de incumplimiento de estos términos.",
+                    textAlign = TextAlign.Justify
                 )
             }
 
             item {
                 Text(
                     "6. Disposiciones Finales",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Justify
                 )
                 AnnotatedText(
                     boldText = "6.1. Ley Aplicable:",
-                    normalText = " Estos términos se rigen por las leyes del Perú y cualquier disputa se someterá a la jurisdicción de los tribunales del Perú."
+                    normalText = " Estos términos se rigen por las leyes del Perú y cualquier disputa se someterá a la jurisdicción de los tribunales del Perú.",
+                    textAlign = TextAlign.Justify
                 )
                 AnnotatedText(
                     boldText = "6.2. Cambios en los Términos:",
-                    normalText = " Nos reservamos el derecho de modificar estos términos en cualquier momento. Te notificaremos de cualquier cambio importante. Si continúas utilizando la Aplicación después de los cambios, se considerará que aceptas los nuevos términos."
+                    normalText = " Nos reservamos el derecho de modificar estos términos en cualquier momento. Te notificaremos de cualquier cambio importante. Si continúas utilizando la Aplicación después de los cambios, se considerará que aceptas los nuevos términos.",
+                    textAlign = TextAlign.Justify
                 )
             }
 
@@ -165,7 +183,8 @@ fun TermsAndConditionsScreen(back: () -> Unit) {
                 Text(
                     "Te agradecemos por utilizar CambiaZo. Si tienes alguna pregunta sobre estos términos, no dudes en contactarnos.",
                     modifier = Modifier.padding(top = 16.dp),
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Justify
                 )
             }
         }
@@ -173,7 +192,7 @@ fun TermsAndConditionsScreen(back: () -> Unit) {
 }
 
 @Composable
-fun AnnotatedText(boldText: String, normalText: String) {
+fun AnnotatedText(boldText: String, normalText: String, textAlign: TextAlign) {
     Text(
         buildAnnotatedString {
             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
@@ -183,6 +202,7 @@ fun AnnotatedText(boldText: String, normalText: String) {
                 append(normalText)
             }
         },
-        modifier = Modifier.padding(bottom = 8.dp)
+        modifier = Modifier.padding(bottom = 8.dp),
+        textAlign = textAlign
     )
 }
