@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.DropdownList
@@ -48,8 +49,24 @@ import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 
 @Composable
 fun PublishScreen(
+    viewModel: PublishViewModel = hiltViewModel(),
     back : () -> Unit = {},
 ) {
+
+    val countries = viewModel.countries.value
+    val departments = viewModel.departments.value
+    val districts = viewModel.districts.value
+    val categories = viewModel.categories.value
+
+    val title = viewModel.name.value
+    val description = viewModel.description.value
+    val categorySelected = viewModel.categorySelected.value
+    val countrySelected = viewModel.countrySelected.value
+    val departmentSelected = viewModel.departmentSelected.value
+    val districtSelected = viewModel.districtSelected.value
+    val objectToChange = viewModel.objectChange.value
+    val price = viewModel.price.value
+    val boost = viewModel.boost.value
 
     val spaceHeight = 20.dp
     MainScaffoldApp(
@@ -77,8 +94,8 @@ fun PublishScreen(
                 Box( modifier = Modifier.fillMaxWidth()) {
                     Text(text = "Título")
                 }
-                FieldTextApp(valueText = "", text = "Nombre del objeto") {
-
+                FieldTextApp(valueText = title, text = "Nombre del objeto") {
+                    viewModel.onChangeName(it)
                 }
             Spacer(modifier = Modifier.height(spaceHeight))
             }
@@ -91,11 +108,11 @@ fun PublishScreen(
                 }
 
                 DropdownList(
-                    selectedOption = "",
-                    label ="Seeleccione una Categoria",
-                    itemList = emptyList(),
-                    onItemClick ={},
-                    itemToString = {""}
+                    selectedOption = categorySelected,
+                    label ="Seleccione una Categoria",
+                    itemList = categories.data ?: emptyList(),
+                    onItemClick ={ viewModel.selectCategory(it)},
+                    itemToString = {it.name}
                 )
             Spacer(modifier = Modifier.height(spaceHeight))
             }
@@ -108,14 +125,14 @@ fun PublishScreen(
                 }
 
                 OutlinedTextField(
-                    value = "",
+                    value = description,
                     placeholder = {
                         Text("Descripción del objeto", color = Color.Gray,
                             style= MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Normal,
                                 fontFamily = FontFamily.SansSerif))
                     },
-                    onValueChange = {  },
+                    onValueChange = { viewModel.onChangeDescription(it) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp)
@@ -134,27 +151,30 @@ fun PublishScreen(
                 }
 
                 DropdownList(
-                    selectedOption = "",
+                    selectedOption = countrySelected,
                     label ="Seeleccione un País",
-                    itemList = emptyList(),
-                    onItemClick ={},
-                    itemToString = {""})
+                    itemList = countries.data ?: emptyList(),
+                    onItemClick ={viewModel.selectCountry(it)},
+                    itemToString = {it.name})
+
                 Spacer(modifier = Modifier.height(10.dp))
 
                 DropdownList(
-                    selectedOption = "",
+                    selectedOption = departmentSelected,
                     label ="Seeleccione un Departamento",
-                    itemList = emptyList(),
-                    onItemClick ={},
-                    itemToString = {""})
+                    itemList = departments.data ?: emptyList(),
+                    onItemClick ={ viewModel.selectDepartment(it) },
+                    itemToString = {it.name})
+
                 Spacer(modifier = Modifier.height(10.dp))
 
                 DropdownList(
-                    selectedOption = "",
+                    selectedOption = districtSelected,
                     label ="Seeleccione un Distrito",
-                    itemList = emptyList(),
-                    onItemClick ={},
-                    itemToString = {""})
+                    itemList = districts.data ?: emptyList(),
+                    onItemClick ={ viewModel.selectDistrict(it)},
+                    itemToString = {it.name})
+
                 Spacer(modifier = Modifier.height(spaceHeight))
             }
 
@@ -166,14 +186,14 @@ fun PublishScreen(
                 }
 
                  OutlinedTextField(
-                    value = "",
+                    value = objectToChange,
                     placeholder = {
                         Text("Objetos...", color = Color.Gray,
                             style= MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Normal,
                                 fontFamily = FontFamily.SansSerif))
                     },
-                    onValueChange = {  },
+                    onValueChange = { viewModel.onChangeObjectChange(it) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp)
@@ -189,15 +209,14 @@ fun PublishScreen(
                 Box( modifier = Modifier.fillMaxWidth()) {
                     Text(text = "Valor Apróximado")
                 }
-                MoneyFieldApp(valueText = "", text = "") {
-
+                MoneyFieldApp(valueText = price, text = "") {
+                    viewModel.onChangePrice(it)
                 }
                 Spacer(modifier = Modifier.height(spaceHeight))
 
             }
             //-------------------BOOST------------------------//
             item {
-                var isChecked by remember { mutableStateOf(false) }
 
                 Row(
                     modifier = Modifier
@@ -219,8 +238,8 @@ fun PublishScreen(
                             .padding(start = 16.dp)
                     ) {
                         Switch(
-                            checked = isChecked,
-                            onCheckedChange = { isChecked = it }
+                            checked = boost,
+                            onCheckedChange = { viewModel.onChangeBoost(it)}
                         )
                     }
                 }
@@ -231,7 +250,6 @@ fun PublishScreen(
 
             item {
                 ButtonApp(text = "Publicar"){
-
                 }
                 Spacer(modifier =   Modifier.height(30.dp))
             }
