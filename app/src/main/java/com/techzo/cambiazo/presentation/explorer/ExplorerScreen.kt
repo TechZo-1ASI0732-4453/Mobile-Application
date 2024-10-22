@@ -144,7 +144,7 @@ fun Products(product: Product, onProductClick: (String, String) -> Unit) {
             .padding(horizontal = 20.dp, vertical = 12.dp)
             .border(0.dp, Color.Transparent, RoundedCornerShape(15.dp))
             .shadow(elevation = 12.dp, RoundedCornerShape(15.dp))
-            .clickable { onProductClick(product.id.toString(), product.userId.toString()) },
+            .clickable { onProductClick(product.id.toString(), product.user.id.toString()) },
     ) {
         Column {
             Box(

@@ -67,13 +67,13 @@ sealed class Routes(val route: String) {
     object Profile : Routes("ProfileScreen")
     object Exchange : Routes("ExchangeScreen")
     object TermsAndConditions: Routes("TermsAndConditionsScreen")
-    object Details : Routes("DetailsScreen/{productId}/{userId}") {
-        fun createRoute(productId: String, userId: String) = "DetailsScreen/$productId/$userId"
-    }
     object ExchangeDetails: Routes("ExchangeDetailsScreen/{exchangeId}/{page}"){
         fun createExchangeDetailsRoute(exchangeId:String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
     }
     object MyReviews : Routes("MyReviewsScreen")
+    object ProductDetails : Routes("ProductDetailsScreen/{productId}/{userId}") {
+        fun createProductDetailsRoute(productId: String, userId: String) = "ProductDetailsScreen/$productId/$userId"
+    }
 }
 
 @Composable
@@ -109,7 +109,12 @@ fun NavScreen() {
                 bottomBar = { BottomBarNavigation(items) },
                 onFilter = { navController.navigate(Routes.Filter.route) },
                 onProductClick = { productId, userId ->
-                    navController.navigate(Routes.Details.createRoute(productId, userId))
+                    navController.navigate(
+                        Routes.ProductDetails.createProductDetailsRoute(
+                            productId,
+                            userId
+                        )
+                    )
                 }
             )
         }
@@ -168,14 +173,16 @@ fun NavScreen() {
             )
         }
 
-        composable(route = Routes.Details.route) { backStackEntry ->
+        composable(route = Routes.ProductDetails.route) { backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull()
             val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
-            ProductDetailsScreen(
-                productId = productId,
-                userId = userId,
-                onBack = { navController.popBackStack() }
-            )
+            if (productId != null && userId != null) {
+                ProductDetailsScreen(
+                    productId = productId,
+                    userId = userId,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
