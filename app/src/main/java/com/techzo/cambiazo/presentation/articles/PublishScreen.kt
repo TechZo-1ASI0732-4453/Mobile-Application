@@ -8,6 +8,8 @@ import android.transition.Transition
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,12 +19,20 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,9 +42,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.bumptech.glide.Glide
@@ -80,7 +94,7 @@ fun PublishScreen(
     val image = viewModel.image.value
 
     val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent(),) { uri ->
-        viewModel.selectImage(uri?: Uri.EMPTY)
+        viewModel.selectImage(uri)
     }
 
     val spaceHeight = 20.dp
@@ -102,22 +116,67 @@ fun PublishScreen(
 
         LazyColumn {
             item {
-                // Mostrar la imagen si está disponible
-                image?.let { uri ->
-                    Image(
-                        painter = rememberImagePainter(uri),
-                        contentDescription = null,
-                        modifier = Modifier.size(100.dp) // Ajusta el tamaño según lo necesites
-                    )
+                Box( modifier = Modifier.fillMaxWidth()) {
+                    Text(text = "Imagen")
                 }
 
-                // Botón para seleccionar una imagen
-                Button(onClick = { selectedImageLauncher.launch("image/*") }) {
-                    Text(text = "Subir Imagen")
+                image?.let { uri ->
+                    Box {
+
+                        IconButton(
+                            onClick = {
+                                viewModel.deselectImage()
+                            },
+                            modifier = Modifier
+                                .offset(x = 5.dp, y = -5.dp)
+                                .size(25.dp)
+                                .background(Color(0xFFFFD146), shape = RoundedCornerShape(50.dp))
+                                .align(Alignment.TopEnd).zIndex(100f)
+                            ,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color(0xFFFFD146),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Icon(Icons.Filled.Close,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp).zIndex(100f))
+                        }
+                        Box(modifier = Modifier
+                            .size(100.dp)
+                            .border(1.dp, color = Color.Gray, shape = RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center)
+                        {
+
+                            Image(
+                                painter = rememberImagePainter(uri),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+                }?: Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .border(1.dp, color = Color.Gray, shape = RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ){
+                    IconButton(
+                        onClick = {
+                            selectedImageLauncher.launch("image/*")
+                        },
+                        modifier = Modifier.size(50.dp).background(Color(0xFFFFD146 ), shape = RoundedCornerShape(50))
+                    ) {
+                            Icon(Icons.Filled.Upload, contentDescription = null)
+                    }
                 }
+
             }
 
-            //----------------TITULO------------------//
+            //----------------TITULO------------------
             item{
 
                 Box( modifier = Modifier.fillMaxWidth()) {

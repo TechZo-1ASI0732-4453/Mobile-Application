@@ -183,8 +183,11 @@ class PublishViewModel @Inject constructor(
     }
 
 
-    fun selectImage(image: Uri){
+    fun selectImage(image: Uri?){
         _image.value = image
+    }
+    fun deselectImage(){
+        _image.value = null
     }
 
      fun createProduct(){
