@@ -72,10 +72,9 @@ sealed class Routes(val route: String) {
     object MyReviews : Routes("MyReviewsScreen")
     object ProductDetails : Routes("ProductDetailsScreen/{productId}/{userId}") {
         fun createProductDetailsRoute(productId: String, userId: String) = "ProductDetailsScreen/$productId/$userId"
-      
-    data object Reviews : Routes("ReviewsScreen/{userId}") {
+    }
+    object Reviews : Routes("ReviewsScreen/{userId}") {
         fun createRoute(userId: String) = "ReviewsScreen/$userId"
-
     }
 }
 
@@ -179,19 +178,11 @@ fun NavScreen() {
         composable(route = Routes.ProductDetails.route) { backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull()
             val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
-        composable(route = Routes.Details.route) { backStackEntry ->
-            val productId = backStackEntry.arguments
-                ?.getString("productId")?.toIntOrNull()
-            val userId = backStackEntry.arguments
-                ?.getString("userId")?.toIntOrNull()
             if (productId != null && userId != null) {
                 ProductDetailsScreen(
                     productId = productId,
                     userId = userId,
-                    onBack = { navController.popBackStack() },
-                    onShowReviews = { userId ->
-                        navController.navigate(Routes.Reviews.createRoute(userId.toString()))
-                    }
+                    onBack = { navController.popBackStack() }
                 )
             }
         }
@@ -202,7 +193,6 @@ fun NavScreen() {
             if (userId != null) {
                 ReviewScreen(
                     userId = userId,
-
                     onBack = { navController.popBackStack() }
                 )
             }

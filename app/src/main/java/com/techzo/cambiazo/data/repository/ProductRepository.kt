@@ -85,4 +85,10 @@ class ProductRepository(private val productService: ProductService) {
             val response = productService.deleteProduct(productId)
             if (response.isSuccessful) {
                 return@withContext Resource.Success(data = Unit)
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+        }
+    }
 }

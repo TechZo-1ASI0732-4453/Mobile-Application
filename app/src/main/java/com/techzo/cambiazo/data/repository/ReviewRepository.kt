@@ -8,14 +8,11 @@ import com.techzo.cambiazo.domain.Review
 import com.techzo.cambiazo.domain.ReviewAverageUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 import kotlinx.coroutines.async
 
 
-class ReviewRepository @Inject constructor(
-    private val reviewService: ReviewService
-) {
+class ReviewRepository(private val reviewService: ReviewService) {
 
     suspend fun getAverageRatingAndReviewsByUserId(userId: Int): Resource<Pair<ReviewAverageUser, List<Review>>> =
         withContext(Dispatchers.IO) {
@@ -47,8 +44,8 @@ class ReviewRepository @Inject constructor(
                 ?: Resource.Error("No se encontró datos para el usuario")
         } else {
             Resource.Error(response.message())
-
         }
+    }
 
     private suspend fun fetchReviews(userId: Int): Resource<List<Review>> {
         val response = reviewService.getReviewsByUserId(userId)
@@ -66,7 +63,6 @@ class ReviewRepository @Inject constructor(
             try {
                 val response = reviewService.getReviewsByUserId(userId)
                 if (response.isSuccessful) {
-
                     response.body()?.let { reviewsDto ->
                         val reviews = reviewsDto.map { it.toReview() }
                         return@withContext Resource.Success(data = reviews)
@@ -78,4 +74,5 @@ class ReviewRepository @Inject constructor(
                 return@withContext Resource.Error(e.message ?: "An error occurred")
             }
         }
+
 }

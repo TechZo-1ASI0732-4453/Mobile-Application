@@ -256,7 +256,6 @@ fun ReviewItem(review: Review, viewModel: ReviewViewModel) {
                         .size(68.dp)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop,
-                    error = painterResource(id = R.drawable.default_user_image)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
