@@ -43,6 +43,7 @@ import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 @Composable
 fun SignUpScreen(openLogin: () -> Unit = {},
                  back: () -> Unit = {},
+                 navigateToTermsAndConditions: () -> Unit,
                  viewModel: SignUpViewModel = hiltViewModel()
 ){
 
@@ -137,7 +138,12 @@ fun SignUpScreen(openLogin: () -> Unit = {},
                     checkedColor = Color(0xFFFFD146)
                 )
             )
-            TextLink("  Aceptar ", "terminos y condiciones", clickable = { }, Arrangement.Start)
+            TextLink(
+                "  Aceptar ",
+                "terminos y condiciones",
+                clickable = { navigateToTermsAndConditions() },
+                Arrangement.Start
+            )
         }
 
         ButtonApp("Registrarse", onClick = {

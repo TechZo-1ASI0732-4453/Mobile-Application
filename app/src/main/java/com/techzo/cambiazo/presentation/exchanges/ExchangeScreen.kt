@@ -2,7 +2,6 @@ package com.techzo.cambiazo.presentation.exchanges
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -33,7 +30,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Tab
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
@@ -55,8 +51,8 @@ fun ExchangeScreen(
 ) {
 
     val state = viewModel.state.value
-    val exchangesSend=viewModel.exchangesSend.value
-    val exchangesReceived=viewModel.exchangesReceived.value
+    //val exchangesSend=viewModel.exchangesSend.value
+    //val exchangesReceived=viewModel.exchangesReceived.value
 
     MainScaffoldApp(bottomBar = bottomBar,
         paddingCard = PaddingValues(top = 10.dp),
@@ -114,6 +110,7 @@ fun ExchangeScreen(
                     coroutineScope.launch {
                         pagerState.animateScrollToPage(2)
                     }
+                    viewModel.getFinishedExchanges()
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (pagerState.currentPage == 2) Color(0xFFFFD146) else Color.Transparent
@@ -129,7 +126,7 @@ fun ExchangeScreen(
         HorizontalPager(
             state = pagerState, userScrollEnabled = false
         ) {
-            LazyColumn() {
+            LazyColumn{
                 items(state.data ?: emptyList()) { exchange ->
                     ExchangeBox(exchange, pagerState.currentPage, goToDetailsScreen)
                 }
@@ -142,6 +139,18 @@ fun ExchangeScreen(
 
 @Composable
 fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, String) -> Unit) {
+    val textUpperImage = when (page) {
+        0 -> "Quieres"
+        1 -> "Quiere"
+        else -> "Cambiaste"
+    }
+
+    val textUpperImage2 = when (page) {
+        0 -> "Ofreces"
+        1 -> "Ofrece"
+        else -> "Obtuviste"
+    }
+
     Column(Modifier.clickable { goToDetailsScreen(exchange.id.toString(), page.toString()) }) {
         Row(
             modifier = Modifier
@@ -178,12 +187,23 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
             }
 
             Text(
-                text = if (page == 0 && exchange.status == "Pendiente") "Enviado" else exchange.status,
-                color = Color.Gray,
+                text =
+                if (page == 0 && exchange.status == "Pendiente") "Enviado"
+                else if(page==1) exchange.status
+                else "WhatsApp",
+                color =
+                    if (page == 0 && exchange.status == "Pendiente") Color.Gray
+                    else if(page==1) Color(0xFFFFD146)
+                    else Color.White,
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
-                    .background(Color(0xFFE8E8E8))
-                    .padding(horizontal = 20.dp, vertical = 4.dp)
+                    .background(
+                        if (page == 0 && exchange.status == "Pendiente") Color(0xFFE8E8E8)
+                        else if(page==1) Color.Black
+                        else Color(0xFF38B000)
+                    )
+                    .padding(horizontal = 20.dp, vertical = 4.dp),
+                fontWeight = FontWeight.Bold
             )
 
         }
@@ -199,16 +219,16 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 productImageUrl =
                 when (page) {
                     0 -> exchange.productChange.image
-                    1 -> exchange.productOwn.image
-                    else -> exchange.productChange.image
+                    1 -> exchange.productChange.image
+                    else -> exchange.productOwn.image
                 },
                 productName =
                 when (page) {
                     0 -> exchange.productChange.name
-                    1 -> exchange.productOwn.name
-                    else -> exchange.productChange.name
+                    1 -> exchange.productChange.name
+                    else -> exchange.productOwn.name
                 },
-                tag = "Quieres"
+                tag = textUpperImage
             )
             Image(
                 painter = painterResource(id = R.drawable.exchange_image),
@@ -219,16 +239,16 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 productImageUrl =
                 when (page) {
                     0 -> exchange.productOwn.image
-                    1 -> exchange.productChange.image
-                    else -> exchange.productOwn.image
+                    1 -> exchange.productOwn.image
+                    else -> exchange.productChange.image
                 },
                 productName =
                 when (page) {
                     0 -> exchange.productOwn.name
-                    1 -> exchange.productChange.name
-                    else -> exchange.productOwn.name
+                    1 -> exchange.productOwn.name
+                    else -> exchange.productChange.name
                 },
-                tag = "Ofreces"
+                tag = textUpperImage2
             )
         }
         HorizontalDivider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(20.dp))
