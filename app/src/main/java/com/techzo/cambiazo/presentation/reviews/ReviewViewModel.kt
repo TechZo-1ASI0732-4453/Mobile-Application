@@ -47,7 +47,8 @@ class ReviewViewModel @Inject constructor(
     fun getReviewAverageByUserId(userId: Int) {
         viewModelScope.launch {
             // Ejecutar todas las llamadas en paralelo
-            val reviewAverageDeferred = async { reviewRepository.getAverageRatingByUserId(userId) }
+            val reviewAverageDeferred =
+                async { reviewRepository.getAverageRatingAndReviewsByUserId(userId) }
             val userDeferred = async { userRepository.getUserById(userId) }
             val reviewsDeferred = async { reviewRepository.getReviewsByUserId(userId) }
             val articlesDeferred = async { productRepository.getProductsByUserId(userId) }
@@ -60,10 +61,12 @@ class ReviewViewModel @Inject constructor(
 
             // Procesar los resultados
             when (reviewAverageResult) {
-                is Resource.Success -> {
-                    reviewAverageUser.value = reviewAverageResult.data
+                is Resource.Success<Pair<ReviewAverageUser, List<Review>>> -> {
+                    reviewAverageUser.value = reviewAverageResult.data?.first
+                    _reviews.value = UIState(data = reviewAverageResult.data?.second)
                     errorMessage.value = null
                 }
+
                 is Resource.Error -> {
                     errorMessage.value = reviewAverageResult.message
                 }
@@ -73,6 +76,7 @@ class ReviewViewModel @Inject constructor(
                 is Resource.Success -> {
                     _user.value = UIState(data = userResult.data)
                 }
+
                 is Resource.Error -> {
                     _user.value = UIState(message = userResult.message ?: "Unknown error")
                 }
@@ -82,6 +86,7 @@ class ReviewViewModel @Inject constructor(
                 is Resource.Success -> {
                     _reviews.value = UIState(data = reviewsResult.data)
                 }
+
                 is Resource.Error -> {
                     _reviews.value = UIState(message = reviewsResult.message ?: "Unknown error")
                 }
@@ -91,6 +96,7 @@ class ReviewViewModel @Inject constructor(
                 is Resource.Success -> {
                     _articles.value = UIState(data = articlesResult.data)
                 }
+
                 is Resource.Error -> {
                     _articles.value = UIState(message = articlesResult.message ?: "Unknown error")
                 }
@@ -106,6 +112,7 @@ class ReviewViewModel @Inject constructor(
                     is Resource.Success -> {
                         emit(UIState(data = result.data))
                     }
+
                     is Resource.Error -> {
                         emit(UIState(message = result.message ?: "Unknown error"))
                     }
