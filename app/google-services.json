@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "806366156677",
+    "project_id": "appcambiazo",
+    "storage_bucket": "appcambiazo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:806366156677:android:1c92270b625891d35296ec",
+        "android_client_info": {
+          "package_name": "com.techzo.cambiazo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAI7z44voASuj2Nu-L3c8c-g1es2QorEgs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

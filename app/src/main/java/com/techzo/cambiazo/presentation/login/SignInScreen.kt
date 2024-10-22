@@ -60,7 +60,7 @@ fun SignInScreen(openRegister: () -> Unit = {},
         paddingCard = PaddingValues(start = 40.dp , end = 40.dp,top = 70.dp),
         contentsHeader = {
             Column(modifier = Modifier
-                .fillMaxWidth().height(150.dp),
+                .fillMaxWidth().height(250.dp),
                 verticalArrangement = Arrangement.Center) {
                 Image(
                     painter = painterResource(R.drawable.cambiazo_logo_name),
@@ -85,17 +85,12 @@ fun SignInScreen(openRegister: () -> Unit = {},
         )
 
 
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
-            shape = RoundedCornerShape(10.dp),
-            value = username,
-            placeholder = {
-                Text("Correo electrónico")},
-            onValueChange = { viewModel.onUsernameChange(it)}
+        FieldTextApp(
+            username,
+            "Correo electrónico",
+            onValueChange = { viewModel.onUsernameChange(it) }
         )
+
 
         OutlinedTextField(
             modifier = Modifier
@@ -105,7 +100,7 @@ fun SignInScreen(openRegister: () -> Unit = {},
                 .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
             shape = RoundedCornerShape(10.dp),
             value = password,
-            placeholder = { Text("Contraseña")},
+            placeholder = { Text("Contraseña",color = Color.Gray)},
             onValueChange = { viewModel.onPasswordChange(it) },
             visualTransformation =
             if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
