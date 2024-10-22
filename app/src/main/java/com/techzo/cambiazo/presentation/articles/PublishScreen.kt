@@ -230,7 +230,7 @@ fun PublishScreen(
 
 
             item {
-                ButtonApp(text = "Publicar", onClick = {viewModel.onPublish()})
+                ButtonApp(text = "Publicar", onClick = {viewModel.createProduct()})
                 Spacer(modifier =   Modifier.height(30.dp))
             }
         }

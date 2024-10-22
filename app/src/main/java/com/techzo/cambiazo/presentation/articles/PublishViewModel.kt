@@ -5,7 +5,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.techzo.cambiazo.common.Constants
+import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.data.remote.products.CreateProductDto
 import com.techzo.cambiazo.data.remote.products.ProductCategory
 import com.techzo.cambiazo.data.repository.LocationRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
@@ -14,6 +18,7 @@ import com.techzo.cambiazo.domain.Country
 import com.techzo.cambiazo.domain.Department
 import com.techzo.cambiazo.domain.District
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -147,6 +152,7 @@ class PublishViewModel @Inject constructor(
     }
 
     fun onPublish(){
+
         if(_name.value.isEmpty()){
             _errorName.value = true
         }
@@ -175,6 +181,30 @@ class PublishViewModel @Inject constructor(
             _errorImage.value = true
             return
         }
+        createProduct()
+    }
+
+     fun createProduct(){
+        val product = CreateProductDto(
+            available = true,
+            boost = _boost.value,
+            description = "hola soy jeremy",
+            desiredObject = "quiero ser full stack",
+            districtId = 1,
+            image = Constants.DEFAULT_PROFILE_PICTURE,
+            name = "jeremy de sanjuan",
+            price = 10,
+            productCategoryId = 1,
+            userId = Constants.user!!.id
+        )
+        viewModelScope.launch {
+            val result = productRepository.createProduct(product)
+            if (result is Resource.Success) {
+                //back()
+            }
+        }
+
+
     }
 
 
