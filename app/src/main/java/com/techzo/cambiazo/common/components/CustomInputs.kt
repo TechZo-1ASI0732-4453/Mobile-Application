@@ -88,6 +88,7 @@ fun MoneyFieldApp(valueText:String,text:String, modifier: Modifier = Modifier,on
 
 @Composable
 fun CustomInput(
+    modifier: Modifier = Modifier,
     value:String,
     placeHolder:String = "",
     type : String,
@@ -96,9 +97,10 @@ fun CustomInput(
     prefix: String? = null,
     suffix: String? = null,
     isError: Boolean = false,
-    messageError: String = "Invalid field",
+    messageError: String? = "Invalid field",
     pressEnter: () -> Unit = {},
     hideText: Boolean = false,
+    readOnly: Boolean = false,
     onValueChange: (String) -> Unit
 ){
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -114,7 +116,7 @@ fun CustomInput(
     }
 
     OutlinedTextField(
-        modifier = Modifier
+        modifier = modifier
             .height(constraints.height)
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp)),
@@ -145,6 +147,7 @@ fun CustomInput(
 
         prefix = {prefix?.let { Text(text = prefix)} },
         suffix = {suffix?.let { Text(text = suffix)} },
+        readOnly = readOnly,
         isError = isError,
         interactionSource = interactionSource,
         colors = TextFieldDefaults.colors(
@@ -161,10 +164,12 @@ fun CustomInput(
         )
     )
     if (isError) {
-        Text(
-            text = messageError,
-            color = Color.Red,
-        )
+        messageError?.let{
+            Text(
+                text = messageError,
+                color = Color.Red,
+            )
+        }
     }
 }
 

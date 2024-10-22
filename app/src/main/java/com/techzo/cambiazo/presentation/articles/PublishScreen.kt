@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
+import com.techzo.cambiazo.common.components.CustomDropDownSelect
 import com.techzo.cambiazo.common.components.CustomInput
-import com.techzo.cambiazo.common.components.DropdownList
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 
@@ -100,11 +100,12 @@ fun PublishScreen(
                     Text(text = "Categoría")
                 }
 
-                DropdownList(
+                CustomDropDownSelect(
                     selectedOption = categorySelected,
                     label ="Seleccione una Categoria",
                     itemList = categories.data ?: emptyList(),
                     onItemClick ={ viewModel.selectCategory(it)},
+                    isError = errorCategory,
                     itemToString = {it.name}
                 )
             Spacer(modifier = Modifier.height(spaceHeight))
@@ -131,29 +132,32 @@ fun PublishScreen(
                     Text(text = "Ubicación")
                 }
 
-                DropdownList(
+                CustomDropDownSelect(
                     selectedOption = countrySelected,
                     label ="Seeleccione un País",
                     itemList = countries.data ?: emptyList(),
                     onItemClick ={viewModel.selectCountry(it)},
+                    isError = errorCountry,
                     itemToString = {it.name})
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                DropdownList(
+                CustomDropDownSelect(
                     selectedOption = departmentSelected,
                     label ="Seeleccione un Departamento",
                     itemList = departments.data ?: emptyList(),
                     onItemClick ={ viewModel.selectDepartment(it) },
+                    isError = errorDepartment,
                     itemToString = {it.name})
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                DropdownList(
+                CustomDropDownSelect(
                     selectedOption = districtSelected,
                     label ="Seeleccione un Distrito",
                     itemList = districts.data ?: emptyList(),
                     onItemClick ={ viewModel.selectDistrict(it)},
+                    isError = errorDistrict,
                     itemToString = {it.name})
 
                 Spacer(modifier = Modifier.height(spaceHeight))
