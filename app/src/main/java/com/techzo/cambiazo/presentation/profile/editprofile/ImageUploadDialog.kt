@@ -13,17 +13,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberImagePainter
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileViewModel
+import com.techzo.cambiazo.presentation.profile.editprofile.uploadImageToFirebase
 import java.util.UUID
 
 @Composable
 fun ImageUploadDialog(
     onDismiss: () -> Unit,
     onImageUploaded: (String) -> Unit,
-    viewModel: EditProfileViewModel= hiltViewModel()
+    viewModel: EditProfileViewModel = hiltViewModel()
 ) {
     var fileUri by remember { mutableStateOf<Uri?>(null) }
     var imageBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
@@ -37,57 +52,78 @@ fun ImageUploadDialog(
         }
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = "Upload Image") },
-        text = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Button(onClick = { launcher.launch("image/*") }) {
-                    Text(text = "Choose Image")
-                }
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+                .background(Color.White, shape = RoundedCornerShape(25.dp))
+                .padding(30.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Cambio de imagen de perfil",
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                style = TextStyle(fontSize = 30.sp, color = Color.Black),
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.padding(8.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+            imageBitmap?.let {
+                Image(
+                    bitmap = it.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(200.dp)
+                        .clip(RoundedCornerShape(100.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } ?: Image(
+                painter = rememberImagePainter("https://png.pngtree.com/element_our/20190601/ourlarge/pngtree-file-upload-icon-image_1344464.jpg"),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(200.dp)
+                    .clip(RoundedCornerShape(100.dp)),
+                contentScale = ContentScale.Crop
+            )
 
-                imageBitmap?.let {
-                    Image(bitmap = it.asImageBitmap(), contentDescription = null, modifier = Modifier.size(200.dp))
-                }
-            }
-        },
-        confirmButton = {
-            val uuid = UUID.randomUUID().toString()
-            Button(onClick = {
-                fileUri?.let { uri ->
-                    val ref: StorageReference = FirebaseStorage.getInstance().reference.child("images/$uuid")
-                    val progressDialog = android.app.ProgressDialog(context).apply {
-                        setTitle("Uploading Image...")
-                        setMessage("Processing...")
-                        show()
-                    }
+            Spacer(modifier = Modifier.padding(8.dp))
 
-                    ref.putFile(uri).addOnSuccessListener {
-                        ref.downloadUrl.addOnSuccessListener { downloadUri ->
-                            progressDialog.dismiss()
-                            val imageUrl = downloadUri.toString()
-                            onImageUploaded(imageUrl)
-                            viewModel.onProfilePictureChanged(imageUrl)
-                            onDismiss()
+            ButtonApp(
+                onClick = { launcher.launch("image/*") },
+                text = "Choose Image"
+            )
+
+            Spacer(modifier = Modifier.padding(8.dp))
+
+            Column {
+                ButtonApp(
+                    text = "Accept",
+                    onClick = {
+                        fileUri?.let { uri ->
+                            uploadImageToFirebase(
+                                context = context,
+                                fileUri = uri,
+                                onSuccess = { imageUrl ->
+                                    onImageUploaded(imageUrl)
+                                    viewModel.onProfilePictureChanged(imageUrl)
+                                    onDismiss()
+                                },
+                                onFailure = {
+                                }
+                            )
                         }
-                    }.addOnFailureListener {
-                        progressDialog.dismiss()
-                        Toast.makeText(context, "File Upload Failed...", Toast.LENGTH_LONG).show()
                     }
-                }
-            }) {
-                Text(text = "Accept")
-            }
-        },
+                )
 
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text(text = "Cancel")
+                Spacer(modifier = Modifier.width(8.dp))
+
+                ButtonApp(
+                    text = "Cancel",
+                    onClick = onDismiss
+                )
             }
         }
-    )
+    }
 }
