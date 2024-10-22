@@ -1,11 +1,7 @@
 package com.techzo.cambiazo.presentation.articles
 
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,13 +9,13 @@ import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.remote.products.CreateProductDto
-import com.techzo.cambiazo.data.remote.products.ProductCategory
 import com.techzo.cambiazo.data.repository.LocationRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
 import com.techzo.cambiazo.domain.Country
 import com.techzo.cambiazo.domain.Department
 import com.techzo.cambiazo.domain.District
+import com.techzo.cambiazo.domain.ProductCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,9 +28,9 @@ class PublishViewModel @Inject constructor(
     private val productRepository: ProductRepository
 ):ViewModel() {
 
-    private val _allCountries = mutableStateListOf<Country>()
-    private val _allDepartments = mutableStateListOf<Department>()
-    private val _allDistricts = mutableStateListOf<District>()
+    private val _allCountries = mutableStateOf<List<Country>>(emptyList())
+    private val _allDepartments = mutableStateOf<List<Department>>(emptyList())
+    private val _allDistricts = mutableStateOf<List<District>>(emptyList())
 
     private val _categories = mutableStateOf(UIState<List<ProductCategory>>())
     val categories: State<UIState<List<ProductCategory>>> = _categories
@@ -104,6 +100,12 @@ class PublishViewModel @Inject constructor(
     private val _errorImage = mutableStateOf(false)
     val errorImage: State<Boolean> get() = _errorImage
 
+
+    init {
+        getCategories()
+        getLocations()
+    }
+
     fun onChangeName(name: String) {
         _errorName.value = false
         _name.value = name
@@ -130,24 +132,24 @@ class PublishViewModel @Inject constructor(
     }
 
     fun selectCategory(category: ProductCategory?) {
-        _errorCategory.value = false
+        if(category!=null)_errorCategory.value = false
         _categorySelected.value = category
     }
 
     fun selectCountry(country: Country?) {
-        _errorCountry.value = false
+        if(country!=null)_errorCountry.value = false
         _countrySelected.value = country
-        _departments.value = UIState(data = _allDepartments.filter { it.id == country?.id })
+        _departments.value = UIState(data = _allDepartments.value.filter { it.countryId == country?.id })
     }
 
     fun selectDepartment(department: Department?) {
-        _errorDepartment.value = false
+        if(department!=null)_errorDepartment.value = false
         _departmentSelected.value = department
-        _districts.value = UIState(data = _allDistricts.filter { it.id == department?.id })
+        _districts.value = UIState(data = _allDistricts.value.filter { it.departmentId == department?.id })
     }
 
     fun selectDistrict(district: District?) {
-        _errorDistrict.value = false
+        if(district!=null)_errorDistrict.value = false
         _districtSelected.value = district
     }
 
@@ -176,6 +178,9 @@ class PublishViewModel @Inject constructor(
         }
         if(_districtSelected.value == null){
             _errorDistrict.value = true
+        }
+        if(_image.value == null){
+            _errorImage.value = true
             return
         }
 
@@ -188,6 +193,46 @@ class PublishViewModel @Inject constructor(
     }
     fun deselectImage(){
         _image.value = null
+    }
+
+    fun getLocations(){
+        viewModelScope.launch {
+            val countryResult = locationRepository.getCountries()
+
+            if (countryResult is Resource.Success) {
+                _allCountries.value = countryResult.data ?: emptyList()
+                _countries.value = UIState(data = countryResult.data)
+            } else {
+                _countries.value  = UIState(message = countryResult.message ?: "Ocurrió un error")
+            }
+
+
+            val departmentResult = locationRepository.getDepartments()
+            if (departmentResult is Resource.Success) {
+                _allDepartments.value = departmentResult.data ?: emptyList()
+            }
+            val districtResult = locationRepository.getDistricts()
+            if (districtResult is Resource.Success) {
+                _allDistricts.value = districtResult.data ?: emptyList()
+            }
+
+            _departmentSelected.value = _allDepartments.value.find { it.id == Constants.filterValues.departmentId }
+            _countrySelected.value = _allCountries.value.find { it.id == Constants.filterValues.countryId }
+            _districtSelected.value = _allDistricts.value.find { it.id == Constants.filterValues.districtId }
+        }
+
+
+    }
+
+    fun getCategories() {
+        viewModelScope.launch {
+            val result = productCategoryRepository.getProductCategories()
+            if (result is Resource.Success) {
+                _categories.value = UIState(data = result.data)
+            } else {
+                _categories.value = UIState(message = result.message ?: "Ocurrió un error")
+            }
+        }
     }
 
      fun createProduct(){
