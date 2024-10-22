@@ -1,8 +1,10 @@
 package com.techzo.cambiazo.presentation.details
 
-import android.util.Patterns
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
-import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.StarRating
@@ -31,45 +33,38 @@ import com.techzo.cambiazo.domain.*
 
 @Composable
 fun ProductDetailsScreen(
+    productId: Int,
+    userId: Int,
     viewModel: ProductDetailsViewModel = hiltViewModel(),
-    productId: Int?,
-    userId: Int?,
     onBack: () -> Unit
 ) {
-    LaunchedEffect(productId, userId) {
-        if (productId != null && userId != null) {
-            viewModel.loadProductDetails(productId, userId)
-        }
-    }
-
     val productState = viewModel.product.value
-    val userState = viewModel.user.value
-    val reviewsState = viewModel.reviews.value
-    val productCategoryState = viewModel.productCategory.value
-    val districtState = viewModel.district.value
-    val departmentState = viewModel.department.value
+    val averageRating = viewModel.averageRating.value
+    val countReviews = viewModel.countReviews.value
     val isFavoriteState = viewModel.isFavorite.value
-    val averageRatingState = viewModel.averageRating.value
+
+    LaunchedEffect(productId, userId) {
+        viewModel.loadProductDetails(productId, userId)
+    }
 
     Scaffold(
         content = { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
-                if (productState.isLoading || userState.isLoading || reviewsState.isLoading || averageRatingState.isLoading) {
-                } else if (productState.data != null) {
+                val product = productState.data
+                if (product != null) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        ProductHeader(product = productState.data!!, onBack = onBack)
+                        ProductHeader(product = product, onBack = onBack)
                         ProductDetails(
-                            product = productState.data!!,
-                            userState = userState,
-                            reviewsState = reviewsState,
-                            productCategoryState = productCategoryState,
-                            districtState = districtState,
-                            departmentState = departmentState,
+                            product = product,
+                            user = product.user,
+                            averageRating = averageRating ?: 0.0,
+                            countReviews = countReviews ?: 0,
                             isFavoriteState = isFavoriteState,
-                            averageRating = averageRatingState.data ?: 0.0,
                             onFavoriteToggle = { isCurrentlyFavorite ->
-                                viewModel.toggleFavoriteStatus(productId!!, isCurrentlyFavorite)
+                                // Lógica para alternar el estado de favorito
+                                viewModel.toggleFavoriteStatus(productId, isCurrentlyFavorite)
                             },
+                            onUserClick = {  },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 360.dp)
@@ -77,8 +72,12 @@ fun ProductDetailsScreen(
                                 .background(Color.White)
                         )
                     }
-                } else if (productState.message != null) {
-                    Text(text = "Error: ${productState.message}", color = Color.Red)
+                } else if (productState.isLoading) {
+                } else {
+                    Text(
+                        text = productState.message ?: "Error al cargar detalles del producto",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
         }
@@ -87,9 +86,10 @@ fun ProductDetailsScreen(
 
 @Composable
 fun ProductHeader(product: Product, onBack: () -> Unit) {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .height(390.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(390.dp)
     ) {
         Image(
             painter = rememberAsyncImagePainter(product.image),
@@ -142,155 +142,131 @@ fun ProductHeader(product: Product, onBack: () -> Unit) {
 @Composable
 fun ProductDetails(
     product: Product,
-    userState: UIState<User>,
-    reviewsState: UIState<List<Review>>,
-    productCategoryState: UIState<ProductCategory>,
-    districtState: UIState<District>,
-    departmentState: UIState<Department>,
-    isFavoriteState: UIState<Boolean>,
+    user: User,
     averageRating: Double,
+    countReviews: Int,
+    isFavoriteState: UIState<Boolean>,
     onFavoriteToggle: (Boolean) -> Unit,
+    onUserClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .padding(20.dp)
     ) {
-        if (userState.data != null) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val imageUrl = userState.data!!.profilePicture
-                val painter =
-                    if (imageUrl.isNullOrEmpty() || !Patterns.WEB_URL.matcher(imageUrl).matches()) {
-                        rememberAsyncImagePainter(R.drawable.default_user_image)
-                    } else {
-                        rememberAsyncImagePainter(imageUrl)
-                    }
-
-                Image(
-                    painter = painter,
-                    contentDescription = "User Avatar",
+        user?.let {
+            if (it.name.isNotEmpty() && it.profilePicture.isNotEmpty()) {
+                Row(
                     modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                        .background(Color.LightGray)
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = userState.data!!.name,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+                        .fillMaxWidth()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onUserClick() }, // Sin efecto visual al hacer clic
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(it.profilePicture),
+                        contentDescription = "User Avatar",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(Color.LightGray)
                     )
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        StarRating(rating = averageRating, size = 26.dp)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .background(Color.Black, shape = RoundedCornerShape(50))
-                                .padding(horizontal = 13.dp, vertical = 1.5.dp)
-                        ) {
-                            Text(
-                                text = "${reviewsState.data?.size ?: 0}",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = it.name,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            StarRating(rating = averageRating, size = 26.dp)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .background(Color.Black, shape = RoundedCornerShape(50))
+                                    .padding(horizontal = 13.dp, vertical = 1.5.dp)
+                            ) {
+                                Text(
+                                    text = "$countReviews",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                            }
                         }
                     }
-                }
 
-                IconButton(
-                    onClick = { onFavoriteToggle(isFavoriteState.data == true) },
-                    modifier = Modifier
-                        .background(
-                            color = if (isFavoriteState.data == true) Color(0xFFFFD146) else Color(
-                                0xFFDFDFDF
-                            ),
-                            shape = CircleShape
-                        )
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorite",
-                        tint = Color.Black,
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(text = product.name, fontWeight = FontWeight.Bold, fontSize = 26.sp)
-            Spacer(modifier = Modifier.height(6.dp))
-
-            if (productCategoryState.data != null) {
-                Text(
-                    text = productCategoryState.data!!.name,
-                    fontSize = 16.sp,
-                    color = Color.Gray
-                )
-            } else if (productCategoryState.message != null) {
-                Text(text = "Error: ${productCategoryState.message}")
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = product.description, fontSize = 18.sp,
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            if (districtState.data != null) {
-                val district = districtState.data!!
-                if (departmentState.data != null) {
-                    val department = departmentState.data!!
-                    Text(
-                        text = "¿Dónde puedo intercambiar este objeto?",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = {
+                            // Aquí invocamos el toggle del favorito
+                            onFavoriteToggle(isFavoriteState.data ?: false)
+                        },
+                        modifier = Modifier
+                            .background(
+                                color = if (isFavoriteState.data == true) Color(0xFFFFD146) else Color(
+                                    0xFFDFDFDF
+                                ),
+                                shape = CircleShape
+                            )
+                            .padding(8.dp)
+                    ) {
                         Icon(
-                            imageVector = Icons.Filled.LocationOn,
-                            contentDescription = "Ubicación",
-                            tint = Color(0xFFFFD146),
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Disponible en ${district.name}, ${department.name}",
-                            fontSize = 18.sp,
-                            color = Color.Gray
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = "Favorite",
+                            tint = Color.Black
                         )
                     }
-                } else if (departmentState.message != null) {
-                    Text(text = "Error: ${departmentState.message}")
                 }
-            } else if (districtState.message != null) {
-                Text(text = "Error: ${districtState.message}")
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(text = "Le interesa:", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text(text = product.desiredObject, fontSize = 18.sp)
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            ButtonApp(
-                text = "Intercambiar",
-                onClick = { /* Handle exchange action */ },
-            )
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(text = product.name, fontWeight = FontWeight.Bold, fontSize = 26.sp)
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(text = product.description, fontSize = 18.sp, color = Color.Gray)
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        if (product.location.districtName.isNotEmpty() && product.location.departmentName.isNotEmpty()) {
+            Text(
+                text = "¿Dónde puedo intercambiar este objeto?",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.LocationOn,
+                    contentDescription = "Ubicación",
+                    tint = Color(0xFFFFD146),
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Disponible en ${product.location.districtName}, ${product.location.departmentName}",
+                    fontSize = 18.sp,
+                    color = Color.Gray
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(text = "Le interesa:", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Text(text = product.desiredObject, fontSize = 18.sp)
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        ButtonApp(
+            text = "Intercambiar",
+            onClick = { /* Acción para intercambio */ }
+        )
     }
 }

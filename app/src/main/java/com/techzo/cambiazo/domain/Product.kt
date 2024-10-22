@@ -13,6 +13,6 @@ data class Product(
     val boost: Boolean,
     val available: Boolean,
     val productCategory: ProductCategory,
-    val userId: Int,
-    val location: Location,
+    val user: User,
+    val location: Location
 )
