@@ -30,4 +30,5 @@ interface ProductService {
     @Headers("Content-Type: application/json","Accept: application/json")
     @DELETE("products/delete/{productId}")
     suspend fun deleteProduct(@Path("productId") productId: Int): Response<Unit>
+
 }
