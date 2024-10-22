@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -219,14 +221,13 @@ fun <T> CustomDropDownMenu(
     width: Dp,
     itemToString: (T) -> String)
 {
-    val scrollState = rememberScrollState()
 
             Popup(
                 alignment = Alignment.TopCenter,
                 properties = PopupProperties(excludeFromSystemGesture = true),
                 onDismissRequest = {  },
             ) {
-                Box(
+                LazyColumn (
                     modifier = Modifier
                         .width(width)
                         .heightIn(max = 170.dp)
@@ -235,8 +236,9 @@ fun <T> CustomDropDownMenu(
                             shape = RoundedCornerShape(5.dp),
                             clip = true
                         )
-                        .verticalScroll(state = scrollState),
                 ) {
+                    item {
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -253,7 +255,8 @@ fun <T> CustomDropDownMenu(
                             modifier = Modifier.padding(vertical = 5.dp, horizontal = 10.dp)
                         )
                     }
-                    itemList.forEach { item ->
+                    }
+                    items(itemList) { item ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
