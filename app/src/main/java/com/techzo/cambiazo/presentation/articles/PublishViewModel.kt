@@ -1,5 +1,8 @@
 package com.techzo.cambiazo.presentation.articles
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -67,8 +70,8 @@ class PublishViewModel @Inject constructor(
     private val _districtSelected = mutableStateOf<District?>(null)
     val districtSelected: State<District?> get() = _districtSelected
 
-    private val _image = mutableStateOf("")
-    val image: State<String> get() = _image
+    private val _image = mutableStateOf<Uri?>(null)
+    val image: State<Uri?> get() = _image
 
     private val _boost = mutableStateOf(false)
     val boost: State<Boolean> get() = _boost
@@ -100,9 +103,6 @@ class PublishViewModel @Inject constructor(
 
     private val _errorImage = mutableStateOf(false)
     val errorImage: State<Boolean> get() = _errorImage
-
-
-
 
     fun onChangeName(name: String) {
         _errorName.value = false
@@ -176,12 +176,15 @@ class PublishViewModel @Inject constructor(
         }
         if(_districtSelected.value == null){
             _errorDistrict.value = true
-        }
-        if(_image.value.isEmpty()){
-            _errorImage.value = true
             return
         }
+
         createProduct()
+    }
+
+
+    fun selectImage(image: Uri){
+        _image.value = image
     }
 
      fun createProduct(){
