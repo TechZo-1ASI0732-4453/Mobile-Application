@@ -23,7 +23,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -40,10 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
+import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.CustomDropDownSelect
 import com.techzo.cambiazo.common.components.CustomInput
+import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 
@@ -85,6 +89,8 @@ fun PublishScreen(
         viewModel.selectImage(uri)
     }
 
+    val productState = viewModel.productState.value
+
     val spaceHeight = 20.dp
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
@@ -119,7 +125,8 @@ fun PublishScreen(
                                 .offset(x = 5.dp, y = -5.dp)
                                 .size(25.dp)
                                 .background(Color(0xFFFFD146), shape = RoundedCornerShape(50.dp))
-                                .align(Alignment.TopEnd).zIndex(100f)
+                                .align(Alignment.TopEnd)
+                                .zIndex(100f)
                             ,
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = Color(0xFFFFD146),
@@ -129,7 +136,9 @@ fun PublishScreen(
                             Icon(Icons.Filled.Close,
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(18.dp).zIndex(100f))
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .zIndex(100f))
                         }
                         Box(modifier = Modifier
                             .size(100.dp)
@@ -157,9 +166,11 @@ fun PublishScreen(
                         onClick = {
                             selectedImageLauncher.launch("image/*")
                         },
-                        modifier = Modifier.size(50.dp).background(Color(0xFFFFD146 ), shape = RoundedCornerShape(50))
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(Color(0xFFFFD146), shape = RoundedCornerShape(50))
                     ) {
-                            Icon(Icons.Filled.Upload, contentDescription = null)
+                            Icon(Icons.Filled.ImageSearch, contentDescription = null)
                     }
                 }
                 if(errorImage){
@@ -308,22 +319,6 @@ fun PublishScreen(
                     Box{
                         Switch(
                             checked = boost,
-                            thumbContent = {
-                                if (boost) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = "Active",
-                                        tint = Color.Black
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Filled.Close,
-                                        contentDescription = "Inactive",
-                                        tint = Color.Black
-                                    )
-                                }
-                            },
-
                             onCheckedChange = { viewModel.onChangeBoost(it)},
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,//circle color when switch is on
@@ -345,8 +340,25 @@ fun PublishScreen(
 
 
             item {
-                ButtonApp(text = "Publicar", onClick = {viewModel.onPublish(openMyArticles)})
+                if(productState.isLoading){
+                    CircularProgressIndicator()
+                }else{
+                    if (productState.data != null) {
+                        DialogApp(
+                            message = "¡Publicación exitosa!",
+                            description = "Otros usuarios podran hacerte ofertas y tambien podras ofertar cuando quieras intercambiar algo.",
+                            labelButton1 = "Entendido",
+                            onClickButton1 = { openMyArticles() },
+                        )
+                    }else{
+                        ButtonApp(text = "Publicar", onClick = {
+                            viewModel.onPublish()
+                        })
+
+                    }
+                }
                 Spacer(modifier =   Modifier.height(30.dp))
+
             }
         }
     }

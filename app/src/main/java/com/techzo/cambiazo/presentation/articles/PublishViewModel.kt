@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.presentation.articles
 
 import android.net.Uri
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -100,6 +101,9 @@ class PublishViewModel @Inject constructor(
     private val _errorImage = mutableStateOf(false)
     val errorImage: State<Boolean> get() = _errorImage
 
+    private val _productState = mutableStateOf(UIState<Any>())
+    val productState: State<UIState<Any>> get() = _productState
+
 
     init {
         getCategories()
@@ -132,71 +136,74 @@ class PublishViewModel @Inject constructor(
     }
 
     fun selectCategory(category: ProductCategory?) {
-        if(category!=null)_errorCategory.value = false
+        if (category != null) _errorCategory.value = false
         _categorySelected.value = category
     }
 
     fun selectCountry(country: Country?) {
-        if(country!=null)_errorCountry.value = false
+        if (country != null) _errorCountry.value = false
         _countrySelected.value = country
-        _departments.value = UIState(data = _allDepartments.value.filter { it.countryId == country?.id })
+        _departments.value =
+            UIState(data = _allDepartments.value.filter { it.countryId == country?.id })
     }
 
     fun selectDepartment(department: Department?) {
-        if(department!=null)_errorDepartment.value = false
+        if (department != null) _errorDepartment.value = false
         _departmentSelected.value = department
-        _districts.value = UIState(data = _allDistricts.value.filter { it.departmentId == department?.id })
+        _districts.value =
+            UIState(data = _allDistricts.value.filter { it.departmentId == department?.id })
     }
 
     fun selectDistrict(district: District?) {
-        if(district!=null)_errorDistrict.value = false
+        if (district != null) _errorDistrict.value = false
         _districtSelected.value = district
     }
 
-    fun onPublish(backArticles: () -> Unit){
+    fun onPublish() {
 
-        if(_name.value.isEmpty()){
+        if (_name.value.isEmpty()) {
             _errorName.value = true
         }
-        if(_description.value.isEmpty()){
+        if (_description.value.isEmpty()) {
             _errorDescription.value = true
         }
-        if(_price.value.isEmpty()){
+        if (_price.value.isEmpty()) {
             _errorPrice.value = true
         }
-        if(_objectChange.value.isEmpty()){
+        if (_objectChange.value.isEmpty()) {
             _errorObjectChange.value = true
         }
-        if(_categorySelected.value == null){
+        if (_categorySelected.value == null) {
             _errorCategory.value = true
         }
-        if(_countrySelected.value == null){
+        if (_countrySelected.value == null) {
             _errorCountry.value = true
         }
-        if(_departmentSelected.value == null){
+        if (_departmentSelected.value == null) {
             _errorDepartment.value = true
         }
-        if(_districtSelected.value == null){
+        if (_districtSelected.value == null) {
             _errorDistrict.value = true
         }
-        if(_image.value == null){
+        if (_image.value == null) {
             _errorImage.value = true
             return
         }
 
-        createProduct(backArticles)
+        createProduct()
     }
 
 
-    fun selectImage(image: Uri?){
-        if(image!=null)_errorImage.value = false
+    fun selectImage(image: Uri?) {
+        if (image != null) _errorImage.value = false
         _image.value = image
     }
-    fun deselectImage(){
+
+    fun deselectImage() {
         _image.value = null
     }
 
-    fun getLocations(){
+    fun getLocations() {
         viewModelScope.launch {
             val countryResult = locationRepository.getCountries()
 
@@ -204,7 +211,7 @@ class PublishViewModel @Inject constructor(
                 _allCountries.value = countryResult.data ?: emptyList()
                 _countries.value = UIState(data = countryResult.data)
             } else {
-                _countries.value  = UIState(message = countryResult.message ?: "Ocurrió un error")
+                _countries.value = UIState(message = countryResult.message ?: "Ocurrió un error")
             }
 
 
@@ -217,9 +224,12 @@ class PublishViewModel @Inject constructor(
                 _allDistricts.value = districtResult.data ?: emptyList()
             }
 
-            _departmentSelected.value = _allDepartments.value.find { it.id == Constants.filterValues.departmentId }
-            _countrySelected.value = _allCountries.value.find { it.id == Constants.filterValues.countryId }
-            _districtSelected.value = _allDistricts.value.find { it.id == Constants.filterValues.districtId }
+            _departmentSelected.value =
+                _allDepartments.value.find { it.id == Constants.filterValues.departmentId }
+            _countrySelected.value =
+                _allCountries.value.find { it.id == Constants.filterValues.countryId }
+            _districtSelected.value =
+                _allDistricts.value.find { it.id == Constants.filterValues.districtId }
         }
 
 
@@ -236,29 +246,26 @@ class PublishViewModel @Inject constructor(
         }
     }
 
-     fun createProduct(backArticles: () -> Unit) {
-        val product = CreateProductDto(
-            available = true,
-            boost = _boost.value,
-            description = _description.value,
-            desiredObject = _objectChange.value,
-            districtId = _districtSelected.value!!.id,
-            image = Constants.DEFAULT_PROFILE_PICTURE,
-            name = _name.value,
-            price = _price.value.toInt(),
-            productCategoryId = _categorySelected.value!!.id,
-            userId = Constants.user!!.id
-        )
+    fun createProduct() {
+        _productState.value = UIState(isLoading = true)
         viewModelScope.launch {
+            val product = CreateProductDto(
+                available = true,
+                boost = _boost.value,
+                description = _description.value,
+                desiredObject = _objectChange.value,
+                districtId = _districtSelected.value!!.id,
+                image = Constants.DEFAULT_PROFILE_PICTURE,
+                name = _name.value,
+                price = _price.value.toInt(),
+                productCategoryId = _categorySelected.value!!.id,
+                userId = Constants.user!!.id
+            )
             val result = productRepository.createProduct(product)
             if (result is Resource.Success) {
-                backArticles()
+                _productState.value = UIState(data = result.data)
             }
         }
-
-
     }
-
-
 
 }
