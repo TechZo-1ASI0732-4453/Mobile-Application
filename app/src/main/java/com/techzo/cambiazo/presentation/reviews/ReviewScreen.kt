@@ -57,8 +57,10 @@ fun ReviewScreen(
     MainScaffoldApp(
         paddingCard = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         contentsHeader = {
-            IconButton(onClick = { onBack() }, modifier = Modifier.border(2.dp, Color.Red)) {
-                Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = null)
+            Box(modifier = Modifier.fillMaxWidth().padding(start = 16.dp)) {
+                IconButton(onClick = { onBack() }) {
+                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = null)
+                }
             }
         },
         profileImage = {
