@@ -21,12 +21,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -290,26 +292,50 @@ fun PublishScreen(
 
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth(),
                 ) {
                     Box(
                         modifier = Modifier.weight(1f)
                     ) {
                         Column(modifier = Modifier.fillMaxSize()) {
                             Text(text = "Boost de Visibilidad")
-                            Text(text = "¡Activa tu boost y destaca tu producto un día en la página principal para más ofertas!")
+                            Text(modifier = Modifier.fillMaxWidth(),
+                                text = "¡Activa tu boost y destaca tu producto un día en la página principal para más ofertas!",
+                                color = Color.Gray)
                         }
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                    ) {
+                    Box{
                         Switch(
                             checked = boost,
-                            onCheckedChange = { viewModel.onChangeBoost(it)}
+                            thumbContent = {
+                                if (boost) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Check,
+                                        contentDescription = "Active",
+                                        tint = Color.Black
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Filled.Close,
+                                        contentDescription = "Inactive",
+                                        tint = Color.Black
+                                    )
+                                }
+                            },
+
+                            onCheckedChange = { viewModel.onChangeBoost(it)},
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,//circle color when switch is on
+                                checkedTrackColor = Color(0xFFFFD146),//background color when switch is on
+                                checkedBorderColor = Color(0xFFFFD146), //border color when switch is on
+                                checkedIconColor = Color(0xFFFFD146),//icon color when switch is on
+
+                                uncheckedThumbColor = Color.White,//circle color when switch is off
+                                uncheckedTrackColor = Color(0xFFD9D9D9),//background color when switch is off
+                                uncheckedBorderColor = Color(0xFFD9D9D9),//border color when switch is off
+                                uncheckedIconColor = Color.Gray//icon color when switch is off
+                            )
                         )
                     }
                 }
