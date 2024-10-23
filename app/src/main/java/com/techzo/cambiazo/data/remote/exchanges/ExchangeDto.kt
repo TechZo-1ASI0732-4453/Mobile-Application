@@ -16,15 +16,15 @@ data class ExchangeDto(
     val status: String,
 )
 
-suspend fun ExchangeDto.toExchange(productRepository: ProductRepository, userRepository: UserRepository): Exchange{
+suspend fun ExchangeDto.toExchange(productRepository: ProductRepository, userRepository: UserRepository): Exchange {
     val productOwnResource = productRepository.getProductById(productOwnId)
     val productChangeResource = productRepository.getProductById(productChangeId)
 
     val productOwn = productOwnResource.data ?: throw Exception("Failed to fetch productOwn")
     val productChange = productChangeResource.data ?: throw Exception("Failed to fetch productChange")
 
-    val userOwnResource = userRepository.getUserById(productOwn.userId)
-    val userChangeResource = userRepository.getUserById(productChange.userId)
+    val userOwnResource = userRepository.getUserById(productOwn.user.id)
+    val userChangeResource = userRepository.getUserById(productChange.user.id)
 
     val userOwn = userOwnResource.data ?: throw Exception("Failed to fetch userOwn")
     val userChange = userChangeResource.data ?: throw Exception("Failed to fetch userChange")

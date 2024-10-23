@@ -1,4 +1,5 @@
 package com.techzo.cambiazo.data.repository
+
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.remote.products.toProduct
@@ -11,9 +12,9 @@ class ProductRepository(private val productService: ProductService) {
         try {
             val response = productService.getProducts()
             if (response.isSuccessful) {
-                response.body()?.let{ productsDto->
+                response.body()?.let { productsDto ->
                     val products = mutableListOf<Product>()
-                    productsDto.forEach{ productDto->
+                    productsDto.forEach { productDto ->
                         products.add(productDto.toProduct())
                     }
                     return@withContext Resource.Success(data = products)
@@ -30,9 +31,9 @@ class ProductRepository(private val productService: ProductService) {
         try {
             val response = productService.getProductsByCategoryId(id)
             if (response.isSuccessful) {
-                response.body()?.let{ productsDto->
+                response.body()?.let { productsDto ->
                     val products = mutableListOf<Product>()
-                    productsDto.forEach{ productDto->
+                    productsDto.forEach { productDto ->
                         products.add(productDto.toProduct())
                     }
                     return@withContext Resource.Success(data = products)
@@ -49,7 +50,7 @@ class ProductRepository(private val productService: ProductService) {
         try {
             val response = productService.getProductById(id)
             if (response.isSuccessful) {
-                response.body()?.let{ productDto->
+                response.body()?.let { productDto ->
                     return@withContext Resource.Success(data = productDto.toProduct())
                 }
                 return@withContext Resource.Error("No se encontró el producto")
@@ -59,6 +60,7 @@ class ProductRepository(private val productService: ProductService) {
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
         }
     }
+    
     suspend fun getProductsByUserId(userId:Int): Resource<List<Product>> = withContext(Dispatchers.IO) {
         try {
             val response = productService.getProductsByUserId(userId)
