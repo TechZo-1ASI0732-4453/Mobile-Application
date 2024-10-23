@@ -1,6 +1,9 @@
 package com.techzo.cambiazo.common.components
 
+import android.widget.Space
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +26,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
@@ -32,8 +37,6 @@ fun CardApp(padding: PaddingValues, content: @Composable () -> Unit = {}) {
             .fillMaxSize()
             .background(Color.White, RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
             .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-
-
     ) {
         Column(
             modifier = Modifier
@@ -56,7 +59,7 @@ fun MainScaffoldApp(paddingCard: PaddingValues,
                     bottomBar: @Composable () -> Unit = {},
                     contentsHeader: @Composable () -> Unit = {},
                     profileImage: (@Composable () -> Unit)? = null,
-                    content: @Composable () -> Unit = {},
+                    content: @Composable () -> Unit = {}
 ) {
     Scaffold(
         bottomBar = bottomBar,
@@ -70,35 +73,44 @@ fun MainScaffoldApp(paddingCard: PaddingValues,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             contentsHeader()
-
-            profileImage?.let {
-                it()
-            }
-
-            CardApp(paddingCard){
-                content()
+            Box {
+                    profileImage?.let {
+                        Column(modifier = Modifier
+                            .fillMaxWidth()
+                            .zIndex(1f),
+                            horizontalAlignment = Alignment.CenterHorizontally){
+                        it()
+                    }
+                }
+                    CardApp(paddingCard) {
+                        content()
+                    }
             }
         }
     }
 }
 
-
 @Composable
-fun ProfileImage(url:String, shape: Shape, size: Dp){
+fun ProfileImage(url: String, shape: Shape, size: Dp) {
     Surface(
-        modifier= Modifier
-            .size(size)
+        modifier = Modifier
             .zIndex(1f)
-            .offset(y = (size/2))
-            .background(Color.Transparent)
-            .clip(RoundedCornerShape(20.dp)),
+            .offset(y = -size / 2)
+            .clip(shape)
+            .border(2.dp, Color.Red, shape)
+            .size(size),
         shape = shape,
     ) {
         GlideImage(
             imageModel = { url },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(20.dp)
+                .height(size)
+                .border(2.dp, Color.Red, shape),
+            requestOptions = {
+                RequestOptions()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+            },
         )
     }
 }
