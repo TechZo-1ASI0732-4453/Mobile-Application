@@ -23,7 +23,7 @@ import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileScreen
 import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.register.SignUpScreen
 import com.techzo.cambiazo.presentation.register.TermsAndConditionsScreen
-import com.techzo.cambiazo.presentation.reviews.ReviewScreen
+import com.techzo.cambiazo.presentation.review.ReviewScreen
 
 sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
