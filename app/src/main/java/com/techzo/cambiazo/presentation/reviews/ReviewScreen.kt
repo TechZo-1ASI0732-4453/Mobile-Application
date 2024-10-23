@@ -134,7 +134,7 @@ fun ReviewScreen(
 
                 CustomTabs(
                     selectedTabIndex = selectedTabIndex.value,
-                    itemTabs = listOf("Artículos", "Reseñas","JerryGay"),
+                    itemTabs = listOf("Artículos", "Reseñas"),
                     onTabSelected = { index -> selectedTabIndex.value = index }
                 )
 
