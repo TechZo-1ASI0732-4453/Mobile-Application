@@ -19,6 +19,7 @@ import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 import com.techzo.cambiazo.presentation.filter.FilterScreen
 import com.techzo.cambiazo.presentation.login.SignInScreen
 import com.techzo.cambiazo.presentation.profile.ProfileScreen
+import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileScreen
 import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.register.SignUpScreen
 import com.techzo.cambiazo.presentation.register.TermsAndConditionsScreen
@@ -69,13 +70,15 @@ sealed class Routes(val route: String) {
     object ExchangeDetails: Routes("ExchangeDetailsScreen/{exchangeId}/{page}"){
         fun createExchangeDetailsRoute(exchangeId:String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
     }
-    object MyReviews : Routes("MyReviewsScreen")
+
     object ProductDetails : Routes("ProductDetailsScreen/{productId}/{userId}") {
         fun createProductDetailsRoute(productId: String, userId: String) = "ProductDetailsScreen/$productId/$userId"
     }
     object Reviews : Routes("ReviewsScreen/{userId}") {
         fun createRoute(userId: String) = "ReviewsScreen/$userId"
     }
+    object EditProfile : Routes("EditProfileScreen")
+    object MyReviews : Routes("MyReviewsScreen")
 }
 
 @Composable
@@ -161,6 +164,7 @@ fun NavScreen() {
                     }
                 },
                 openMyReviews = { navController.navigate(Routes.MyReviews.route) },
+                openEditProfile = { navController.navigate(Routes.EditProfile.route) },
                 bottomBar = { BottomBarNavigation(items) }
             )
         }
@@ -171,6 +175,11 @@ fun NavScreen() {
 
         composable(route = Routes.MyReviews.route) {
             MyReviewsScreen(
+                back = { navController.popBackStack() }
+            )
+        }
+        composable(route = Routes.EditProfile.route) {
+            EditProfileScreen(
                 back = { navController.popBackStack() }
             )
         }

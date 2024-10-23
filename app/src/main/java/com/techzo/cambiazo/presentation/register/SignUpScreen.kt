@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -65,7 +66,7 @@ fun SignUpScreen(openLogin: () -> Unit = {},
         paddingCard = PaddingValues(horizontal = 40.dp , vertical = 25.dp),
         contentsHeader = {
             Column(
-                Modifier.fillMaxWidth(),
+                Modifier.fillMaxWidth().padding(bottom = 35.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ){
@@ -74,8 +75,11 @@ fun SignUpScreen(openLogin: () -> Unit = {},
             }
         }
     ){
+        Spacer(modifier = Modifier.size(20.dp))
         FieldTextApp(name,"Nombre",onValueChange = { viewModel.onNameChange(it) })
+        Spacer(modifier = Modifier.size(20.dp))
         FieldTextApp(phoneNumber,"Numero de Telefono",onValueChange = { viewModel.onPhoneNumberChange(it) })
+        Spacer(modifier = Modifier.size(20.dp))
         FieldTextApp(username,"Correo electrónico",onValueChange = { viewModel.onUsernameChange(it) })
         OutlinedTextField(
             modifier = Modifier
@@ -85,7 +89,7 @@ fun SignUpScreen(openLogin: () -> Unit = {},
                 .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
             shape = RoundedCornerShape(10.dp),
             value = password,
-            placeholder = { Text("Contraseña")},
+            placeholder = { Text("Contraseña",color = Color.Gray)},
             onValueChange = { viewModel.onPasswordChange(it) },
             visualTransformation =
             if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
@@ -108,7 +112,7 @@ fun SignUpScreen(openLogin: () -> Unit = {},
                 .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
             shape = RoundedCornerShape(10.dp),
             value = repitePassword,
-            placeholder = { Text("Confirmar contraseña")},
+            placeholder = { Text("Confirmar contraseña",color = Color.Gray)},
             onValueChange = { viewModel.onRepitePasswordChange(it) },
             visualTransformation =
             if(showPasswordRepeat) VisualTransformation.None else PasswordVisualTransformation(),

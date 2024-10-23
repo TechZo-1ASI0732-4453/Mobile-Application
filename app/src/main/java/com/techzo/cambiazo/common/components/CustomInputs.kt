@@ -31,7 +31,6 @@ fun FieldTextApp(valueText:String,text:String,onValueChange: (String) -> Unit){
         },
         onValueChange = { onValueChange(it) },
         modifier = Modifier
-            .padding(top = 20.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),

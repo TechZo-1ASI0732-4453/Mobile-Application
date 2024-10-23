@@ -63,7 +63,7 @@ fun MyReviewsScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = averageRating?.let { String.format("%.1f", it) } ?: "0",
+                        text = averageRating?.let { String.format("%.1f", it) } ?: "0.0",
                         color = Color(0xFFFFD146),
                         modifier = Modifier.padding(top = 5.dp),
                         fontSize = 70.sp,

@@ -30,13 +30,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-/*
-@Preview(showBackground = true, widthDp = 393, heightDp = 851)
-@Composable
-fun AppPreview() {
-    CambiazoTheme {
-        NavScreen()
-    }
-}
- */

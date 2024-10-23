@@ -22,6 +22,9 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -109,7 +112,7 @@ fun ArticlesScreen(
 }
 
 @Composable
-fun ArticlesOwn(product: Product, modifier: Modifier = Modifier,deleteProduct : (Int)->Unit = {}){
+fun ArticlesOwn(product: Product, modifier: Modifier = Modifier, deleteProduct: (Int) -> Unit = {}) {
     var showDialog by remember { mutableStateOf(false) }
     var showActions by remember { mutableStateOf(false) }
 
@@ -125,14 +128,14 @@ fun ArticlesOwn(product: Product, modifier: Modifier = Modifier,deleteProduct : 
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            Box(modifier = Modifier
-                .background(Color.Transparent)
-                .height(120.dp),
+            Box(
+                modifier = Modifier
+                    .background(Color.Transparent)
+                    .height(120.dp),
                 contentAlignment = Alignment.TopEnd
-
             ) {
                 GlideImage(
-                    imageModel = { product.image},
+                    imageModel = { product.image },
                     modifier = Modifier.fillMaxSize()
                 )
 
@@ -143,72 +146,70 @@ fun ArticlesOwn(product: Product, modifier: Modifier = Modifier,deleteProduct : 
                     ) {
                         Row(
                             modifier = Modifier
-                                .padding(5.dp) // Se mostrará debajo del otro Box
-
+                                .padding(5.dp)
                                 .background(
-                                    Color.Black.copy(alpha = 0.7f),
+                                    Color.Black.copy(alpha = 0.6f),
                                     RoundedCornerShape(25.dp)
                                 ),
                         ) {
-                                IconsAction(icon = Icons.Filled.Edit,onclick = {  })
-                                Spacer(modifier = Modifier.size(15.dp))
-                                IconsAction(icon = Icons.Filled.Delete,
-                                    onclick = {
-                                        showDialog = true
-                                    })
-                                if(showDialog){
-                                    DialogApp(
-                                        message = "¿Estás seguro de eliminar esta publicación?",
-                                        description = "Recuerda que una vez eliminada la publicación, no se podrá deshacer.",
-                                        labelButton1 = "Eliminar",
-                                        labelButton2 = "Cancelar",
-                                        onDismissRequest = { showDialog = false;showActions = false },
-                                        onClickButton1 = { deleteProduct(product.id); showDialog = false;showActions = false },
-                                        onClickButton2 = { showDialog = false;showActions = false }
-                                    )
-                                }
-                                Spacer(modifier = Modifier.size(15.dp))
-                                IconsAction(icon = Icons.Filled.Cancel, onclick = { showActions = false })
+                            IconsAction(icon = Icons.Outlined.Edit, onclick = { })
+                            Spacer(modifier = Modifier.size(15.dp))
+                            IconsAction(icon = Icons.Outlined.Delete, onclick = {
+                                showDialog = true
+                            })
+                            if (showDialog) {
+                                DialogApp(
+                                    message = "¿Estás seguro de eliminar esta publicación?",
+                                    description = "Recuerda que una vez eliminada la publicación, no se podrá deshacer.",
+                                    labelButton1 = "Eliminar",
+                                    labelButton2 = "Cancelar",
+                                    onDismissRequest = { showDialog = false; showActions = false },
+                                    onClickButton1 = { deleteProduct(product.id); showDialog = false; showActions = false },
+                                    onClickButton2 = { showDialog = false; showActions = false }
+                                )
+                            }
+                            Spacer(modifier = Modifier.size(15.dp))
+                            IconsAction(icon = Icons.Outlined.Close, onclick = { showActions = false })
                         }
                     }
+                } else {
+                    IconsAction(icon = Icons.Filled.MoreVert, margin = 5.dp, onclick = { showActions = true })
                 }
-                IconsAction(icon = Icons.Filled.MoreVert, margin = 5.dp,onclick = { showActions = true })
-
-
-
             }
 
-            Box{
-                Column{
-
-                Text(
-                    text = product.name,
-                    color = Color.Black,
-                    maxLines = 2,
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .fillMaxWidth(),
-                    fontWeight = FontWeight.Bold,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center
-                )
+            Box {
+                Column {
+                    Text(
+                        text = product.name,
+                        color = Color.Black,
+                        maxLines = 2,
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .fillMaxWidth(),
+                        fontWeight = FontWeight.Bold,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
-
     }
 }
 
 
 @Composable
-fun IconsAction(icon:ImageVector, margin: Dp = 0.dp,onclick:()->Unit = {}){
+fun IconsAction(icon: ImageVector, margin: Dp = 0.dp, onclick: () -> Unit = {}) {
+    val backgroundColor = if (icon == Icons.Filled.MoreVert) {
+        Color.Black.copy(alpha = 0.6f)
+    } else {
+        Color.Transparent
+    }
+
     IconButton(
         onClick = onclick,
         modifier = Modifier
             .padding(margin)
-            .background(
-                Color.Black.copy(alpha = 0.7f), RoundedCornerShape(25.dp)
-            )
+            .background(backgroundColor, RoundedCornerShape(25.dp))
             .size(38.dp)
     ) {
         Icon(
