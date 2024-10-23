@@ -211,7 +211,7 @@ fun ProductItem(
     Card(
         modifier = modifier
             .clickable { onClick(product) }
-            .background(Color(0xFFF0F0F0)),
+            .background(Color(0xFFF0F0F0), shape = RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0))
@@ -229,7 +229,6 @@ fun ProductItem(
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
                 contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.height(8.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
