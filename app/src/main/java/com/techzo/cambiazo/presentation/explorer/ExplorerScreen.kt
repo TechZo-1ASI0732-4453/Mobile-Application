@@ -168,7 +168,7 @@ fun Products(product: Product,
                         modifier = Modifier.padding(8.dp)
                             .align(Alignment.TopEnd)
                             .background(
-                                Color.Black.copy(alpha = 0.7f), RoundedCornerShape(50.dp)
+                                Color.Black.copy(alpha = 0.6f), RoundedCornerShape(50.dp)
                             )
                     ) {
                         IconButton(onClick = onClickIcon) {
