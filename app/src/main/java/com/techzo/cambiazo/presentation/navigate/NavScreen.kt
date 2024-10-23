@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
+import com.techzo.cambiazo.presentation.articles.PublishScreen
 import com.techzo.cambiazo.presentation.details.ProductDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
@@ -70,7 +71,6 @@ sealed class Routes(val route: String) {
     object ExchangeDetails: Routes("ExchangeDetailsScreen/{exchangeId}/{page}"){
         fun createExchangeDetailsRoute(exchangeId:String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
     }
-
     object ProductDetails : Routes("ProductDetailsScreen/{productId}/{userId}") {
         fun createProductDetailsRoute(productId: String, userId: String) = "ProductDetailsScreen/$productId/$userId"
     }
@@ -79,6 +79,8 @@ sealed class Routes(val route: String) {
     }
     object EditProfile : Routes("EditProfileScreen")
     object MyReviews : Routes("MyReviewsScreen")
+    object Publish : Routes("PublishScreen")
+
 }
 
 @Composable
@@ -142,7 +144,8 @@ fun NavScreen() {
 
         composable(route = Routes.Article.route) {
             ArticlesScreen(
-                bottomBar = { BottomBarNavigation(items) }
+                bottomBar = { BottomBarNavigation(items) },
+                onPublish = {navController.navigate(Routes.Publish.route)}
             )
         }
 
@@ -205,6 +208,13 @@ fun NavScreen() {
                     onBack = { navController.popBackStack() }
                 )
             }
+        }
+
+        composable(route = Routes.Publish.route){
+            PublishScreen(
+                back = {navController.popBackStack()},
+                openMyArticles = {navController.navigate(Routes.Article.route)}
+            )
         }
     }
 }
