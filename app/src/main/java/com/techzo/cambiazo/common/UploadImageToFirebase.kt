@@ -1,5 +1,4 @@
-package com.techzo.cambiazo.presentation.profile.editprofile
-import android.app.ProgressDialog
+package com.techzo.cambiazo.common
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
@@ -10,25 +9,24 @@ import java.util.UUID
 fun uploadImageToFirebase(
     context: Context,
     fileUri: Uri,
+    path: String,
     onSuccess: (String) -> Unit,
-    onFailure: () -> Unit
+    onFailure: () -> Unit,
+    onUploadStateChange: (Boolean) -> Unit
 ) {
     val uuid = UUID.randomUUID().toString()
-    val ref: StorageReference = FirebaseStorage.getInstance().reference.child("images/$uuid")
-    val progressDialog = ProgressDialog(context).apply {
-        setTitle("Uploading Image...")
-        setMessage("Processing...")
-        show()
-    }
+    val ref: StorageReference = FirebaseStorage.getInstance().reference.child("$path/$uuid")
+
+    onUploadStateChange(true)
 
     ref.putFile(fileUri).addOnSuccessListener {
         ref.downloadUrl.addOnSuccessListener { downloadUri ->
-            progressDialog.dismiss()
+            onUploadStateChange(false)
             val imageUrl = downloadUri.toString()
             onSuccess(imageUrl)
         }
     }.addOnFailureListener {
-        progressDialog.dismiss()
+        onUploadStateChange(false)
         Toast.makeText(context, "File Upload Failed...", Toast.LENGTH_LONG).show()
         onFailure()
     }
