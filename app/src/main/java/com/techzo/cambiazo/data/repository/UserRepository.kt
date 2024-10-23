@@ -5,6 +5,8 @@ import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.remote.auth.UserService
 import com.techzo.cambiazo.data.remote.auth.toUser
 import com.techzo.cambiazo.domain.User
+import com.techzo.cambiazo.domain.UserEdit
+import com.techzo.cambiazo.domain.UserSignIn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -40,6 +42,21 @@ class UserRepository(private val userService: UserService) {
             }
             return@withContext Resource.Error(response.message())
         }catch (e: Exception){
+            return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+        }
+    }
+
+    suspend fun updateUserById(id: Int, user: UserEdit): Resource<UserSignIn> = withContext(Dispatchers.IO) {
+        try {
+            val response = userService.updateUserById(id, user)
+            if (response.isSuccessful) {
+                response.body()?.let { userSignIn ->
+                    return@withContext Resource.Success(data = userSignIn)
+                }
+                return@withContext Resource.Error("No se encontró el usuario")
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
         }
     }

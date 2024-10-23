@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -137,14 +139,17 @@ fun ExplorerScreen(
 }
 
 @Composable
-fun Products(product: Product, onProductClick: (String, String) -> Unit) {
+fun Products(product: Product,
+             onProductClick: (String, String) -> Unit,
+             icon: ImageVector?=null,
+             onClickIcon: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp)
             .border(0.dp, Color.Transparent, RoundedCornerShape(15.dp))
             .shadow(elevation = 12.dp, RoundedCornerShape(15.dp))
-            .clickable { onProductClick(product.id.toString(), product.userId.toString()) },
+            .clickable { onProductClick(product.id.toString(), product.user.id.toString()) },
     ) {
         Column {
             Box(
@@ -157,6 +162,22 @@ fun Products(product: Product, onProductClick: (String, String) -> Unit) {
                     imageModel = { product.image },
                     modifier = Modifier.fillMaxSize()
                 )
+
+                icon?.let {
+                    Box(
+                        modifier = Modifier.padding(8.dp)
+                            .align(Alignment.TopEnd)
+                            .background(
+                                Color.Black.copy(alpha = 0.6f), RoundedCornerShape(50.dp)
+                            )
+                    ) {
+                        IconButton(onClick = onClickIcon) {
+                            Icon(imageVector = icon,
+                                contentDescription = null,
+                                tint = Color(0xFFFFD146))
+                        }
+                    }
+                }
 
                 Box(
                     modifier = Modifier

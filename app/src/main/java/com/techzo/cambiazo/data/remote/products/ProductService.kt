@@ -1,9 +1,11 @@
 package com.techzo.cambiazo.data.remote.products
 
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Headers
+import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface ProductService {
@@ -30,4 +32,10 @@ interface ProductService {
     @Headers("Content-Type: application/json","Accept: application/json")
     @DELETE("products/delete/{productId}")
     suspend fun deleteProduct(@Path("productId") productId: Int): Response<Unit>
+
+
+    @Headers("Content-Type: application/json","Accept: application/json")
+    @POST("products")
+    suspend fun createProduct(@Body productDto: CreateProductDto): Response<CreateProductDto>
+
 }

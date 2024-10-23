@@ -26,6 +26,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,11 +44,20 @@ import com.techzo.cambiazo.common.components.StarRating
 fun ProfileScreen(
     logOut: () -> Unit = {},
     openMyReviews: () -> Unit = {},
+    openEditProfile: () -> Unit = {},
+    openFavorites: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()) {
 
     val averageRating = viewModel.averageRating.value
     val countReviews = viewModel.countReviews.value
+
+    val user = viewModel.user.value
+    val state = viewModel.state.value
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshUserData()
+    }
 
     MainScaffoldApp(
         bottomBar = bottomBar,
@@ -55,10 +65,11 @@ fun ProfileScreen(
         contentsHeader = {
         },
         profileImage = {
-            ProfileImage(
-                url = Constants.user?.profilePicture ?: Constants.DEFAULT_PROFILE_PICTURE,
-                shape = CircleShape,
-                size = 120.dp)
+                ProfileImage(
+                    url = user?.profilePicture ?: "",
+                    shape = CircleShape,
+                    size = 120.dp)
+
         },
         content = {
             Column(
@@ -67,28 +78,30 @@ fun ProfileScreen(
                     .background(Color.White),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(60.dp))
 
-                Text(
-                    text = Constants.user?.name ?: "",
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
+                    Spacer(modifier = Modifier.height(60.dp))
 
-                Text(
-                    text = Constants.user?.username ?: "",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
+                    Text(
+                        text = user?.name ?: "",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = user?.username ?: "",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
-                    StarRating(rating = averageRating ?: 0.0, 24.dp)
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                        StarRating(rating = averageRating ?: 0.0, 24.dp)
+                        Spacer(modifier = Modifier.width(4.dp))
+
 
                     Box(
                         modifier = Modifier
@@ -116,9 +129,16 @@ fun ProfileScreen(
                         .padding(horizontal = 30.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    ProfileOption(icon = Icons.Outlined.Edit, text = "Editar Perfil")
+                    ProfileOption(
+                        icon = Icons.Outlined.Edit,
+                        text = "Editar Perfil",
+                        onClick = { openEditProfile() }
+                    )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
-                    ProfileOption(icon = Icons.Outlined.FavoriteBorder, text = "Favoritos")
+                    ProfileOption(
+                        icon = Icons.Outlined.FavoriteBorder,
+                        text = "Favoritos",
+                        onClick = { openFavorites() })
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
                     ProfileOption(
                         icon = Icons.Outlined.StarOutline,
@@ -140,10 +160,15 @@ fun ProfileScreen(
             }
         }
     )
+
 }
 
 @Composable
 fun ProfileOption(icon: ImageVector, text: String, onClick: () -> Unit = {}) {
+    val isLogout = text == "Cerrar Sesión" || text == "Eliminar Cuenta"
+    val iconTint = if (isLogout) Color.Red else Color.Gray
+    val textColor = if (isLogout) Color.Red else Color.Black
+
     Row(
         modifier = Modifier
             .padding(16.dp, 22.dp)
@@ -154,7 +179,7 @@ fun ProfileOption(icon: ImageVector, text: String, onClick: () -> Unit = {}) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Color.Gray,
+            tint = iconTint,
             modifier = Modifier.size(25.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -162,7 +187,7 @@ fun ProfileOption(icon: ImageVector, text: String, onClick: () -> Unit = {}) {
         Text(
             text = text,
             fontSize = 18.sp,
-            color = Color.Black,
+            color = textColor,
             fontWeight = FontWeight.Normal,
             modifier = Modifier.weight(1f)
         )
@@ -170,10 +195,10 @@ fun ProfileOption(icon: ImageVector, text: String, onClick: () -> Unit = {}) {
         Icon(
             imageVector = Icons.Outlined.ChevronRight,
             contentDescription = null,
-            tint = Color(0xFFFFD146),
+            tint = iconTint,
             modifier = Modifier.size(28.dp)
         )
     }
-    }
+}
 
 
