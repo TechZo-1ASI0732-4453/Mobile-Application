@@ -144,7 +144,7 @@ fun ArticlesOwn(product: Product, modifier: Modifier = Modifier,deleteProduct : 
                     ) {
                         Row(
                             modifier = Modifier
-                                .padding(5.dp) // Se mostrará debajo del otro Box
+                                .padding(5.dp)
 
                                 .background(
                                     Color.Black.copy(alpha = 0.7f),

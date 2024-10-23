@@ -153,7 +153,7 @@ class PublishViewModel @Inject constructor(
         _districtSelected.value = district
     }
 
-    fun onPublish(){
+    fun onPublish(backArticles: () -> Unit){
 
         if(_name.value.isEmpty()){
             _errorName.value = true
@@ -184,11 +184,12 @@ class PublishViewModel @Inject constructor(
             return
         }
 
-        createProduct()
+        createProduct(backArticles)
     }
 
 
     fun selectImage(image: Uri?){
+        if(image!=null)_errorImage.value = false
         _image.value = image
     }
     fun deselectImage(){
@@ -235,23 +236,23 @@ class PublishViewModel @Inject constructor(
         }
     }
 
-     fun createProduct(){
+     fun createProduct(backArticles: () -> Unit) {
         val product = CreateProductDto(
             available = true,
             boost = _boost.value,
-            description = "hola soy jeremy",
-            desiredObject = "quiero ser full stack",
-            districtId = 1,
+            description = _description.value,
+            desiredObject = _objectChange.value,
+            districtId = _districtSelected.value!!.id,
             image = Constants.DEFAULT_PROFILE_PICTURE,
-            name = "jeremy de sanjuan",
-            price = 10,
-            productCategoryId = 1,
+            name = _name.value,
+            price = _price.value.toInt(),
+            productCategoryId = _categorySelected.value!!.id,
             userId = Constants.user!!.id
         )
         viewModelScope.launch {
             val result = productRepository.createProduct(product)
             if (result is Resource.Success) {
-                //back()
+                backArticles()
             }
         }
 

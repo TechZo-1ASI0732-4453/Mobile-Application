@@ -178,7 +178,8 @@ fun NavScreen() {
 
         composable(route = Routes.Publish.route){
             PublishScreen(
-                back = {navController.popBackStack()}
+                back = {navController.popBackStack()},
+                openMyArticles = {navController.navigate(Routes.Article.route)}
             )
         }
     }
