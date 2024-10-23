@@ -21,6 +21,7 @@ import com.techzo.cambiazo.presentation.filter.FilterScreen
 import com.techzo.cambiazo.presentation.login.SignInScreen
 import com.techzo.cambiazo.presentation.profile.ProfileScreen
 import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileScreen
+import com.techzo.cambiazo.presentation.profile.favorites.FavoritesScreen
 import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.register.SignUpScreen
 import com.techzo.cambiazo.presentation.register.TermsAndConditionsScreen
@@ -80,7 +81,7 @@ sealed class Routes(val route: String) {
     object EditProfile : Routes("EditProfileScreen")
     object MyReviews : Routes("MyReviewsScreen")
     object Publish : Routes("PublishScreen")
-
+    object Favorites : Routes("FavoritesScreen")
 }
 
 @Composable
@@ -168,6 +169,7 @@ fun NavScreen() {
                 },
                 openMyReviews = { navController.navigate(Routes.MyReviews.route) },
                 openEditProfile = { navController.navigate(Routes.EditProfile.route) },
+                openFavorites = { navController.navigate(Routes.Favorites.route) },
                 bottomBar = { BottomBarNavigation(items) }
             )
         }
@@ -184,6 +186,20 @@ fun NavScreen() {
         composable(route = Routes.EditProfile.route) {
             EditProfileScreen(
                 back = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Routes.Favorites.route) {
+            FavoritesScreen(
+                back = { navController.popBackStack() },
+                onProductClick = { productId, userId ->
+                    navController.navigate(
+                        Routes.ProductDetails.createProductDetailsRoute(
+                            productId,
+                            userId
+                        )
+                    )
+                }
             )
         }
 
