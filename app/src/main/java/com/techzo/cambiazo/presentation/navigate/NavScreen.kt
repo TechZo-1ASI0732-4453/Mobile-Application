@@ -39,7 +39,7 @@ sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate
 
     data class Articles(val onNavigate: () -> Unit = {}) : ItemsScreens(
         icon = Icons.Filled.Label,
-        title = "Mis Articulos",
+        title = "Mis Artículos",
         navigate = onNavigate
     )
 
@@ -65,9 +65,9 @@ sealed class Routes(val route: String) {
     object Donation : Routes("DonationScreen")
     object Profile : Routes("ProfileScreen")
     object Exchange : Routes("ExchangeScreen")
-    object TermsAndConditions: Routes("TermsAndConditionsScreen")
-    object ExchangeDetails: Routes("ExchangeDetailsScreen/{exchangeId}/{page}"){
-        fun createExchangeDetailsRoute(exchangeId:String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
+    object TermsAndConditions : Routes("TermsAndConditionsScreen")
+    object ExchangeDetails : Routes("ExchangeDetailsScreen/{exchangeId}/{page}") {
+        fun createExchangeDetailsRoute(exchangeId: String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
     }
     object MyReviews : Routes("MyReviewsScreen")
     object ProductDetails : Routes("ProductDetailsScreen/{productId}/{userId}") {
@@ -113,8 +113,8 @@ fun NavScreen() {
                 onProductClick = { productId, userId ->
                     navController.navigate(
                         Routes.ProductDetails.createProductDetailsRoute(
-                            productId,
-                            userId
+                            productId.toString(),
+                            userId.toString()
                         )
                     )
                 }
@@ -132,7 +132,12 @@ fun NavScreen() {
             ExchangeScreen(
                 bottomBar = { BottomBarNavigation(items) },
                 goToDetailsScreen = { exchangeId, page ->
-                    navController.navigate(Routes.ExchangeDetails.createExchangeDetailsRoute(exchangeId, page))
+                    navController.navigate(
+                        Routes.ExchangeDetails.createExchangeDetailsRoute(
+                            exchangeId,
+                            page
+                        )
+                    )
                 }
             )
         }
@@ -146,11 +151,13 @@ fun NavScreen() {
         composable(route = Routes.ExchangeDetails.route) { backStackEntry ->
             val exchange = backStackEntry.arguments?.getString("exchangeId")?.toIntOrNull()
             val page = backStackEntry.arguments?.getString("page")?.toIntOrNull()
-            ExchangeDetailsScreen(
-                goBack = { navController.popBackStack() },
-                exchangeId = exchange!!,
-                page = page!!
-            )
+            if (exchange != null && page != null) {
+                ExchangeDetailsScreen(
+                    goBack = { navController.popBackStack() },
+                    exchangeId = exchange,
+                    page = page
+                )
+            }
         }
 
         composable(route = Routes.Profile.route) {
@@ -171,8 +178,32 @@ fun NavScreen() {
 
         composable(route = Routes.MyReviews.route) {
             MyReviewsScreen(
-                back = { navController.popBackStack() }
+                back = { navController.popBackStack() },
+                OnUserClick = { userId ->
+                    navController.navigate(Routes.Reviews.createRoute(userId.toString()))
+                }
             )
+        }
+
+        composable(route = Routes.Reviews.route) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
+            if (userId != null) {
+                ReviewScreen(
+                    userId = userId,
+                    onBack = { navController.popBackStack() },
+                    onProductClick = { product ->
+                        navController.navigate(
+                            Routes.ProductDetails.createProductDetailsRoute(
+                                product.id.toString(),
+                                product.user.id.toString()
+                            )
+                        )
+                    },
+                    onUserClick = { selectedUserId ->
+                        navController.navigate(Routes.Reviews.createRoute(selectedUserId.toString()))
+                    }
+                )
+            }
         }
 
         composable(route = Routes.ProductDetails.route) { backStackEntry ->
@@ -182,20 +213,13 @@ fun NavScreen() {
                 ProductDetailsScreen(
                     productId = productId,
                     userId = userId,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onUserClick = { selectedUserId ->
+                        navController.navigate(Routes.Reviews.createRoute(selectedUserId.toString()))
+                    }
                 )
             }
         }
 
-        composable(route = Routes.Reviews.route) { backStackEntry ->
-            val userId = backStackEntry.arguments
-                ?.getString("userId")?.toIntOrNull()
-            if (userId != null) {
-                ReviewScreen(
-                    userId = userId,
-                    onBack = { navController.popBackStack() }
-                )
-            }
-        }
     }
 }
