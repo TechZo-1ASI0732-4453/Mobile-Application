@@ -6,7 +6,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,10 +20,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ImageSearch
-import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,11 +35,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
-import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.CustomDropDownSelect
@@ -90,7 +87,7 @@ fun PublishScreen(
     }
 
     val productState = viewModel.productState.value
-
+    val context = LocalContext.current
     val spaceHeight = 20.dp
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
@@ -341,9 +338,12 @@ fun PublishScreen(
 
             item {
                 if(productState.isLoading){
-                    CircularProgressIndicator()
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color(0xFFFFD146))
+                    }
                 }else{
                     if (productState.data != null) {
+
                         DialogApp(
                             message = "¡Publicación exitosa!",
                             description = "Otros usuarios podran hacerte ofertas y tambien podras ofertar cuando quieras intercambiar algo.",
@@ -352,7 +352,7 @@ fun PublishScreen(
                         )
                     }else{
                         ButtonApp(text = "Publicar", onClick = {
-                            viewModel.onPublish()
+                            viewModel.validatePublish(context)
                         })
 
                     }
