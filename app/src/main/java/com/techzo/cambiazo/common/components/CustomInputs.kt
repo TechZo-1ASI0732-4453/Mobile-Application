@@ -97,7 +97,7 @@ fun CustomInput(
     prefix: String? = null,
     suffix: String? = null,
     isError: Boolean = false,
-    messageError: String? = "Invalid field",
+    messageError: String? = "Campo Inválido",
     pressEnter: () -> Unit = {},
     hideText: Boolean = false,
     readOnly: Boolean = false,
@@ -166,7 +166,7 @@ fun CustomInput(
     if (isError) {
         messageError?.let{
             Text(
-                text = messageError,
+                text = "*$messageError",
                 color = Color.Red,
             )
         }

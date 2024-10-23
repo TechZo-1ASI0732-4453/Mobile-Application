@@ -158,7 +158,7 @@ fun  <T> CustomDropDownSelect(
     label: String,
     itemList: List<T>,
     isError: Boolean = false,
-    messageError: String = "Invalid field",
+    messageError: String = "Campo Inválido",
     onItemClick: (T?) -> Unit,
     itemToString: (T) -> String
 ) {
@@ -195,7 +195,7 @@ fun  <T> CustomDropDownSelect(
             if (isError){
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = messageError,
+                    text = "*$messageError",
                     color = Color.Red,
                     textAlign = TextAlign.Start
                 )
