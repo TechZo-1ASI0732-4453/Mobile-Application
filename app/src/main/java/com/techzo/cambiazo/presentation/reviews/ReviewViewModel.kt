@@ -22,15 +22,11 @@ import javax.inject.Inject
 @HiltViewModel
 class ReviewViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
-    private val userRepository: UserRepository,
     private val productRepository: ProductRepository
 ) : ViewModel() {
 
     var reviewAverageUser = mutableStateOf<ReviewAverageUser?>(null)
         private set
-
-    private val _user = mutableStateOf(UIState<User>())
-    val user: State<UIState<User>> = _user
 
     private val _reviews = mutableStateOf(UIState<List<Review>>())
     val reviews: State<UIState<List<Review>>> = _reviews
@@ -41,25 +37,15 @@ class ReviewViewModel @Inject constructor(
     var errorMessage = mutableStateOf<String?>(null)
         private set
 
-    // Cache para almacenar los flujos de usuarios por userId
-    private val userCache = mutableMapOf<Int, StateFlow<UIState<User>>>()
-
     fun getReviewAverageByUserId(userId: Int) {
         viewModelScope.launch {
-            // Ejecutar todas las llamadas en paralelo
-            val reviewAverageDeferred =
-                async { reviewRepository.getAverageRatingAndReviewsByUserId(userId) }
-            val userDeferred = async { userRepository.getUserById(userId) }
-            val reviewsDeferred = async { reviewRepository.getReviewsByUserId(userId) }
+            val reviewAverageDeferred = async { reviewRepository.getAverageRatingAndReviewsByUserId(userId) }
             val articlesDeferred = async { productRepository.getProductsByUserId(userId) }
 
-            // Esperar a que todas las llamadas terminen
             val reviewAverageResult = reviewAverageDeferred.await()
-            val userResult = userDeferred.await()
-            val reviewsResult = reviewsDeferred.await()
             val articlesResult = articlesDeferred.await()
 
-            // Procesar los resultados
+            // Procesar los resultados de las reseñas
             when (reviewAverageResult) {
                 is Resource.Success<Pair<ReviewAverageUser, List<Review>>> -> {
                     reviewAverageUser.value = reviewAverageResult.data?.first
@@ -72,26 +58,6 @@ class ReviewViewModel @Inject constructor(
                 }
             }
 
-            when (userResult) {
-                is Resource.Success -> {
-                    _user.value = UIState(data = userResult.data)
-                }
-
-                is Resource.Error -> {
-                    _user.value = UIState(message = userResult.message ?: "Unknown error")
-                }
-            }
-
-            when (reviewsResult) {
-                is Resource.Success -> {
-                    _reviews.value = UIState(data = reviewsResult.data)
-                }
-
-                is Resource.Error -> {
-                    _reviews.value = UIState(message = reviewsResult.message ?: "Unknown error")
-                }
-            }
-
             when (articlesResult) {
                 is Resource.Success -> {
                     _articles.value = UIState(data = articlesResult.data)
@@ -101,23 +67,6 @@ class ReviewViewModel @Inject constructor(
                     _articles.value = UIState(message = articlesResult.message ?: "Unknown error")
                 }
             }
-        }
-    }
-
-    fun getUserById(userId: Int): StateFlow<UIState<User>> {
-        return userCache.getOrPut(userId) {
-            flow {
-                emit(UIState(isLoading = false)) // Eliminamos el estado de carga
-                when (val result = userRepository.getUserById(userId)) {
-                    is Resource.Success -> {
-                        emit(UIState(data = result.data))
-                    }
-
-                    is Resource.Error -> {
-                        emit(UIState(message = result.message ?: "Unknown error"))
-                    }
-                }
-            }.stateIn(viewModelScope, SharingStarted.Lazily, UIState(isLoading = false))
         }
     }
 }

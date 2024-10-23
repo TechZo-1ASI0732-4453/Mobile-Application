@@ -33,7 +33,8 @@ import com.techzo.cambiazo.presentation.profile.ProfileViewModel
 fun MyReviewsScreen(
     back: () -> Unit = {},
     profileViewModel: ProfileViewModel = hiltViewModel(),
-    myReviewsViewModel: MyReviewsViewModel = hiltViewModel()
+    myReviewsViewModel: MyReviewsViewModel = hiltViewModel(),
+    OnUserClick: (Int) -> Unit
 ) {
 
     val averageRating = profileViewModel.averageRating.value
@@ -87,7 +88,7 @@ fun MyReviewsScreen(
 
                 LazyColumn {
                     items(reviewsState.data ?: emptyList()) { review ->
-                        ReviewItem(review)
+                        ReviewItem(review, OnUserClick)
                     }
                 }
 
