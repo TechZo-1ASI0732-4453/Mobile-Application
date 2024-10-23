@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.filled.Info
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.techzo.cambiazo.common.components.CustomTabs
 import com.techzo.cambiazo.common.components.EmptyStateMessage
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.ProfileImage
@@ -53,6 +54,7 @@ fun ReviewScreen(
     val reviewsState = viewModel.reviews.value
     val articlesState = viewModel.articles.value
     val errorMessage = viewModel.errorMessage.value
+
 
     MainScaffoldApp(
         paddingCard = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -132,6 +134,7 @@ fun ReviewScreen(
 
                 CustomTabs(
                     selectedTabIndex = selectedTabIndex.value,
+                    itemTabs = listOf("Artículos", "Reseñas","JerryGay"),
                     onTabSelected = { index -> selectedTabIndex.value = index }
                 )
 
@@ -198,47 +201,6 @@ fun ReviewScreen(
 }
 
 
-@Composable
-fun CustomTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
-    val tabs = listOf("Artículos", "Reseñas")
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFF0F0F0), shape = RoundedCornerShape(16.dp)),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            tabs.forEachIndexed { index, title ->
-                val isSelected = selectedTabIndex == index
-                Button(
-                    onClick = { onTabSelected(index) },
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSelected) Color(0xFFFFD146) else Color(0xFFF0F0F0),
-                        contentColor = if (isSelected) Color.Black else Color.Gray
-                    ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 2.5.dp)
-                        .padding(vertical = 3.dp)
-                        .height(48.dp)
-                ) {
-                    Text(
-                        text = title,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Normal,
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun ProductItem(
