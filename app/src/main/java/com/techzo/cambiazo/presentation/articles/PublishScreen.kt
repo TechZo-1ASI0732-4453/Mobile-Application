@@ -49,6 +49,7 @@ import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 fun PublishScreen(
     viewModel: PublishViewModel = hiltViewModel(),
     back : () -> Unit = {},
+    openMyArticles: () -> Unit = {}
 ) {
 
     val countries = viewModel.countries.value
@@ -74,6 +75,7 @@ fun PublishScreen(
     val errorDepartment = viewModel.errorDepartment.value
     val errorDistrict = viewModel.errorDistrict.value
     val errorObjectChange = viewModel.errorObjectChange.value
+    val errorImage = viewModel.errorImage.value
 
     val image = viewModel.image.value
 
@@ -142,6 +144,7 @@ fun PublishScreen(
                             )
                         }
                     }
+
                 }?: Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -157,6 +160,9 @@ fun PublishScreen(
                             Icon(Icons.Filled.Upload, contentDescription = null)
                     }
                 }
+                if(errorImage){
+                    Text(text = "Campo invalido", color = Color.Red)
+                }
                 Spacer(modifier = Modifier.height(spaceHeight))
             }
 
@@ -169,7 +175,7 @@ fun PublishScreen(
                 CustomInput(
                     value = name,
                     placeHolder = "Nombre del objeto",
-                    type = "Password",
+                    type = "Text",
                     isError = errorName,
                     onValueChange = { viewModel.onChangeName(it) }
                 )
@@ -272,7 +278,7 @@ fun PublishScreen(
                 CustomInput(
                     value = price,
                     placeHolder = "Precio",
-                    type = "Password",
+                    type = "Money",
                     isError = errorPrice,
                     onValueChange = { viewModel.onChangePrice(it) }
                 )
@@ -313,7 +319,7 @@ fun PublishScreen(
 
 
             item {
-                ButtonApp(text = "Publicar", onClick = {viewModel.onPublish()})
+                ButtonApp(text = "Publicar", onClick = {viewModel.onPublish(openMyArticles)})
                 Spacer(modifier =   Modifier.height(30.dp))
             }
         }
