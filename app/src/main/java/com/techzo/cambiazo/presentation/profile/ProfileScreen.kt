@@ -45,6 +45,7 @@ fun ProfileScreen(
     logOut: () -> Unit = {},
     openMyReviews: () -> Unit = {},
     openEditProfile: () -> Unit = {},
+    openFavorites: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()) {
 
@@ -134,7 +135,10 @@ fun ProfileScreen(
                         onClick = { openEditProfile() }
                     )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
-                    ProfileOption(icon = Icons.Outlined.FavoriteBorder, text = "Favoritos")
+                    ProfileOption(
+                        icon = Icons.Outlined.FavoriteBorder,
+                        text = "Favoritos",
+                        onClick = { openFavorites() })
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
                     ProfileOption(
                         icon = Icons.Outlined.StarOutline,
