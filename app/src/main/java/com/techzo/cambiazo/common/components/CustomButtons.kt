@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -99,3 +100,29 @@ fun ButtonIconHeaderApp(iconVector: ImageVector, onClick: () -> Unit, iconSize: 
         }
     }
 }
+
+
+@Composable
+fun FloatingButtonApp(text: String,modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
+    FloatingActionButton(
+        onClick = onClick,
+        modifier = modifier
+            .padding(vertical = 4.dp)
+            .fillMaxWidth()
+            .height(65.dp)
+            .padding(bottom = 10.dp, top = 10.dp)
+            .border(1.5.dp, color = Color(0xFFFFD146), RoundedCornerShape(10.dp)),
+        containerColor = Color(0xFFFFD146),
+        contentColor = Color.Black,
+        shape = RoundedCornerShape(10.dp),
+    ) {
+        Text(
+            text = text,
+            fontSize = 18.sp,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif)
+        )
+    }
+}
+
