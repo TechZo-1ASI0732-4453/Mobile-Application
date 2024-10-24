@@ -63,6 +63,7 @@ fun ProfileScreen(
         bottomBar = bottomBar,
         paddingCard = PaddingValues(top = 15.dp),
         contentsHeader = {
+            Spacer(modifier = Modifier.height(60.dp))
         },
         profileImage = {
                 ProfileImage(

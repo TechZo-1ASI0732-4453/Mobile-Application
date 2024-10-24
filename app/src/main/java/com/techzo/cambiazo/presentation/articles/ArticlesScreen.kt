@@ -176,6 +176,7 @@ fun ArticlesOwn(product: Product, modifier: Modifier = Modifier, deleteProduct: 
                 } else {
                     IconsAction(icon = Icons.Filled.MoreVert, margin = 5.dp, onclick = { showActions = true })
                 }
+
             }
 
             Box {

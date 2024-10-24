@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,9 +36,10 @@ import com.techzo.cambiazo.domain.*
 fun ProductDetailsScreen(
     productId: Int,
     userId: Int,
-    viewModel: ProductDetailsViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onUserClick: (Int) -> Unit
 ) {
+    val viewModel: ProductDetailsViewModel = hiltViewModel()
     val productState = viewModel.product.value
     val averageRating = viewModel.averageRating.value
     val countReviews = viewModel.countReviews.value
@@ -61,10 +63,9 @@ fun ProductDetailsScreen(
                             countReviews = countReviews ?: 0,
                             isFavoriteState = isFavoriteState,
                             onFavoriteToggle = { isCurrentlyFavorite ->
-                                // Lógica para alternar el estado de favorito
                                 viewModel.toggleFavoriteStatus(productId, isCurrentlyFavorite)
                             },
-                            onUserClick = {},
+                            onUserClick = { onUserClick(product.user.id) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 360.dp)
@@ -162,7 +163,7 @@ fun ProductDetails(
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
-                        ) { onUserClick() }, // Sin efecto visual al hacer clic
+                        ) { onUserClick() },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
@@ -183,19 +184,23 @@ fun ProductDetails(
                             fontSize = 20.sp
                         )
 
+                        Spacer(modifier = Modifier.height(4.5.dp))
+
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            StarRating(rating = averageRating, size = 26.dp)
-                            Spacer(modifier = Modifier.width(6.dp))
+                            StarRating(rating = averageRating, size = 24.dp)
+                            Spacer(modifier = Modifier.width(4.dp))
                             Box(
                                 modifier = Modifier
-                                    .background(Color.Black, shape = RoundedCornerShape(50))
-                                    .padding(horizontal = 13.dp, vertical = 1.5.dp)
+                                    .background(Color.Black, shape = RoundedCornerShape(44))
+                                    .size(height = 21.3.dp, width = 29.dp)
+                                    .wrapContentSize(Alignment.Center)
                             ) {
                                 Text(
                                     text = "$countReviews",
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
+                                    fontSize = 15.sp,
+                                    textAlign = TextAlign.Center
                                 )
                             }
                         }
@@ -203,7 +208,6 @@ fun ProductDetails(
 
                     IconButton(
                         onClick = {
-                            // Aquí invocamos el toggle del favorito
                             onFavoriteToggle(isFavoriteState.data ?: false)
                         },
                         modifier = Modifier
@@ -241,6 +245,8 @@ fun ProductDetails(
                 fontSize = 20.sp
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Filled.LocationOn,
@@ -260,7 +266,7 @@ fun ProductDetails(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(text = "Le interesa:", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text(text = product.desiredObject, fontSize = 18.sp)
+        Text(text = product.desiredObject, fontSize = 18.sp , color = Color.Gray)
 
         Spacer(modifier = Modifier.weight(1f))
 
