@@ -164,8 +164,8 @@ object CambiazoModule {
 
     @Provides
     @Singleton
-    fun provideExchangeRepository(service: ExchangeService, productRepository: ProductRepository, userRepository: UserRepository): ExchangeRepository {
-        return ExchangeRepository(service, productRepository, userRepository)
+    fun provideExchangeRepository(service: ExchangeService): ExchangeRepository {
+        return ExchangeRepository(service)
     }
 
     @Provides
