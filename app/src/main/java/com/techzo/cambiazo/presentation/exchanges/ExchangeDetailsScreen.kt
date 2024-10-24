@@ -1,6 +1,9 @@
 package com.techzo.cambiazo.presentation.exchanges
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -160,6 +164,25 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                 else -> "Hiciste cambio por:"
             }
 
+            val phoneNumber =when (page) {
+                0 -> "+51${exchange.userChange.phoneNumber}"
+                1 -> "+51${exchange.userOwn.phoneNumber}"
+                else -> if(boolean) "+51${exchange.userChange.phoneNumber}" else "+51${exchange.userOwn.phoneNumber}"
+            }
+
+            val textColorStatus= when (page) {
+                0 -> if (exchange.status == "Pendiente") Color.Gray else Color(0xFF38B000)
+                1 -> Color(0xFFFFD146)
+                else -> Color.White
+            }
+
+            val textBackgroundColor= when (page) {
+                0 -> if (exchange.status == "Pendiente") Color(0xFFE8E8E8) else Color(0xFF38B000)
+                1 -> Color.Black
+                else -> Color(0xFF38B000)
+            }
+
+            val context = LocalContext.current
 
             Column{
                 Row(
@@ -185,19 +208,23 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                     }
                     Text(
                         text = status,
-                        color =
-                        if (page == 0 && exchange.status == "Pendiente") Color.Gray
-                        else if(page==1) Color(0xFFFFD146)
-                        else Color.White,
+                        color = textColorStatus,
                         modifier = Modifier
                             .clip(RoundedCornerShape(50.dp))
-                            .background(
-                                if (page == 0 && exchange.status == "Pendiente") Color(0xFFE8E8E8)
-                                else if(page==1) Color.Black
-                                else Color(0xFF38B000)
-                            )
-                            .padding(horizontal = 20.dp, vertical = 4.dp),
-                        fontWeight = FontWeight.Bold
+                            .background(textBackgroundColor)
+                            .padding(horizontal = 20.dp, vertical = 4.dp)
+                            .clickable {
+                                if(page==2){
+                                    val formattedNumber = phoneNumber.replace("+", "").replace(" ", "")
+                                    val url = "https://wa.me/$formattedNumber"
+                                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                                        data = Uri.parse(url)
+                                    }
+                                    context.startActivity(intent)
+                                }
+                            }
+                        ,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -249,14 +276,14 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                     }
                 }
                 HorizontalDivider()
-                BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id)
+                BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id, goBack = goBack)
             }
         }
     }
 }
 
 @Composable
-fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, price: String, page: Int, viewModel: ExchangeViewModel = hiltViewModel(), exchangeId: Int) {
+fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, price: String, page: Int, viewModel: ExchangeViewModel = hiltViewModel(), exchangeId: Int, goBack: () -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
     var showDialog2 by remember { mutableStateOf(false) }
 
@@ -347,7 +374,7 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                             message = "¡Intercambio Aceptado!",
                             description = "¡Felicidades por completar tu CambiaZo! Ahora puedes comunicarte con el otro usuario para concretar el intercambio.",
                             labelButton1 = "Aceptar",
-                            onClickButton1 = { showDialog = false }
+                            onClickButton1 = { viewModel.getExchangesByUserChangeId(); showDialog = false; goBack() }
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
@@ -375,7 +402,7 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                             description = "Si rechazas la oferta, no podrás volver a verla. ¿Quieres continuar?",
                             labelButton1 = "Rechazar Oferta",
                             labelButton2 = "Cancelar",
-                            onClickButton1 = { viewModel.updateExchangeStatus(exchangeId, "Rechazado"); showDialog2 = false; },
+                            onClickButton1 = { viewModel.updateExchangeStatus(exchangeId, "Rechazado"); viewModel.getExchangesByUserChangeId(); showDialog2 = false; goBack() },
                             onClickButton2 = { showDialog2 = false; }
                         )
                     }
