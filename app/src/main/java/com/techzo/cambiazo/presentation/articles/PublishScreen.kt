@@ -3,10 +3,11 @@ package com.techzo.cambiazo.presentation.articles
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,12 +20,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ImageSearch
-import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,13 +38,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
-import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.CustomDropDownSelect
@@ -90,14 +98,14 @@ fun PublishScreen(
     }
 
     val productState = viewModel.productState.value
-
+    val context = LocalContext.current
     val spaceHeight = 20.dp
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
         contentsHeader = {
             Column(
                 Modifier
-                    .padding(bottom = 40.dp)
+                    .padding(bottom = 30.dp)
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ){
@@ -111,68 +119,79 @@ fun PublishScreen(
         LazyColumn {
             item {
                 Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Imagen")
+                    Text(text = "Imagen", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
                 }
+
 
                 image?.let { uri ->
                     Box {
-
+                        Image(
+                            painter = rememberImagePainter(uri),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .height(350.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp)),
+                            contentScale = ContentScale.Crop
+                        )
                         IconButton(
                             onClick = {
                                 viewModel.deselectImage()
                             },
                             modifier = Modifier
-                                .offset(x = 5.dp, y = -5.dp)
-                                .size(25.dp)
-                                .background(Color(0xFFFFD146), shape = RoundedCornerShape(50.dp))
                                 .align(Alignment.TopEnd)
-                                .zIndex(100f)
-                            ,
+                                .padding(8.dp)
+                                .size(40.dp)
+                                .background(Color.Black.copy(alpha = 0.6f), shape = CircleShape)
+                                .zIndex(100f),
                             colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = Color(0xFFFFD146),
+                                containerColor = Color.Transparent,
                                 contentColor = Color.White
                             )
                         ) {
-                            Icon(Icons.Filled.Close,
+                            Icon(
+                                imageVector = Icons.Filled.Close,
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .zIndex(100f))
-                        }
-                        Box(modifier = Modifier
-                            .size(100.dp)
-                            .border(1.dp, color = Color.Gray, shape = RoundedCornerShape(10.dp))
-                            .clip(RoundedCornerShape(10.dp)),
-                            contentAlignment = Alignment.Center)
-                        {
-
-                            Image(
-                                painter = rememberImagePainter(uri),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
+                                modifier = Modifier.size(25.dp)
                             )
                         }
                     }
-
-                }?: Box(
+                } ?: Box(
                     modifier = Modifier
-                        .size(100.dp)
-                        .border(1.dp, color = Color.Gray, shape = RoundedCornerShape(10.dp)),
-                    contentAlignment = Alignment.Center
-                ){
-                    IconButton(
-                        onClick = {
-                            selectedImageLauncher.launch("image/*")
-                        },
-                        modifier = Modifier
-                            .size(50.dp)
-                            .background(Color(0xFFFFD146), shape = RoundedCornerShape(50))
+                        .height(150.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable { selectedImageLauncher.launch("image/*") }
+                ) {
+                    Canvas(modifier = Modifier.matchParentSize()) {
+                        drawRoundRect(
+                            color = Color.Gray,
+                            style = Stroke(
+                                width = 3.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(25f, 25f), 0f)
+                            ),
+                            cornerRadius = CornerRadius(10.dp.toPx())
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                            Icon(Icons.Filled.ImageSearch, contentDescription = null)
+                        Icon(
+                            imageVector = Icons.Filled.ImageSearch,
+                            contentDescription = "Upload Icon",
+                            modifier = Modifier.size(60.dp),
+                            tint = Color.Gray
+                        )
+                        Text(
+                            text = "Sube tu foto",
+                            color = Color.Gray,
+                            style = TextStyle(fontSize = 16.sp)
+                        )
                     }
                 }
+
                 if(errorImage){
                     Text(text = "Campo invalido", color = Color.Red)
                 }
@@ -183,7 +202,8 @@ fun PublishScreen(
             item{
 
                 Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Título")
+                    Text(text = "Título", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
+
                 }
                 CustomInput(
                     value = name,
@@ -199,7 +219,7 @@ fun PublishScreen(
 
             item {
                 Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Categoría")
+                    Text(text = "Categoría", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
                 }
 
                 CustomDropDownSelect(
@@ -217,7 +237,8 @@ fun PublishScreen(
             //----------------DESCRIPTION ------------------//
             item{
                 Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Descripción")
+                    Text(text = "Descripción", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
+
                 }
                 CustomInput(value = description,
                     placeHolder = "Descripción del objeto" ,
@@ -231,7 +252,8 @@ fun PublishScreen(
             //----------------LOCATION------------------//
             item {
                 Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Ubicación")
+                    Text(text = "Ubicación", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
+
                 }
 
                 CustomDropDownSelect(
@@ -269,7 +291,8 @@ fun PublishScreen(
             item{
 
                 Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "¿Que quieres a Cambio?")
+                    Text(text = "¿Que quieres a Cambio?", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
+
                 }
 
                 CustomInput(
@@ -285,7 +308,8 @@ fun PublishScreen(
             //------------------PRICE--------------------------//
             item{
                 Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Valor Apróximado")
+                    Text(text = "Valor Apróximado", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
+
                 }
 
                 CustomInput(
@@ -309,7 +333,7 @@ fun PublishScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Column(modifier = Modifier.fillMaxSize()) {
-                            Text(text = "Boost de Visibilidad")
+                            Text(text = "Boost de Visibilidad", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
                             Text(modifier = Modifier.fillMaxWidth(),
                                 text = "¡Activa tu boost y destaca tu producto un día en la página principal para más ofertas!",
                                 color = Color.Gray)
@@ -341,9 +365,12 @@ fun PublishScreen(
 
             item {
                 if(productState.isLoading){
-                    CircularProgressIndicator()
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color(0xFFFFD146))
+                    }
                 }else{
                     if (productState.data != null) {
+
                         DialogApp(
                             message = "¡Publicación exitosa!",
                             description = "Otros usuarios podran hacerte ofertas y tambien podras ofertar cuando quieras intercambiar algo.",
@@ -352,7 +379,7 @@ fun PublishScreen(
                         )
                     }else{
                         ButtonApp(text = "Publicar", onClick = {
-                            viewModel.onPublish()
+                            viewModel.validatePublish(context)
                         })
 
                     }

@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
@@ -55,10 +57,10 @@ fun FilterScreen(
 
 
     MainScaffoldApp(
-        paddingCard = PaddingValues(start=20.dp,end=20.dp,top=25.dp),
+        paddingCard = PaddingValues(start=30.dp,end=30.dp,top=25.dp),
         contentsHeader = {
             Column(
-                Modifier.padding(bottom = 40.dp).fillMaxWidth(),
+                Modifier.padding(bottom = 30.dp).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ){
 
@@ -69,26 +71,34 @@ fun FilterScreen(
         }
     ) {
 
+        Spacer(modifier = Modifier.height(10.dp))
+
+
         Box( modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Ubicacion")
+            Text(text = "Ubicacion", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+
         }
 
         DropdownList(
-            label = "selecciona un pais",
+            label = "Selecciona un Pais",
             selectedOption = countrySelected ,
             itemList = countries.data?: emptyList(),
             itemToString = { it.name},
             onItemClick = { viewModel.onChangeCountry(it)}
         )
+        Spacer(modifier = Modifier.height(10.dp))
+
         DropdownList(
-            label = "selecciona un departamento",
+            label = "Selecciona un Departamento",
             selectedOption = departmentSelected,
             itemList = departments.data?: emptyList(),
             itemToString = { it.name},
             onItemClick = {viewModel.onChangeDepartment(it)}
         )
+        Spacer(modifier = Modifier.height(10.dp))
+
         DropdownList(
-            label = "selecciona un distrito",
+            label = "Selecciona un Distrito",
             selectedOption = districtSelected,
             itemList = districts.data?: emptyList(),
             itemToString = { it.name},
@@ -96,10 +106,11 @@ fun FilterScreen(
         )
 
         Spacer(modifier = Modifier.height(20.dp))
+
         Box( modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 15.dp, bottom = 10.dp)) {
-            Text(text = "Valor Aproximado")
+            .fillMaxWidth()) {
+            Text(text = "Valor Aproximado", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 6.dp))
+
         }
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -117,7 +128,8 @@ fun FilterScreen(
 
         }
 
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+
         ButtonApp(text = "Aplicar filtro"){
             viewModel.applyFilter()
             openExplorer()
@@ -127,7 +139,6 @@ fun FilterScreen(
             viewModel.clearFilters()
             openExplorer()
         }
-
     }
 }
 

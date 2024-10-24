@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveRedEye
@@ -20,6 +21,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -123,7 +125,16 @@ fun SignInScreen(openRegister: () -> Unit = {},
             openApp()
         }
         if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.height(68.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp, bottom = 31.dp)
+            ) {
+                LinearProgressIndicator(
+                    color = Color(0xFFFFD146),
+                    modifier = Modifier.align(Alignment.Center).fillMaxWidth()
+                )
+            }
         }else{
             ButtonApp("Iniciar Sesion", onClick = {
                 viewModel.signIn()
