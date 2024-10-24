@@ -2,7 +2,9 @@ package com.techzo.cambiazo.common.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -38,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import coil.compose.AsyncImage
 import com.techzo.cambiazo.domain.Product
@@ -136,6 +140,64 @@ fun ArticlesOwn(
     }
 }
 
+@Composable
+fun ArticleExchange(
+    productLeft: Product,
+    productRight: Product,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Quieres",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Gray,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
+            ArticlesOwn(
+                product = productLeft,
+                modifier = Modifier
+                    .size(width = 400.dp, height = 190.dp)
+            )
+        }
+
+        Icon(
+            imageVector = Icons.Filled.SwapHoriz,
+            contentDescription = "Intercambio",
+            modifier = Modifier
+                .size(60.dp),
+            tint = Color(0xFFFFD146)
+        )
+
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Ofreces",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Gray,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
+            ArticlesOwn(
+                product = productRight,
+                modifier = Modifier
+                    .size(width = 400.dp, height = 190.dp)
+            )
+        }
+    }
+}
 
 @Composable
 fun IconsAction(icon: ImageVector, margin: Dp = 0.dp, onclick: () -> Unit = {}) {

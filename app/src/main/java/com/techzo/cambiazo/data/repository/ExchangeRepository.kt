@@ -1,6 +1,8 @@
 package com.techzo.cambiazo.data.repository
 
 import com.techzo.cambiazo.common.Resource
+import com.techzo.cambiazo.data.remote.exchanges.ExchangeDto
+import com.techzo.cambiazo.data.remote.exchanges.ExchangeRequestDto
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeStatusRequestDto
 import com.techzo.cambiazo.data.remote.exchanges.toExchange
@@ -89,6 +91,21 @@ class ExchangeRepository(private val exchangeService: ExchangeService
             return@withContext Resource.Error(response.message())
         } catch (e: Exception) {
             return@withContext Resource.Error(e.message ?: "An error occurred")
+        }
+    }
+
+    suspend fun createExchange(exchangeRequestDto: ExchangeRequestDto): Resource<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = exchangeService.createExchange(exchangeRequestDto)
+                if (response.isSuccessful) {
+                    Resource.Success(true)
+                } else {
+                    Resource.Error("Failed to create exchange")
+                }
+            } catch (e: Exception) {
+                Resource.Error(e.message ?: "Unknown error")
+            }
         }
     }
 

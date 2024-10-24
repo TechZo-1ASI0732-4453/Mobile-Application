@@ -29,7 +29,6 @@
         private val _name = mutableStateOf("")
         val name: State<String> get() = _name
 
-        //category id
         private val _categoryId = mutableStateOf<Int?>(Constants.filterValues.categoryId)
         val categoryId: State<Int?> get() = _categoryId
 
@@ -42,19 +41,16 @@
             applyFilter()
         }
 
-        fun getProducts() {
+        private fun getProducts() {
             _state.value = UIState(isLoading = true)
             viewModelScope.launch {
-
                 val result = productRepository.getProducts()
-                if(result is Resource.Success){
-                    val products = result.data?: emptyList()
-                    _allProducts.value = products
-                    _state.value = UIState(data = products, isLoading = false)
-                }else{
-                    _state.value = UIState(message = result.message?:"Ocurrió un error")
+                if (result is Resource.Success) {
+                    _allProducts.value = result.data ?: emptyList()
+                    _state.value = UIState(data = result.data ?: emptyList(), isLoading = false)
+                } else {
+                    _state.value = UIState(message = result.message ?: "Ocurrió un error")
                 }
-                applyFilter()
             }
         }
 
@@ -114,5 +110,9 @@
                     _productCategories.value = UIState(message = result.message?:"Ocurrió un error")
                 }
             }
+        }
+
+        fun getProductById(productId: Int): Product? {
+            return _allProducts.value.find { it.id == productId }
         }
     }
