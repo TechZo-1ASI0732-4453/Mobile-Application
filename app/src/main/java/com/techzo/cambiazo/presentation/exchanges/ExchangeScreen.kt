@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import com.techzo.cambiazo.domain.Exchange
 import kotlinx.coroutines.launch
 
@@ -57,7 +58,9 @@ fun ExchangeScreen(
     MainScaffoldApp(bottomBar = bottomBar,
         paddingCard = PaddingValues(top = 10.dp),
         contentsHeader = {
-            Text(text = "Mis intercambios", fontSize = 32.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 20.dp))
+            Spacer(modifier = Modifier.height(30.dp))
+            TextTitleHeaderApp(text ="Mis intercambios")
+            Spacer(modifier = Modifier.height(30.dp))
         }) {
         val pagerState = rememberPagerState(
             pageCount = { 3 }, initialPage = 0

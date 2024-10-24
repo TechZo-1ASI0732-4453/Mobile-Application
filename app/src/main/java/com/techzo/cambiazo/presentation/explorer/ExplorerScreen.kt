@@ -55,7 +55,7 @@ fun ExplorerScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 10.dp, horizontal = 20.dp),
+                    .padding(vertical = 25.dp, horizontal = 20.dp),
             ) {
                 OutlinedTextField(
                     modifier = Modifier
@@ -99,10 +99,11 @@ fun ExplorerScreen(
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 15.dp)
+                .padding(horizontal = 20.dp, vertical = 10.dp)
         ) {
             items(categories.data ?: emptyList()) { category ->
                 val isSelected = viewModel.categoryId.value == category.id
+
 
                 Button(
                     onClick = { viewModel.onProductCategorySelected(category.id) },
@@ -132,7 +133,7 @@ fun ExplorerScreen(
                 Products(product, onProductClick)
             }
             item {
-                Spacer(modifier = Modifier.height(110.dp))
+                Spacer(modifier = Modifier.height(30.dp))
             }
         }
     }

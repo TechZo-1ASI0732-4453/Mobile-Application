@@ -201,7 +201,7 @@ class PublishViewModel @Inject constructor(
             onFailure = {
             },
             onUploadStateChange = {  },
-            path = "images"
+            path = "products"
         )
 
     }
