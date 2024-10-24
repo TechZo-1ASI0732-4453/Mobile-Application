@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -39,6 +41,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.R
+import com.techzo.cambiazo.common.Constants
+import com.techzo.cambiazo.common.components.EmptyStateMessage
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.domain.Exchange
 import kotlinx.coroutines.launch
@@ -126,9 +130,25 @@ fun ExchangeScreen(
         HorizontalPager(
             state = pagerState, userScrollEnabled = false
         ) {
-            LazyColumn{
-                items(state.data ?: emptyList()) { exchange ->
-                    ExchangeBox(exchange, pagerState.currentPage, goToDetailsScreen)
+            if (state.isLoading) {
+                EmptyStateMessage(
+                    icon = Icons.Default.Info,
+                    message = "Cargando...",
+                    subMessage = "Por favor espere un momento",
+                    modifier = Modifier.padding(20.dp)
+                )
+            } else if (state.data.isNullOrEmpty()) {
+                EmptyStateMessage(
+                    icon = Icons.Default.Info,
+                    message = "No hay intercambios",
+                    subMessage = "No tienes intercambios en esta sección",
+                    modifier = Modifier.padding(20.dp)
+                )
+            } else {
+                LazyColumn {
+                    items(state.data ?: emptyList()) { exchange ->
+                        ExchangeBox(exchange, pagerState.currentPage, goToDetailsScreen)
+                    }
                 }
             }
         }
@@ -139,6 +159,8 @@ fun ExchangeScreen(
 
 @Composable
 fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, String) -> Unit) {
+    val boolean = exchange.userOwn.id == Constants.user?.id
+
     val textUpperImage = when (page) {
         0 -> "Quieres"
         1 -> "Quiere"
@@ -151,6 +173,61 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
         else -> "Obtuviste"
     }
 
+    val upperUserProfileImage= when (page) {
+        0 -> exchange.userChange.profilePicture
+        1 -> exchange.userOwn.profilePicture
+        else -> if(boolean) exchange.userChange.profilePicture else exchange.userOwn.profilePicture
+    }
+
+    val upperUserName= when (page) {
+        0 -> exchange.userChange.name
+        1 -> exchange.userOwn.name
+        else -> if(boolean) exchange.userChange.name else exchange.userOwn.name
+    }
+
+    val statusText = {
+        if (page == 0 && exchange.status == "Pendiente") "Enviado"
+        else if (page == 1) exchange.status
+        else "WhatsApp"
+    }
+
+    val statusColor= {
+        if (page == 0 && exchange.status == "Pendiente") Color.Gray
+        else if(page==1) Color(0xFFFFD146)
+        else Color.White
+    }
+
+    val statusBackgroundColor= {
+        if (page == 0 && exchange.status == "Pendiente") Color(0xFFE8E8E8)
+        else if(page==1) Color.Black
+        else Color(0xFF38B000)
+    }
+
+    val firstProductImage= when (page) {
+        0 -> exchange.productChange.image
+        1 -> exchange.productChange.image
+        else -> if(boolean) exchange.productOwn.image else exchange.productChange.image
+    }
+
+    val secondProductImage= when (page) {
+        0 -> exchange.productOwn.image
+        1 -> exchange.productOwn.image
+        else -> if(boolean) exchange.productChange.image else exchange.productOwn.image
+    }
+
+    val firstProductName= when (page) {
+        0 -> exchange.productChange.name
+        1 -> exchange.productChange.name
+        else -> if(boolean) exchange.productOwn.name else exchange.productChange.name
+    }
+
+    val secondProductName= when (page) {
+        0 -> exchange.productOwn.name
+        1 -> exchange.productOwn.name
+        else -> if(boolean) exchange.productChange.name else exchange.productOwn.name
+    }
+
+
     Column(Modifier.clickable { goToDetailsScreen(exchange.id.toString(), page.toString()) }) {
         Row(
             modifier = Modifier
@@ -161,47 +238,25 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 GlideImage(
-                    imageModel = {
-                        when (page) {
-                            0 -> exchange.userChange.profilePicture
-                            1 -> exchange.userOwn.profilePicture
-                            else -> exchange.userChange.profilePicture
-                        }
-                                 },
+                    imageModel = { upperUserProfileImage },
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text =
-                        when (page) {
-                            0 -> exchange.userChange.name
-                            1 -> exchange.userOwn.name
-                            else -> exchange.userChange.name
-                        }
-                    ,
+                    text = upperUserName,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             Text(
-                text =
-                if (page == 0 && exchange.status == "Pendiente") "Enviado"
-                else if(page==1) exchange.status
-                else "WhatsApp",
-                color =
-                    if (page == 0 && exchange.status == "Pendiente") Color.Gray
-                    else if(page==1) Color(0xFFFFD146)
-                    else Color.White,
+                text = statusText(),
+                color = statusColor(),
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
-                    .background(
-                        if (page == 0 && exchange.status == "Pendiente") Color(0xFFE8E8E8)
-                        else if(page==1) Color.Black
-                        else Color(0xFF38B000)
-                    )
+                    .background(statusBackgroundColor())
                     .padding(horizontal = 20.dp, vertical = 4.dp),
                 fontWeight = FontWeight.Bold
             )
@@ -216,18 +271,8 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ExchangeProductCard(
-                productImageUrl =
-                when (page) {
-                    0 -> exchange.productChange.image
-                    1 -> exchange.productChange.image
-                    else -> exchange.productOwn.image
-                },
-                productName =
-                when (page) {
-                    0 -> exchange.productChange.name
-                    1 -> exchange.productChange.name
-                    else -> exchange.productOwn.name
-                },
+                productImageUrl = firstProductImage,
+                productName = firstProductName,
                 tag = textUpperImage
             )
             Image(
@@ -236,18 +281,8 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 modifier = Modifier.size(50.dp)
             )
             ExchangeProductCard(
-                productImageUrl =
-                when (page) {
-                    0 -> exchange.productOwn.image
-                    1 -> exchange.productOwn.image
-                    else -> exchange.productChange.image
-                },
-                productName =
-                when (page) {
-                    0 -> exchange.productOwn.name
-                    1 -> exchange.productOwn.name
-                    else -> exchange.productChange.name
-                },
+                productImageUrl = secondProductImage,
+                productName = secondProductName,
                 tag = textUpperImage2
             )
         }
