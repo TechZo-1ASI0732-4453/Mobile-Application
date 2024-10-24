@@ -219,11 +219,11 @@ fun NavScreen() {
                 ReviewScreen(
                     userId = userId,
                     onBack = { navController.popBackStack() },
-                    onProductClick = { product ->
+                    onProductClick = { productId,productUserid ->
                         navController.navigate(
                             Routes.ProductDetails.createProductDetailsRoute(
-                                product.id.toString(),
-                                product.user.id.toString()
+                                productId.toString(),
+                                productUserid.toString()
                             )
                         )
                     },
