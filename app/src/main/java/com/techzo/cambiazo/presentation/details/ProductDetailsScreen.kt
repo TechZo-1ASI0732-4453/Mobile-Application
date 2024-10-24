@@ -36,7 +36,9 @@ fun ProductDetailsScreen(
     productId: Int,
     userId: Int,
     viewModel: ProductDetailsViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onUserClick: () -> Unit,
+    onMakeOffer: (desiredProduct: Product, offeredProduct: Product) -> Unit
 ) {
     val productState = viewModel.product.value
     val averageRating = viewModel.averageRating.value
@@ -61,10 +63,10 @@ fun ProductDetailsScreen(
                             countReviews = countReviews ?: 0,
                             isFavoriteState = isFavoriteState,
                             onFavoriteToggle = { isCurrentlyFavorite ->
-                                // Lógica para alternar el estado de favorito
                                 viewModel.toggleFavoriteStatus(productId, isCurrentlyFavorite)
                             },
-                            onUserClick = {},
+                            onUserClick = { onUserClick() },
+                            onMakeOffer = onMakeOffer,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 360.dp)
@@ -73,6 +75,7 @@ fun ProductDetailsScreen(
                         )
                     }
                 } else if (productState.isLoading) {
+                    // Show loading indicator
                 } else {
                     Text(
                         text = productState.message ?: "Error al cargar detalles del producto",
@@ -148,6 +151,7 @@ fun ProductDetails(
     isFavoriteState: UIState<Boolean>,
     onFavoriteToggle: (Boolean) -> Unit,
     onUserClick: () -> Unit,
+    onMakeOffer: (desiredProduct: Product, offeredProduct: Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -162,7 +166,7 @@ fun ProductDetails(
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
-                        ) { onUserClick() }, // Sin efecto visual al hacer clic
+                        ) { onUserClick() },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
@@ -171,9 +175,9 @@ fun ProductDetails(
                         modifier = Modifier
                             .size(60.dp)
                             .clip(CircleShape)
-                            .background(Color.LightGray)
+                            .background(Color.LightGray),
+                        contentScale = ContentScale.Crop
                     )
-
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
@@ -203,7 +207,6 @@ fun ProductDetails(
 
                     IconButton(
                         onClick = {
-                            // Aquí invocamos el toggle del favorito
                             onFavoriteToggle(isFavoriteState.data ?: false)
                         },
                         modifier = Modifier
@@ -266,7 +269,9 @@ fun ProductDetails(
 
         ButtonApp(
             text = "Intercambiar",
-            onClick = { /* Acción para intercambio */ }
+            onClick = {
+                onMakeOffer(product, product)
+            }
         )
     }
 }
