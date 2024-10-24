@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.Constants
+import com.techzo.cambiazo.common.components.CustomTabs
 import com.techzo.cambiazo.common.components.EmptyStateMessage
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
@@ -70,66 +71,23 @@ fun ExchangeScreen(
             pageCount = { 3 }, initialPage = 0
         )
 
-
         val coroutineScope = rememberCoroutineScope()
 
-        Row(
-            modifier = Modifier
-                .clip(
-                    RoundedCornerShape(20.dp)
-                )
-                .background(Color(0xFFE8E8E8))
-        ) {
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(0)
-                    }
-                    viewModel.getExchangesByUserOwnId()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (pagerState.currentPage == 0) Color(0xFFFFD146) else Color.Transparent
-                )
-            ) {
-                Text(
-                    text = "Enviados",
-                    color = if (pagerState.currentPage == 0) Color.Black else Color.Gray
-                )
+        val itemTabs= listOf("Enviados", "Recibidos", "Finalizados")
+        CustomTabs(
+            selectedTabIndex = pagerState.currentPage,
+            itemTabs = itemTabs,
+            onTabSelected = { index ->
+                coroutineScope.launch {
+                    pagerState.animateScrollToPage(index)
+                }
+                when(index) {
+                    0 -> viewModel.getExchangesByUserOwnId()
+                    1 -> viewModel.getExchangesByUserChangeId()
+                    2 -> viewModel.getFinishedExchanges()
+                }
             }
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(1)
-                    }
-                    viewModel.getExchangesByUserChangeId()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (pagerState.currentPage == 1) Color(0xFFFFD146) else Color.Transparent
-                )
-            ) {
-                Text(
-                    text = "Recibidos",
-                    color = if (pagerState.currentPage == 1) Color.Black else Color.Gray
-                )
-            }
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(2)
-                    }
-                    viewModel.getFinishedExchanges()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (pagerState.currentPage == 2) Color(0xFFFFD146) else Color.Transparent
-                )
-            ) {
-                Text(
-                    text = "Finalizados",
-                    color = if (pagerState.currentPage == 2) Color.Black else Color.Gray
-                )
-            }
-        }
-
+        )
         HorizontalPager(
             state = pagerState, userScrollEnabled = false
         ) {
