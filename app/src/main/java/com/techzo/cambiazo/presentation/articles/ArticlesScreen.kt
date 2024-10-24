@@ -27,8 +27,9 @@ import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 fun ArticlesScreen(
     viewModel: ArticlesViewModel = hiltViewModel(),
     bottomBar : @Composable () -> Unit = {},
-    onPublish: () -> Unit = {}
-){
+    onPublish: () -> Unit = {},
+    onProductClick: (Int, Int) -> Unit,
+    ){
 
     val products = viewModel.products.value
 
@@ -60,6 +61,7 @@ fun ArticlesScreen(
                                     iconActions = true,
                                     deleteProduct = {productId->viewModel.deleteProduct(productId)},
                                     editProduct = {},
+                                    onClick = onProductClick
                                 )
                             }
                             if (rowItems.size == 1) {

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -38,6 +39,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.R
@@ -61,7 +63,7 @@ fun ExchangeScreen(
     //val exchangesReceived=viewModel.exchangesReceived.value
 
     MainScaffoldApp(bottomBar = bottomBar,
-        paddingCard = PaddingValues(top = 10.dp),
+        paddingCard = PaddingValues(start = 15.dp, end = 15.dp, top = 20.dp),
         contentsHeader = {
             Spacer(modifier = Modifier.height(30.dp))
             TextTitleHeaderApp(text ="Mis intercambios")
@@ -88,6 +90,8 @@ fun ExchangeScreen(
                 }
             }
         )
+        Spacer(modifier = Modifier.height(15.dp))
+
         HorizontalPager(
             state = pagerState, userScrollEnabled = false
         ) {
@@ -107,8 +111,11 @@ fun ExchangeScreen(
                 )
             } else {
                 LazyColumn {
-                    items(state.data ?: emptyList()) { exchange ->
+                    itemsIndexed(state.data ?: emptyList()) { index, exchange ->
                         ExchangeBox(exchange, pagerState.currentPage, goToDetailsScreen)
+                        if (index != (state.data?.size ?: 0) - 1) {
+                            HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
+                        }
                     }
                 }
             }
@@ -189,11 +196,15 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
     }
 
 
+
     Column(Modifier.clickable { goToDetailsScreen(exchange.id.toString(), page.toString()) }) {
+
+        Spacer(modifier = Modifier.height(20.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
+                .padding(horizontal = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -201,7 +212,7 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 GlideImage(
                     imageModel = { upperUserProfileImage },
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(50.dp)
                         .clip(CircleShape)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -218,16 +229,18 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
                     .background(statusBackgroundColor())
-                    .padding(horizontal = 20.dp, vertical = 4.dp),
-                fontWeight = FontWeight.Bold
+                    .padding(horizontal = 20.dp, vertical = 3.dp),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp
             )
 
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(15.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(9.dp),
+                .padding(horizontal = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -247,7 +260,8 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 tag = textUpperImage2
             )
         }
-        HorizontalDivider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(20.dp))
+        Spacer(modifier = Modifier.height(35.dp))
+
     }
 }
 
@@ -257,21 +271,25 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
         Text(
             text = tag,
             color = Color(0xFF6D6D6D),
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
+            modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp),
+            textAlign = TextAlign.Center,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
         )
         GlideImage(
             imageModel = { productImageUrl },
             modifier = Modifier
-                .height(150.dp)
+                .height(125.dp)
                 .clip(RoundedCornerShape(10, 10, 0, 0))
         )
         Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxWidth()
+                .height(60.dp)
                 .shadow(
                     elevation = 4.dp,
-                    shape = RoundedCornerShape(0, 0, 20, 20),
+                    shape = RoundedCornerShape(12.dp),
                     clip = true
                 )
                 .background(color = Color.White, shape = RoundedCornerShape(0, 0, 10, 10))
@@ -279,9 +297,10 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
             Text(
                 text = productName,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
+                    .fillMaxWidth(),
                 textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.Bold,
             )
         }

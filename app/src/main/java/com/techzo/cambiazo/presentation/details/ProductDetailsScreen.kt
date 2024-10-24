@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.StarRating
@@ -270,9 +271,13 @@ fun ProductDetails(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        ButtonApp(
-            text = "Intercambiar",
-            onClick = { /* Acción para intercambio */ }
-        )
+        val currentUserId = Constants.user?.id
+
+        if (product.user.id != currentUserId) {
+            ButtonApp(
+                text = "Intercambiar",
+                onClick = { /* Acción para intercambio */ }
+            )
+        }
     }
 }

@@ -26,7 +26,7 @@ fun CustomTabs(selectedTabIndex: Int,itemTabs: List<String> ,onTabSelected: (Int
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 14.dp),
+            .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(

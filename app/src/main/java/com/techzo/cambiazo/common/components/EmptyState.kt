@@ -39,7 +39,7 @@ fun EmptyStateMessage(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .padding(horizontal = 15.dp, vertical = 16.dp),
             elevation = CardDefaults.cardElevation(8.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0)),
             shape = RoundedCornerShape(16.dp)
