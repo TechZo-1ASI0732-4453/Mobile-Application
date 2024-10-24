@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.presentation.review
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -118,6 +119,17 @@ class ReviewViewModel @Inject constructor(
                     }
                 }
             }.stateIn(viewModelScope, SharingStarted.Lazily, UIState(isLoading = false))
+        }
+    }
+
+    fun addReview(message: String, rating: Int, state:String, userAuthorId:Int, userReceptorId: Int, exchangeId: Int) {
+        viewModelScope.launch {
+            val result = reviewRepository.addReview(message, rating, state, userAuthorId, userReceptorId, exchangeId)
+            if (result is Resource.Success){
+                Log.d("ReviewViewModel", "Review added successfully")
+            }else{
+                Log.e("ReviewViewModel", "Error adding review: ${result.message}")
+            }
         }
     }
 }

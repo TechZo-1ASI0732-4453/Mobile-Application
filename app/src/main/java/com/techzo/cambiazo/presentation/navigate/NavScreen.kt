@@ -52,7 +52,7 @@ sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate
 
     data class Articles(val onNavigate: () -> Unit = {}) : ItemsScreens(
         icon = Icons.Filled.Label,
-        title = "Mis Articulos",
+        title = "Mis Artículos",
         navigate = onNavigate
     )
 
@@ -78,9 +78,9 @@ sealed class Routes(val route: String) {
     object Donation : Routes("DonationScreen")
     object Profile : Routes("ProfileScreen")
     object Exchange : Routes("ExchangeScreen")
-    object TermsAndConditions: Routes("TermsAndConditionsScreen")
-    object ExchangeDetails: Routes("ExchangeDetailsScreen/{exchangeId}/{page}"){
-        fun createExchangeDetailsRoute(exchangeId:String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
+    object TermsAndConditions : Routes("TermsAndConditionsScreen")
+    object ExchangeDetails : Routes("ExchangeDetailsScreen/{exchangeId}/{page}") {
+        fun createExchangeDetailsRoute(exchangeId: String, page: String) = "ExchangeDetailsScreen/$exchangeId/$page"
     }
     object ProductDetails : Routes("ProductDetailsScreen/{productId}/{userId}") {
         fun createProductDetailsRoute(productId: String, userId: String) = "ProductDetailsScreen/$productId/$userId"
@@ -141,8 +141,8 @@ fun NavScreen() {
                 onProductClick = { productId, userId ->
                     navController.navigate(
                         Routes.ProductDetails.createProductDetailsRoute(
-                            productId,
-                            userId
+                            productId.toString(),
+                            userId.toString()
                         )
                     )
                 }
@@ -160,7 +160,12 @@ fun NavScreen() {
             ExchangeScreen(
                 bottomBar = { BottomBarNavigation(items) },
                 goToDetailsScreen = { exchangeId, page ->
-                    navController.navigate(Routes.ExchangeDetails.createExchangeDetailsRoute(exchangeId, page))
+                    navController.navigate(
+                        Routes.ExchangeDetails.createExchangeDetailsRoute(
+                            exchangeId,
+                            page
+                        )
+                    )
                 }
             )
         }
@@ -168,18 +173,29 @@ fun NavScreen() {
         composable(route = Routes.Article.route) {
             ArticlesScreen(
                 bottomBar = { BottomBarNavigation(items) },
-                onPublish = {navController.navigate(Routes.Publish.route)}
+                onPublish = {navController.navigate(Routes.Publish.route)},
+                onProductClick = { productId, userId ->
+                    navController.navigate(
+                        Routes.ProductDetails.createProductDetailsRoute(
+                            productId.toString(),
+                            userId.toString()
+                        )
+                    )
+                }
+
             )
         }
 
         composable(route = Routes.ExchangeDetails.route) { backStackEntry ->
             val exchange = backStackEntry.arguments?.getString("exchangeId")?.toIntOrNull()
             val page = backStackEntry.arguments?.getString("page")?.toIntOrNull()
-            ExchangeDetailsScreen(
-                goBack = { navController.popBackStack() },
-                exchangeId = exchange!!,
-                page = page!!
-            )
+            if (exchange != null && page != null) {
+                ExchangeDetailsScreen(
+                    goBack = { navController.popBackStack() },
+                    exchangeId = exchange,
+                    page = page
+                )
+            }
         }
 
         composable(route = Routes.Profile.route) {
@@ -202,7 +218,10 @@ fun NavScreen() {
 
         composable(route = Routes.MyReviews.route) {
             MyReviewsScreen(
-                back = { navController.popBackStack() }
+                back = { navController.popBackStack() },
+                OnUserClick = { userId ->
+                    navController.navigate(Routes.Reviews.createRoute(userId.toString()))
+                }
             )
         }
         composable(route = Routes.EditProfile.route) {
@@ -225,6 +244,27 @@ fun NavScreen() {
             )
         }
 
+        composable(route = Routes.Reviews.route) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
+            if (userId != null) {
+                ReviewScreen(
+                    userId = userId,
+                    onBack = { navController.popBackStack() },
+                    onProductClick = { productId,productUserid ->
+                        navController.navigate(
+                            Routes.ProductDetails.createProductDetailsRoute(
+                                productId.toString(),
+                                productUserid.toString()
+                            )
+                        )
+                    },
+                    onUserClick = { selectedUserId ->
+                        navController.navigate(Routes.Reviews.createRoute(selectedUserId.toString()))
+                    }
+                )
+            }
+        }
+
         composable(route = Routes.ProductDetails.route) { backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull()
             val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
@@ -233,28 +273,9 @@ fun NavScreen() {
                     productId = productId,
                     userId = userId,
                     onBack = { navController.popBackStack() },
-                    onMakeOffer = { desiredProduct, offeredProduct ->
-                        navController.navigate(
-                            Routes.MakeOffer.createMakeOfferRoute(
-                                desiredProductId = desiredProduct.id.toString(),
-                                offeredProductIds = listOf(offeredProduct.id.toString())
-                            )
-                        )
-                    },
-                    onUserClick = {
-                        navController.navigate(Routes.Reviews.createRoute(userId.toString()))
+                    onUserClick = { selectedUserId ->
+                        navController.navigate(Routes.Reviews.createRoute(selectedUserId.toString()))
                     }
-                )
-            }
-        }
-
-        composable(route = Routes.Reviews.route) { backStackEntry ->
-            val userId = backStackEntry.arguments
-                ?.getString("userId")?.toIntOrNull()
-            if (userId != null) {
-                ReviewScreen(
-                    userId = userId,
-                    onBack = { navController.popBackStack() }
                 )
             }
         }

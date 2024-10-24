@@ -53,7 +53,6 @@ fun ProfileScreen(
     val countReviews = viewModel.countReviews.value
 
     val user = viewModel.user.value
-    val state = viewModel.state.value
 
     LaunchedEffect(Unit) {
         viewModel.refreshUserData()
@@ -63,6 +62,7 @@ fun ProfileScreen(
         bottomBar = bottomBar,
         paddingCard = PaddingValues(top = 15.dp),
         contentsHeader = {
+            Spacer(modifier = Modifier.height(60.dp))
         },
         profileImage = {
                 ProfileImage(

@@ -1,5 +1,7 @@
 package com.techzo.cambiazo.common.components
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,11 +26,11 @@ import androidx.compose.ui.unit.sp
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.domain.Review
 
-
 @Composable
-fun ReviewItem(review: Review){
+fun ReviewItem(review: Review, OnUserClick: (Int) -> Unit, dividerUp: Boolean = true) {
+    val interactionSource = remember { MutableInteractionSource() }
 
-    HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
+    if (dividerUp) HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
 
     Spacer(modifier = Modifier.height(20.dp))
 
@@ -42,6 +45,10 @@ fun ReviewItem(review: Review){
                 modifier = Modifier
                     .size(65.dp)
                     .clip(CircleShape)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) { OnUserClick(review.userAuthor.id) }
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column {
@@ -49,7 +56,13 @@ fun ReviewItem(review: Review){
                     text = review.userAuthor.name,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(start = 2.dp))
+                    modifier = Modifier
+                        .padding(start = 2.dp)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) { OnUserClick(review.userAuthor.id) }
+                )
                 StarRating(rating = review.rating.toDouble(), size = 22.dp)
             }
         }
@@ -63,4 +76,7 @@ fun ReviewItem(review: Review){
         )
         Spacer(modifier = Modifier.height(20.dp))
     }
+
+    if (!dividerUp) HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
+
 }

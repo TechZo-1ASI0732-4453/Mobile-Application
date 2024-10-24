@@ -55,7 +55,7 @@ fun ExplorerScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 10.dp, horizontal = 20.dp),
+                    .padding(vertical = 25.dp, horizontal = 20.dp),
             ) {
                 OutlinedTextField(
                     modifier = Modifier
@@ -99,28 +99,31 @@ fun ExplorerScreen(
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 15.dp)
+                .padding(horizontal = 20.dp, vertical = 10.dp)
         ) {
             items(categories.data ?: emptyList()) { category ->
                 val isSelected = viewModel.categoryId.value == category.id
 
-                Button(
-                    onClick = { viewModel.onProductCategorySelected(category.id) },
+                Box(
                     modifier = Modifier
                         .padding(end = 10.dp)
+                        .height(45.dp)
                         .background(
                             if (isSelected) Color(0xFFFFD146)
                             else Color.White,
                             RoundedCornerShape(10.dp)
                         )
-                        .border(1.dp, Color(0xFFFFD146), RoundedCornerShape(10.dp))
-                        .clip(RoundedCornerShape(10.dp)),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color.Black
-                    )
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable { viewModel.onProductCategorySelected(category.id) }
+                        .border(1.dp, Color(0xFFFFD146), RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(text = category.name, color = Color.Black, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
+                    Text(
+                        modifier = Modifier.padding(horizontal = 25.dp).fillMaxWidth(),
+                        text = category.name,
+                        color = Color.Black,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
                         fontFamily = FontFamily.SansSerif)
                 }
             }
@@ -132,7 +135,7 @@ fun ExplorerScreen(
                 Products(product, onProductClick)
             }
             item {
-                Spacer(modifier = Modifier.height(110.dp))
+                Spacer(modifier = Modifier.height(30.dp))
             }
         }
     }

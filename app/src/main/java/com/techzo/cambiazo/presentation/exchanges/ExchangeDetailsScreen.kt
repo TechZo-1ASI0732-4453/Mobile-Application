@@ -1,6 +1,9 @@
 package com.techzo.cambiazo.presentation.exchanges
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,10 +30,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,17 +46,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.skydoves.landscapist.glide.GlideImage
+import com.techzo.cambiazo.common.Constants
+import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.presentation.review.ReviewViewModel
 
 @Composable
-fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), exchangeId:Int, page: Int) {
+fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), reviewViewModel: ExchangeViewModel=hiltViewModel(), exchangeId:Int, page: Int) {
 
     LaunchedEffect(Unit) {
         viewModel.getExchangeById(exchangeId)
     }
 
     val exchange = viewModel.exchange.value
-
+    val boolean = exchange.data?.userOwn?.id == Constants.user?.id
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 10.dp),
@@ -81,37 +92,37 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
             val  profilePicture= when (page) {
                 0 -> exchange.userChange.profilePicture
                 1 -> exchange.userOwn.profilePicture
-                else -> exchange.userChange.profilePicture
+                else -> if(boolean) exchange.userChange.profilePicture else exchange.userOwn.profilePicture
             }
 
             val userName= when (page) {
                 0 -> exchange.userChange.name
                 1 -> exchange.userOwn.name
-                else -> exchange.userChange.name
+                else -> if(boolean) exchange.userChange.name else exchange.userOwn.name
             }
 
             val productName= when (page) {
                 0 -> exchange.productChange.name
                 1 -> exchange.productOwn.name
-                else -> exchange.productChange.name
+                else ->if(boolean) exchange.productChange.name else exchange.productOwn.name
             }
 
             val productName2= when (page) {
                 0 -> exchange.productOwn.name
                 1 -> exchange.productChange.name
-                else -> exchange.productOwn.name
+                else -> if(boolean) exchange.productOwn.name else exchange.productChange.name
             }
 
             val price= when (page) {
                 0 -> exchange.productChange.price
                 1 -> exchange.productOwn.price
-                else -> exchange.productChange.price
+                else -> if(boolean) exchange.productChange.price else exchange.productOwn.price
             }
 
             val price2= when (page) {
                 0 -> exchange.productOwn.price
                 1 -> exchange.productChange.price
-                else -> exchange.productOwn.price
+                else -> if(boolean) exchange.productOwn.price else exchange.productChange.price
             }
 
             val status= if (page == 0 && exchange.status == "Pendiente") "Enviado"
@@ -121,25 +132,25 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
             val description= when (page) {
                 0 -> exchange.productChange.description
                 1 -> exchange.productOwn.description
-                else -> exchange.productChange.description
+                else -> if(boolean) exchange.productChange.description else exchange.productOwn.description
             }
 
             val location= when (page) {
-                0 -> viewModel.getLocationString(exchange.productChange.location.districtId)
-                1 -> viewModel.getLocationString(exchange.productOwn.location.districtId)
-                else -> viewModel.getLocationString(exchange.productChange.location.districtId)
+                0 -> viewModel.getLocationString(exchange.productChange.districtId)
+                1 -> viewModel.getLocationString(exchange.productOwn.districtId)
+                else -> viewModel.getLocationString(exchange.productChange.districtId)
             }
 
             val productImage= when (page) {
                 0 -> exchange.productChange.image
                 1 -> exchange.productOwn.image
-                else -> exchange.productChange.image
+                else -> if(boolean) exchange.productChange.image else exchange.productOwn.image
             }
 
             val productImage2= when (page) {
                 0 -> exchange.productOwn.image
                 1 -> exchange.productChange.image
-                else -> exchange.productOwn.image
+                else -> if(boolean) exchange.productOwn.image else exchange.productChange.image
             }
 
             val textUnderImage = when (page) {
@@ -154,6 +165,28 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                 else -> "Hiciste cambio por:"
             }
 
+            val phoneNumber =when (page) {
+                0 -> "+51${exchange.userChange.phoneNumber}"
+                1 -> "+51${exchange.userOwn.phoneNumber}"
+                else -> if(boolean) "+51${exchange.userChange.phoneNumber}" else "+51${exchange.userOwn.phoneNumber}"
+            }
+
+            val textColorStatus= when (page) {
+                0 -> if (exchange.status == "Pendiente") Color.Gray else Color(0xFF38B000)
+                1 -> Color(0xFFFFD146)
+                else -> Color.White
+            }
+
+            val textBackgroundColor= when (page) {
+                0 -> if (exchange.status == "Pendiente") Color(0xFFE8E8E8) else Color(0xFF38B000)
+                1 -> Color.Black
+                else -> Color(0xFF38B000)
+            }
+
+            val context = LocalContext.current
+
+            val authorId= if(boolean) exchange.userOwn.id else exchange.userChange.id
+            val receptorId = if(boolean) exchange.userChange.id else exchange.userOwn.id
 
             Column{
                 Row(
@@ -179,19 +212,23 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                     }
                     Text(
                         text = status,
-                        color =
-                        if (page == 0 && exchange.status == "Pendiente") Color.Gray
-                        else if(page==1) Color(0xFFFFD146)
-                        else Color.White,
+                        color = textColorStatus,
                         modifier = Modifier
                             .clip(RoundedCornerShape(50.dp))
-                            .background(
-                                if (page == 0 && exchange.status == "Pendiente") Color(0xFFE8E8E8)
-                                else if(page==1) Color.Black
-                                else Color(0xFF38B000)
-                            )
-                            .padding(horizontal = 20.dp, vertical = 4.dp),
-                        fontWeight = FontWeight.Bold
+                            .background(textBackgroundColor)
+                            .padding(horizontal = 20.dp, vertical = 4.dp)
+                            .clickable {
+                                if(page==2){
+                                    val formattedNumber = phoneNumber.replace("+", "").replace(" ", "")
+                                    val url = "https://wa.me/$formattedNumber"
+                                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                                        data = Uri.parse(url)
+                                    }
+                                    context.startActivity(intent)
+                                }
+                            }
+                        ,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -243,14 +280,19 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                     }
                 }
                 HorizontalDivider()
-                BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page)
+                BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id, goBack = goBack, userAuthor = authorId, userReceptor = receptorId)
             }
         }
     }
 }
 
 @Composable
-fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, price: String, page: Int){
+fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, price: String, page: Int, viewModel: ExchangeViewModel = hiltViewModel(), reviewViewModel: ReviewViewModel= hiltViewModel(), exchangeId: Int, goBack: () -> Unit,userAuthor:Int, userReceptor: Int) {
+    var showDialog by remember { mutableStateOf(false) }
+    var showDialog2 by remember { mutableStateOf(false) }
+    var showDialog3 by remember { mutableStateOf(false) }
+
+
     if(page == 0){
         Box(
             modifier = Modifier
@@ -314,7 +356,10 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                     }
                 }
                 Row(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)){
-                    Button(onClick = { },
+                    Button(onClick = {
+                        showDialog=true
+                        viewModel.updateExchangeStatus(exchangeId,"Aceptado")
+                    },
                         modifier = Modifier.weight(0.5f)
                             .height(40.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -330,8 +375,18 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                                 fontFamily = FontFamily.SansSerif)
                         )
                     }
+                    if(showDialog){
+                        DialogApp(
+                            message = "¡Intercambio Aceptado!",
+                            description = "¡Felicidades por completar tu CambiaZo! Ahora puedes comunicarte con el otro usuario para concretar el intercambio.",
+                            labelButton1 = "Aceptar",
+                            onClickButton1 = { viewModel.getExchangesByUserChangeId(); showDialog = false; goBack() }
+                        )
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { },
+                    Button(onClick = {
+                        showDialog2=true
+                    },
                         modifier = Modifier.weight(0.5f)
                             .height(40.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -347,11 +402,23 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                                 fontFamily = FontFamily.SansSerif)
                         )
                     }
+                    if(showDialog2){
+                        DialogApp(
+                            message = "¿Estás seguro de deseas rechazar la oferta?",
+                            description = "Si rechazas la oferta, no podrás volver a verla. ¿Quieres continuar?",
+                            labelButton1 = "Rechazar Oferta",
+                            labelButton2 = "Cancelar",
+                            onClickButton1 = { viewModel.updateExchangeStatus(exchangeId, "Rechazado"); viewModel.getExchangesByUserChangeId(); showDialog2 = false; goBack() },
+                            onClickButton2 = { showDialog2 = false; }
+                        )
+                    }
                 }
             }
         }
     }
     if(page == 2){
+        var review= ""
+        var rating= 0
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -392,7 +459,9 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                             color = Color(0xFFFFD146),
                             fontWeight = FontWeight.Bold
                         )
-                        Button(onClick = { },
+                        Button(onClick = {
+                            showDialog3=true
+                        },
                             modifier = Modifier.fillMaxWidth()
                                 .height(40.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -408,29 +477,25 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                                     fontFamily = FontFamily.SansSerif)
                             )
                         }
+                        if(showDialog3){
+                            DialogApp(
+                                message = "Deja tu Reseña",
+                                isNewReview = true,
+                                labelButton1 = "Enviar",
+                                labelButton2 = "Cancelar",
+                                onClickButton1 = { showDialog3=false},
+                                onClickButton2 = {showDialog3=false},
+                                onSubmitReview = { newRating, newReview ->
+                                    rating = newRating
+                                    review = newReview
+                                    reviewViewModel.addReview(review,rating,"Enviado",userAuthor, userReceptor, exchangeId,)
+                                    showDialog3 = false
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
     }
-
-    /*
-    Box(modifier = Modifier.fillMaxWidth()){
-        Column {
-            Text(textUnderImage2)
-            Row {
-                GlideImage(
-                    imageModel = {productImage2},
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                )
-                Column {
-                    Text(productName2)
-                    Text("S/${price2} valor aprox.")
-                }
-            }
-        }
-    }
-     */
 }

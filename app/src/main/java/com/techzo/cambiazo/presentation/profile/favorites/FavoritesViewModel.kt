@@ -74,7 +74,10 @@ class FavoritesViewModel @Inject constructor(
         viewModelScope.launch {
             val result = productDetailsRepository.deleteFavoriteProduct(productId)
             if (result is Resource.Success) {
-                removeProductLocally(productId)
+                _allFavoriteProducts.value = UIState(
+                    data = _allFavoriteProducts.value.data?.filter { it.id != productId },
+                    isLoading = false
+                )
             } else {
                 _favoriteProducts.value = UIState(
                     data = _favoriteProducts.value.data,
@@ -83,14 +86,6 @@ class FavoritesViewModel @Inject constructor(
             }
         }
     }
-
-    fun removeProductLocally(productId: Int) {
-        _allFavoriteProducts.value = UIState(
-            data = _allFavoriteProducts.value.data?.filter { it.id != productId },
-            isLoading = false
-        )
-    }
-
 
     fun confirmRemoveProduct(product: Product) {
         _productToRemove.value = product

@@ -22,10 +22,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.StarRating
@@ -40,6 +42,7 @@ fun ProductDetailsScreen(
     onUserClick: () -> Unit,
     onMakeOffer: (desiredProduct: Product, offeredProduct: Product) -> Unit
 ) {
+    val viewModel: ProductDetailsViewModel = hiltViewModel()
     val productState = viewModel.product.value
     val averageRating = viewModel.averageRating.value
     val countReviews = viewModel.countReviews.value
@@ -187,19 +190,23 @@ fun ProductDetails(
                             fontSize = 20.sp
                         )
 
+                        Spacer(modifier = Modifier.height(4.5.dp))
+
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            StarRating(rating = averageRating, size = 26.dp)
-                            Spacer(modifier = Modifier.width(6.dp))
+                            StarRating(rating = averageRating, size = 24.dp)
+                            Spacer(modifier = Modifier.width(4.dp))
                             Box(
                                 modifier = Modifier
-                                    .background(Color.Black, shape = RoundedCornerShape(50))
-                                    .padding(horizontal = 13.dp, vertical = 1.5.dp)
+                                    .background(Color.Black, shape = RoundedCornerShape(44))
+                                    .size(height = 21.3.dp, width = 29.dp)
+                                    .wrapContentSize(Alignment.Center)
                             ) {
                                 Text(
                                     text = "$countReviews",
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
+                                    fontSize = 15.sp,
+                                    textAlign = TextAlign.Center
                                 )
                             }
                         }
@@ -244,6 +251,8 @@ fun ProductDetails(
                 fontSize = 20.sp
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Filled.LocationOn,
@@ -263,7 +272,7 @@ fun ProductDetails(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(text = "Le interesa:", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text(text = product.desiredObject, fontSize = 18.sp)
+        Text(text = product.desiredObject, fontSize = 18.sp , color = Color.Gray)
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -273,5 +282,6 @@ fun ProductDetails(
                 onMakeOffer(product, product)
             }
         )
+
     }
 }

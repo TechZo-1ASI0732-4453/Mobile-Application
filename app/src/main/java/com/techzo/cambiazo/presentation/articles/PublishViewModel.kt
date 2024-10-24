@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.presentation.articles
 
+import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -9,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.common.uploadImageToFirebase
 import com.techzo.cambiazo.data.remote.products.CreateProductDto
 import com.techzo.cambiazo.data.repository.LocationRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
@@ -159,7 +161,7 @@ class PublishViewModel @Inject constructor(
         _districtSelected.value = district
     }
 
-    fun onPublish() {
+    fun validatePublish(context: Context) {
 
         if (_name.value.isEmpty()) {
             _errorName.value = true
@@ -190,7 +192,18 @@ class PublishViewModel @Inject constructor(
             return
         }
 
-        createProduct()
+        uploadImageToFirebase(
+            context = context,
+            fileUri = _image.value!!,
+            onSuccess = { imageUrl ->
+                createProduct(imageUrl)
+            },
+            onFailure = {
+            },
+            onUploadStateChange = {  },
+            path = "products"
+        )
+
     }
 
 
@@ -246,7 +259,7 @@ class PublishViewModel @Inject constructor(
         }
     }
 
-    fun createProduct() {
+    fun createProduct(urlImage: String) {
         _productState.value = UIState(isLoading = true)
         viewModelScope.launch {
             val product = CreateProductDto(
@@ -255,7 +268,7 @@ class PublishViewModel @Inject constructor(
                 description = _description.value,
                 desiredObject = _objectChange.value,
                 districtId = _districtSelected.value!!.id,
-                image = Constants.DEFAULT_PROFILE_PICTURE,
+                image = urlImage,
                 name = _name.value,
                 price = _price.value.toInt(),
                 productCategoryId = _categorySelected.value!!.id,
