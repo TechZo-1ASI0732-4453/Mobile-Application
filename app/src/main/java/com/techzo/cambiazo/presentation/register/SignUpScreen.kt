@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,9 +16,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
+import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.FieldTextApp
 import com.techzo.cambiazo.common.components.LoginGoogleApp
@@ -48,16 +52,17 @@ fun SignUpScreen(
     navigateToTermsAndConditions: () -> Unit,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
-    val username = viewModel.username.value
-    val password = viewModel.password.value
     val name = viewModel.name.value
+    val password = viewModel.password.value
+    val email = viewModel.username.value
     val phoneNumber = viewModel.phoneNumber.value
     val showPassword = viewModel.showPassword.value
     val showPasswordRepeat = viewModel.showPasswordRepeat.value
     val repitePassword = viewModel.repitePassword.value
+    val isChecked = viewModel.isChecked
+     val state = viewModel.state.value
+    val successDialog = viewModel.successDialog.value
 
-    val isChecked = remember { mutableStateOf(false) }
-    val showDialog = remember { mutableStateOf(false) }
 
     MainScaffoldApp(
         paddingCard = PaddingValues(horizontal = 40.dp, vertical = 25.dp),
@@ -75,11 +80,26 @@ fun SignUpScreen(
         }
     ) {
         Spacer(modifier = Modifier.size(20.dp))
-        FieldTextApp(name, "Nombre", onValueChange = { viewModel.onNameChange(it) })
+        CustomInput(
+            value = name ,
+            type = "Text",
+            placeHolder = "Nombre",
+            onValueChange = { viewModel.onNameChange(it) }
+        )
         Spacer(modifier = Modifier.size(20.dp))
-        FieldTextApp(phoneNumber, "Numero de Telefono", onValueChange = { viewModel.onPhoneNumberChange(it) })
+        CustomInput(
+            value = phoneNumber ,
+            type = "Number",
+            placeHolder = "Numero de Telefono",
+            onValueChange = { viewModel.onPhoneNumberChange(it) }
+        )
         Spacer(modifier = Modifier.size(20.dp))
-        FieldTextApp(username, "Correo electrónico", onValueChange = { viewModel.onUsernameChange(it) })
+        CustomInput(
+            value = email ,
+            type = "Text",
+            placeHolder = "Correo electrónico",
+            onValueChange = { viewModel.onUsernameChange(it) }
+        )
 
         OutlinedTextField(
             modifier = Modifier
@@ -136,7 +156,7 @@ fun SignUpScreen(
         ) {
             Checkbox(
                 checked = isChecked.value,
-                onCheckedChange = { isChecked.value = it },
+                onCheckedChange = { viewModel.onCheckedChange(it) },
                 modifier = Modifier.size(20.dp),
                 colors = CheckboxDefaults.colors(
                     uncheckedColor = Color.Gray,
@@ -151,10 +171,18 @@ fun SignUpScreen(
             )
         }
 
-        ButtonApp("Registrarse", onClick = {
-            viewModel.signUp()
-            showDialog.value = true
-        })
+
+        state.message.let {
+            Text(text = it, color = Color.Red)
+        }
+
+        if (state.isLoading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }else{
+            ButtonApp("Registrarse", onClick = {
+                viewModel.signUp()
+            })
+        }
 
         Row(
             modifier = Modifier
@@ -183,13 +211,13 @@ fun SignUpScreen(
 
         TextLink("¿Ya tienes una cuenta? ", " Inicia Sesión", clickable = { openLogin() })
 
-        if (showDialog.value) {
+        if (successDialog) {
             DialogApp(
                 message = "¡Registro exitoso!",
                 description = "Solo queda un último paso para empezar con los CambiaZos.",
                 labelButton1 = "Iniciar Sesión",
                 onClickButton1 = {
-                    showDialog.value = false
+                    viewModel.hideSuccessDialog()
                     openLogin()
                 }
             )
