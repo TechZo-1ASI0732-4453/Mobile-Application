@@ -3,6 +3,7 @@ package com.techzo.cambiazo.presentation.articles
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,11 +40,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -50,7 +54,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import coil.compose.AsyncImage
 import com.skydoves.landscapist.glide.GlideImage
+import com.techzo.cambiazo.common.components.ArticlesOwn
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
@@ -88,9 +94,12 @@ fun ArticlesScreen(
                         horizontalArrangement = Arrangement.SpaceBetween){
 
                             rowItems.forEach {
-                                ArticlesOwn(product = it,Modifier.weight(1f)){productId->
-                                    viewModel.deleteProduct(productId)
-                                }
+                                ArticlesOwn(
+                                    product = it,Modifier.weight(1f),
+                                    iconActions = true,
+                                    deleteProduct = {productId->viewModel.deleteProduct(productId)},
+                                    editProduct = {},
+                                )
                             }
                             if (rowItems.size == 1) {
                                 Spacer(
@@ -112,116 +121,7 @@ fun ArticlesScreen(
     }
 }
 
-@Composable
-fun ArticlesOwn(product: Product, modifier: Modifier = Modifier, deleteProduct: (Int) -> Unit = {}) {
-    var showDialog by remember { mutableStateOf(false) }
-    var showActions by remember { mutableStateOf(false) }
 
-    Card(
-        modifier = modifier
-            .padding(10.dp)
-            .height(180.dp)
-            .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp))
-            .background(Color.White)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-            Box(
-                modifier = Modifier
-                    .background(Color.Transparent)
-                    .height(120.dp),
-                contentAlignment = Alignment.TopEnd
-            ) {
-                GlideImage(
-                    imageModel = { product.image },
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                if (showActions) {
-                    Popup(
-                        alignment = Alignment.TopEnd,
-                        onDismissRequest = { showActions = false }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(5.dp)
-                                .background(
-                                    Color.Black.copy(alpha = 0.6f),
-                                    RoundedCornerShape(25.dp)
-                                ),
-                        ) {
-                            IconsAction(icon = Icons.Outlined.Edit, onclick = { })
-                            Spacer(modifier = Modifier.size(15.dp))
-                            IconsAction(icon = Icons.Outlined.Delete, onclick = {
-                                showDialog = true
-                            })
-                            if (showDialog) {
-                                DialogApp(
-                                    message = "¿Estás seguro de eliminar esta publicación?",
-                                    description = "Recuerda que una vez eliminada la publicación, no se podrá deshacer.",
-                                    labelButton1 = "Eliminar",
-                                    labelButton2 = "Cancelar",
-                                    onDismissRequest = { showDialog = false; showActions = false },
-                                    onClickButton1 = { deleteProduct(product.id); showDialog = false; showActions = false },
-                                    onClickButton2 = { showDialog = false; showActions = false }
-                                )
-                            }
-                            Spacer(modifier = Modifier.size(15.dp))
-                            IconsAction(icon = Icons.Outlined.Close, onclick = { showActions = false })
-                        }
-                    }
-                } else {
-                    IconsAction(icon = Icons.Filled.MoreVert, margin = 5.dp, onclick = { showActions = true })
-                }
-
-            }
-
-            Box {
-                Column {
-                    Text(
-                        text = product.name,
-                        color = Color.Black,
-                        maxLines = 2,
-                        modifier = Modifier
-                            .padding(5.dp)
-                            .fillMaxWidth(),
-                        fontWeight = FontWeight.Bold,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun IconsAction(icon: ImageVector, margin: Dp = 0.dp, onclick: () -> Unit = {}) {
-    val backgroundColor = if (icon == Icons.Filled.MoreVert) {
-        Color.Black.copy(alpha = 0.6f)
-    } else {
-        Color.Transparent
-    }
-
-    IconButton(
-        onClick = onclick,
-        modifier = Modifier
-            .padding(margin)
-            .background(backgroundColor, RoundedCornerShape(25.dp))
-            .size(38.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(25.dp)
-        )
-    }
-}
 
 @Composable
 fun FloatingButtonApp(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
