@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.data.repository
 
 import com.techzo.cambiazo.common.Resource
+import com.techzo.cambiazo.data.remote.reviews.ReviewRequestDto
 import com.techzo.cambiazo.data.remote.reviews.ReviewService
 import com.techzo.cambiazo.data.remote.reviews.toReview
 import com.techzo.cambiazo.data.remote.reviews.toReviewAverageUser
@@ -58,21 +59,34 @@ class ReviewRepository(private val reviewService: ReviewService) {
         }
     }
 
-    suspend fun getReviewsByUserId(userId: Int): Resource<List<Review>> =
-        withContext(Dispatchers.IO) {
-            try {
-                val response = reviewService.getReviewsByUserId(userId)
-                if (response.isSuccessful) {
-                    response.body()?.let { reviewsDto ->
-                        val reviews = reviewsDto.map { it.toReview() }
-                        return@withContext Resource.Success(data = reviews)
-                    }
-                    return@withContext Resource.Error("No reviews found")
+    suspend fun getReviewsByUserId(userId: Int): Resource<List<Review>> = withContext(Dispatchers.IO) {
+        try {
+            val response = reviewService.getReviewsByUserId(userId)
+            if (response.isSuccessful) {
+                response.body()?.let { reviewsDto ->
+                    val reviews = reviewsDto.map { it.toReview() }
+                    return@withContext Resource.Success(data = reviews)
                 }
-                return@withContext Resource.Error(response.message())
-            } catch (e: Exception) {
-                return@withContext Resource.Error(e.message ?: "An error occurred")
+                return@withContext Resource.Error("No reviews found")
             }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "An error occurred")
         }
+    }
 
+    suspend fun addReview(message: String, rating: Int, state:String, userAuthorId:Int, userReceptorId: Int, exchangeId: Int): Resource<Review> = withContext(Dispatchers.IO) {
+        try {
+            val response = reviewService.addReview(ReviewRequestDto(message, rating, state,exchangeId, userAuthorId, userReceptorId))
+            if (response.isSuccessful) {
+                response.body()?.let { reviewDto ->
+                    return@withContext Resource.Success(data = reviewDto.toReview())
+                }
+                return@withContext Resource.Error("No review found")
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "An error occurred")
+        }
+    }
 }
