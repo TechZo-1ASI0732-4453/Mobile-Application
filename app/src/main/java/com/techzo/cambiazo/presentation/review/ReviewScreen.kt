@@ -68,7 +68,7 @@ fun ReviewScreen(
                 ProfileImage(
                     url = it.profilePicture,
                     shape = CircleShape,
-                    size = 100.dp
+                    size = 120.dp
                 )
             }
         },
@@ -79,7 +79,7 @@ fun ReviewScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 50.dp),
+                        .padding(top = 60.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     val user = reviewsState.data?.firstOrNull()?.userReceptor
@@ -88,9 +88,8 @@ fun ReviewScreen(
                     Text(
                         text = user?.name ?: "Usuario",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
+                        fontSize = 28.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
 
                     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                     val formattedDate = user?.createdAt?.let { dateFormat.format(it) }
@@ -102,30 +101,35 @@ fun ReviewScreen(
                         fontWeight = FontWeight.Normal
                     )
 
-                    Spacer(modifier = Modifier.height(6.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+
+
                         val averageRating = reviewAverageUser.averageRating ?: 0.0
-                        StarRating(rating = averageRating, size = 28.dp)
+                        StarRating(rating = averageRating, size = 26.dp)
                         Spacer(modifier = Modifier.width(6.dp))
+
                         Box(
                             modifier = Modifier
-                                .background(Color.Black, shape = RoundedCornerShape(50))
-                                .padding(horizontal = 12.dp, vertical = 2.dp)
+                                .background(Color.Black, shape = CircleShape)
+                                .offset(y = (-3).dp)
+                                .height(18.dp)
+                                .padding(horizontal = 10.dp),
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "${reviewsState.data?.size ?: 0}",
+                                text =  "${reviewsState.data?.size ?: 0}",
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
+                                fontSize = 12.sp
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 CustomTabs(
                     selectedTabIndex = selectedTabIndex.value,
@@ -133,7 +137,7 @@ fun ReviewScreen(
                     onTabSelected = { index -> selectedTabIndex.value = index }
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 if (selectedTabIndex.value == 0) {
                     if (articlesState.data != null && articlesState.data!!.isNotEmpty()) {
@@ -175,7 +179,7 @@ fun ReviewScreen(
                                 .fillMaxWidth()
                         ) {
                             items(reviewsState.data!!) { review ->
-                                ReviewItem(review, onUserClick)
+                                ReviewItem(review, onUserClick, dividerUp = false)
                             }
                         }
                     } else if (reviewsState.data != null && reviewsState.data!!.isEmpty()) {

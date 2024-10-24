@@ -53,7 +53,6 @@ fun ProfileScreen(
     val countReviews = viewModel.countReviews.value
 
     val user = viewModel.user.value
-    val state = viewModel.state.value
 
     LaunchedEffect(Unit) {
         viewModel.refreshUserData()

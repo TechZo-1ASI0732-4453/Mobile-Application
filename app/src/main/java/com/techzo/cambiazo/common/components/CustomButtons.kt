@@ -107,7 +107,7 @@ fun FloatingButtonApp(text: String,modifier: Modifier = Modifier, onClick: () ->
     FloatingActionButton(
         onClick = onClick,
         modifier = modifier
-            .padding(vertical = 4.dp)
+            .padding(vertical = 5.dp)
             .fillMaxWidth()
             .height(65.dp)
             .padding(bottom = 10.dp, top = 10.dp)

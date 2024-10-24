@@ -151,7 +151,16 @@ fun NavScreen() {
         composable(route = Routes.Article.route) {
             ArticlesScreen(
                 bottomBar = { BottomBarNavigation(items) },
-                onPublish = {navController.navigate(Routes.Publish.route)}
+                onPublish = {navController.navigate(Routes.Publish.route)},
+                onProductClick = { productId, userId ->
+                    navController.navigate(
+                        Routes.ProductDetails.createProductDetailsRoute(
+                            productId.toString(),
+                            userId.toString()
+                        )
+                    )
+                }
+
             )
         }
 
