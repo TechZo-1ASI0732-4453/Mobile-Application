@@ -267,7 +267,7 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
 
 @Composable
 fun ExchangeProductCard(productImageUrl: String, productName: String, tag: String) {
-    Column(modifier = Modifier.width(150.dp)) {
+    Column(modifier = Modifier.width(165.dp)) {
         Text(
             text = tag,
             color = Color(0xFF6D6D6D),
@@ -279,7 +279,12 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
         GlideImage(
             imageModel = { productImageUrl },
             modifier = Modifier
-                .height(125.dp)
+                .height(120.dp)
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(10,10),
+                    clip = true
+                )
                 .clip(RoundedCornerShape(10, 10, 0, 0))
         )
         Box(
@@ -289,7 +294,6 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
                 .height(60.dp)
                 .shadow(
                     elevation = 4.dp,
-                    shape = RoundedCornerShape(12.dp),
                     clip = true
                 )
                 .background(color = Color.White, shape = RoundedCornerShape(0, 0, 10, 10))
