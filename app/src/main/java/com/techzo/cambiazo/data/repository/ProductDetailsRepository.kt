@@ -26,6 +26,23 @@ class ProductDetailsRepository(
             }
         }
 
+    suspend fun getFavoriteProductByUserId(userId: Int): Resource<List<FavoriteProduct>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = favoriteProductService.getFavoriteProductsByUserId(userId)
+                if (response.isSuccessful) {
+                    response.body()?.let { favoriteProductsDto ->
+                        val favoriteProducts = favoriteProductsDto.map { it.toFavoriteProduct() }
+                        return@withContext Resource.Success(data = favoriteProducts)
+                    }
+                    return@withContext Resource.Error("No se encontraron productos favoritos")
+                }
+                return@withContext Resource.Error(response.message())
+            } catch (e: Exception) {
+                return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+            }
+        }
+
     suspend fun addFavoriteProduct(productId: Int): Resource<FavoriteProduct> =
         withContext(Dispatchers.IO) {
             try {

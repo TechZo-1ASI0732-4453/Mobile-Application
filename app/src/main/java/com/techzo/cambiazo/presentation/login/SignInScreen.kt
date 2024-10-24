@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveRedEye
@@ -20,6 +21,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -60,7 +62,7 @@ fun SignInScreen(openRegister: () -> Unit = {},
         paddingCard = PaddingValues(start = 40.dp , end = 40.dp,top = 70.dp),
         contentsHeader = {
             Column(modifier = Modifier
-                .fillMaxWidth().height(150.dp),
+                .fillMaxWidth().height(250.dp),
                 verticalArrangement = Arrangement.Center) {
                 Image(
                     painter = painterResource(R.drawable.cambiazo_logo_name),
@@ -85,17 +87,12 @@ fun SignInScreen(openRegister: () -> Unit = {},
         )
 
 
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
-            shape = RoundedCornerShape(10.dp),
-            value = username,
-            placeholder = {
-                Text("Correo electrónico")},
-            onValueChange = { viewModel.onUsernameChange(it)}
+        FieldTextApp(
+            username,
+            "Correo electrónico",
+            onValueChange = { viewModel.onUsernameChange(it) }
         )
+
 
         OutlinedTextField(
             modifier = Modifier
@@ -105,7 +102,7 @@ fun SignInScreen(openRegister: () -> Unit = {},
                 .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
             shape = RoundedCornerShape(10.dp),
             value = password,
-            placeholder = { Text("Contraseña")},
+            placeholder = { Text("Contraseña",color = Color.Gray)},
             onValueChange = { viewModel.onPasswordChange(it) },
             visualTransformation =
             if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
@@ -128,7 +125,16 @@ fun SignInScreen(openRegister: () -> Unit = {},
             openApp()
         }
         if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.height(68.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp, bottom = 31.dp)
+            ) {
+                LinearProgressIndicator(
+                    color = Color(0xFFFFD146),
+                    modifier = Modifier.align(Alignment.Center).fillMaxWidth()
+                )
+            }
         }else{
             ButtonApp("Iniciar Sesion", onClick = {
                 viewModel.signIn()

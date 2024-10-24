@@ -33,7 +33,8 @@ import com.techzo.cambiazo.presentation.profile.ProfileViewModel
 fun MyReviewsScreen(
     back: () -> Unit = {},
     profileViewModel: ProfileViewModel = hiltViewModel(),
-    myReviewsViewModel: MyReviewsViewModel = hiltViewModel()
+    myReviewsViewModel: MyReviewsViewModel = hiltViewModel(),
+    OnUserClick: (Int) -> Unit
 ) {
 
     val averageRating = profileViewModel.averageRating.value
@@ -63,7 +64,7 @@ fun MyReviewsScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = averageRating?.let { String.format("%.1f", it) } ?: "0",
+                        text = averageRating?.let { String.format("%.1f", it) } ?: "0.0",
                         color = Color(0xFFFFD146),
                         modifier = Modifier.padding(top = 5.dp),
                         fontSize = 70.sp,
@@ -87,7 +88,7 @@ fun MyReviewsScreen(
 
                 LazyColumn {
                     items(reviewsState.data ?: emptyList()) { review ->
-                        ReviewItem(review)
+                        ReviewItem(review, OnUserClick)
                     }
                 }
 

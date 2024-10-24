@@ -1,6 +1,8 @@
-package com.techzo.cambiazo.presentation.reviews
+package com.techzo.cambiazo.presentation.review
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,20 +18,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.Info
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.techzo.cambiazo.R
+import com.techzo.cambiazo.common.components.CustomTabs
+import com.techzo.cambiazo.common.components.EmptyStateMessage
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.ProfileImage
+import com.techzo.cambiazo.common.components.ReviewItem
 import com.techzo.cambiazo.common.components.StarRating
 import com.techzo.cambiazo.domain.Product
-import com.techzo.cambiazo.domain.Review
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -37,7 +40,9 @@ import java.util.Locale
 fun ReviewScreen(
     userId: Int,
     viewModel: ReviewViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onProductClick: (Product) -> Unit,
+    onUserClick: (Int) -> Unit
 ) {
     val selectedTabIndex = remember { mutableStateOf(0) }
 
@@ -46,104 +51,97 @@ fun ReviewScreen(
     }
 
     val reviewAverageUser = viewModel.reviewAverageUser.value
-    val userState = viewModel.user.value
     val reviewsState = viewModel.reviews.value
     val articlesState = viewModel.articles.value
     val errorMessage = viewModel.errorMessage.value
 
+
     MainScaffoldApp(
-        paddingCard = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        paddingCard = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         contentsHeader = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp) // Fija la altura del contenedor del icono
-            ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .size(69.dp)
-                        .align(Alignment.TopStart)
-                        .padding(start = 16.dp, top = 16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.Black,
-                        modifier = Modifier.size(40.dp)
-                    )
+            Box(modifier = Modifier.fillMaxWidth().padding(start = 16.dp)) {
+                IconButton(onClick = { onBack() }) {
+                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = null)
                 }
             }
         },
         profileImage = {
-            userState.data?.let { user ->
+            val user = reviewsState.data?.firstOrNull()?.userReceptor
+                ?: articlesState.data?.firstOrNull()?.user
+
+            user?.let {
                 ProfileImage(
-                    url = user.profilePicture,
+                    url = it.profilePicture,
                     shape = CircleShape,
-                    size = 120.dp
+                    size = 100.dp
                 )
             }
         },
         content = {
             if (errorMessage != null) {
                 Text(text = errorMessage, color = Color.Red)
-            } else if (reviewAverageUser != null && userState.data != null) {
+            } else if (reviewAverageUser != null) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 60.dp),
+                        .padding(top = 50.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    val user = reviewsState.data?.firstOrNull()?.userReceptor
+                        ?: articlesState.data?.firstOrNull()?.user
+
                     Text(
-                        text = userState.data!!.name,
+                        text = user?.name ?: "Usuario",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 26.sp
+                        fontSize = 24.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
 
                     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                    val formattedDate = dateFormat.format(userState.data!!.createdAt)
+                    val formattedDate = user?.createdAt?.let { dateFormat.format(it) }
 
                     Text(
-                        text = "Registrado el $formattedDate",
+                        text = "Registrado el ${formattedDate ?: "Fecha desconocida"}",
                         color = Color.Gray,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Normal
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         val averageRating = reviewAverageUser.averageRating ?: 0.0
-                        StarRating(rating = averageRating, size = 32.dp)
+                        StarRating(rating = averageRating, size = 28.dp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
                                 .background(Color.Black, shape = RoundedCornerShape(50))
-                                .padding(horizontal = 16.dp, vertical = 3.dp)
+                                .padding(horizontal = 12.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = "${reviewsState.data?.size ?: 0}",
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
+                                fontSize = 16.sp
                             )
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 CustomTabs(
                     selectedTabIndex = selectedTabIndex.value,
+                    itemTabs = listOf("Artículos", "Reseñas"),
                     onTabSelected = { index -> selectedTabIndex.value = index }
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 if (selectedTabIndex.value == 0) {
-                    if (articlesState.data != null) {
+                    if (articlesState.data != null && articlesState.data!!.isNotEmpty()) {
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -159,8 +157,8 @@ fun ReviewScreen(
                                     rowProducts.forEach { product ->
                                         ProductItem(
                                             product = product,
-                                            modifier = Modifier
-                                                .weight(1f)
+                                            onClick = onProductClick,
+                                            modifier = Modifier.weight(1f)
                                         )
                                     }
                                     if (rowProducts.size < 2) {
@@ -169,23 +167,32 @@ fun ReviewScreen(
                                 }
                             }
                         }
-                    } else if (articlesState.message != null) {
-                        Text(text = articlesState.message!!, color = Color.Red)
+                    } else {
+                        EmptyStateMessage(
+                            icon = Icons.Filled.Info,
+                            message = "No hay artículos disponibles",
+                            subMessage = "Vuelve pronto para ver más artículos."
+                        )
                     }
-                } else if (selectedTabIndex.value == 1) {
-                    if (reviewsState.data != null) {
+                }
+
+                if (selectedTabIndex.value == 1) {
+                    if (reviewsState.data != null && reviewsState.data!!.isNotEmpty()) {
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                         ) {
                             items(reviewsState.data!!) { review ->
-                                ReviewItem(review = review, viewModel = viewModel)
-                                Divider()
+                                ReviewItem(review, onUserClick)
                             }
                         }
-                    } else if (reviewsState.message != null) {
-                        Text(text = reviewsState.message!!, color = Color.Red)
+                    } else if (reviewsState.data != null && reviewsState.data!!.isEmpty()) {
+                        EmptyStateMessage(
+                            icon = Icons.Filled.Info,
+                            message = "Este usuario no tiene reseñas disponibles",
+                            subMessage = "Sé el primero en dejar una reseña."
+                        )
                     }
                 }
             }
@@ -193,107 +200,25 @@ fun ReviewScreen(
     )
 }
 
-@Composable
-fun CustomTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
-    val tabs = listOf("Artículos", "Reseñas")
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp), // Ajustar el padding para que coincida con el contenido
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFF0F0F0), shape = RoundedCornerShape(16.dp)),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            tabs.forEachIndexed { index, title ->
-                val isSelected = selectedTabIndex == index
-                Button(
-                    onClick = { onTabSelected(index) },
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSelected) Color(0xFFFFD146) else Color(0xFFF0F0F0),
-                        contentColor = if (isSelected) Color.Black else Color.Gray
-                    ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 2.5.dp)
-                        .padding(vertical = 3.dp)
-                        .height(48.dp)
-                ) {
-                    Text(
-                        text = title,
-                        fontSize = 16.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ReviewItem(review: Review, viewModel: ReviewViewModel) {
-    val authorFlow = remember(review.userAuthorId) { viewModel.getUserById(review.userAuthorId) }
-    val authorState by authorFlow.collectAsState()
-    val author = authorState.data
-
-    if (author != null) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 15.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                val profileUrl = author.profilePicture
-                AsyncImage(
-                    model = profileUrl,
-                    contentDescription = "Foto de perfil de ${author.name}",
-                    modifier = Modifier
-                        .size(68.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop,
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = author.name,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    StarRating(
-                        rating = review.rating.toDouble(),
-                        size = 28.dp
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = review.message,
-                fontSize = 18.sp,
-                lineHeight = 22.sp
-            )
-        }
-    }
-}
 
 
 @Composable
-fun ProductItem(product: Product, modifier: Modifier = Modifier) {
+fun ProductItem(
+    product: Product,
+    modifier: Modifier = Modifier,
+    onClick: (Product) -> Unit
+) {
     Card(
-        modifier = modifier,
+        modifier = modifier
+            .clickable { onClick(product) }
+            .background(Color(0xFFF0F0F0), shape = RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0))
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .background(Color(0xFFF0F0F0))
+            modifier = Modifier.background(Color(0xFFF0F0F0))
         ) {
             AsyncImage(
                 model = product.image,
@@ -304,14 +229,13 @@ fun ProductItem(product: Product, modifier: Modifier = Modifier) {
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
                 contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.height(8.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp) // Establecer altura fija
+                    .height(48.dp)
                     .background(Color.White)
                     .padding(horizontal = 8.dp),
-                contentAlignment = Alignment.Center // Centrar el contenido
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = product.name,
@@ -319,8 +243,8 @@ fun ProductItem(product: Product, modifier: Modifier = Modifier) {
                     fontSize = 16.sp,
                     color = Color.Black,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis, // Añadir puntos suspensivos si el texto es muy largo
-                    textAlign = TextAlign.Center // Centrar el texto
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
                 )
             }
         }
