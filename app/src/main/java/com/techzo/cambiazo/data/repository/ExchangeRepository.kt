@@ -2,14 +2,13 @@ package com.techzo.cambiazo.data.repository
 
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
+import com.techzo.cambiazo.data.remote.exchanges.ExchangeStatusRequestDto
 import com.techzo.cambiazo.data.remote.exchanges.toExchange
 import com.techzo.cambiazo.domain.Exchange
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ExchangeRepository(private val exchangeService: ExchangeService,
-    private val productRepository: ProductRepository,
-    private val userRepository: UserRepository
+class ExchangeRepository(private val exchangeService: ExchangeService
 ) {
     suspend fun getExchangesByUserOwnId(userId: Int): Resource<List<Exchange>> = withContext(Dispatchers.IO) {
         try {
@@ -17,7 +16,7 @@ class ExchangeRepository(private val exchangeService: ExchangeService,
             if (response.isSuccessful) {
                 response.body()?.let { exchangesDto ->
                     val pendingExchanges = exchangesDto.filter { it.status == "Pendiente" }
-                    val exchanges = pendingExchanges.map { it.toExchange(productRepository, userRepository) }
+                    val exchanges = pendingExchanges.map { it.toExchange() }
                     return@withContext Resource.Success(data = exchanges)
                 }
                 return@withContext Resource.Error("No exchanges found")
@@ -34,7 +33,7 @@ class ExchangeRepository(private val exchangeService: ExchangeService,
             if (response.isSuccessful) {
                 response.body()?.let { exchangesDto ->
                     val pendingExchanges = exchangesDto.filter { it.status == "Pendiente" }
-                    val exchanges = pendingExchanges.map { it.toExchange(productRepository, userRepository) }
+                    val exchanges = pendingExchanges.map { it.toExchange() }
                     return@withContext Resource.Success(data = exchanges)
                 }
                 return@withContext Resource.Error("No exchanges found")
@@ -50,7 +49,7 @@ class ExchangeRepository(private val exchangeService: ExchangeService,
             val response = exchangeService.getFinishedExchangesByUserId(userId)
             if (response.isSuccessful) {
                 response.body()?.let { exchangesDto ->
-                    val exchanges = exchangesDto.map { it.toExchange(productRepository, userRepository) }
+                    val exchanges = exchangesDto.map { it.toExchange() }
                     return@withContext Resource.Success(data = exchanges)
                 }
                 return@withContext Resource.Error("No exchanges found")
@@ -66,7 +65,23 @@ class ExchangeRepository(private val exchangeService: ExchangeService,
             val response = exchangeService.getExchangeById(exchangeId)
             if (response.isSuccessful) {
                 response.body()?.let { exchangeDto ->
-                    val exchange = exchangeDto.toExchange(productRepository, userRepository)
+                    val exchange = exchangeDto.toExchange()
+                    return@withContext Resource.Success(data = exchange)
+                }
+                return@withContext Resource.Error("Exchange not found")
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "An error occurred")
+        }
+    }
+
+    suspend fun updateExchangeStatus(exchangeId: Int, status: String): Resource<Exchange> = withContext(Dispatchers.IO) {
+        try {
+            val response = exchangeService.updateExchangeStatus(exchangeId, ExchangeStatusRequestDto(status))
+            if (response.isSuccessful) {
+                response.body()?.let { exchangeDto ->
+                    val exchange = exchangeDto.toExchange()
                     return@withContext Resource.Success(data = exchange)
                 }
                 return@withContext Resource.Error("Exchange not found")

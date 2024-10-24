@@ -27,6 +27,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.skydoves.landscapist.glide.GlideImage
+import com.techzo.cambiazo.common.Constants
+import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 
 @Composable
@@ -48,7 +54,7 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
     }
 
     val exchange = viewModel.exchange.value
-
+    val boolean = exchange.data?.userOwn?.id == Constants.user?.id
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 10.dp),
@@ -81,37 +87,37 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
             val  profilePicture= when (page) {
                 0 -> exchange.userChange.profilePicture
                 1 -> exchange.userOwn.profilePicture
-                else -> exchange.userChange.profilePicture
+                else -> if(boolean) exchange.userChange.profilePicture else exchange.userOwn.profilePicture
             }
 
             val userName= when (page) {
                 0 -> exchange.userChange.name
                 1 -> exchange.userOwn.name
-                else -> exchange.userChange.name
+                else -> if(boolean) exchange.userChange.name else exchange.userOwn.name
             }
 
             val productName= when (page) {
                 0 -> exchange.productChange.name
                 1 -> exchange.productOwn.name
-                else -> exchange.productChange.name
+                else ->if(boolean) exchange.productChange.name else exchange.productOwn.name
             }
 
             val productName2= when (page) {
                 0 -> exchange.productOwn.name
                 1 -> exchange.productChange.name
-                else -> exchange.productOwn.name
+                else -> if(boolean) exchange.productOwn.name else exchange.productChange.name
             }
 
             val price= when (page) {
                 0 -> exchange.productChange.price
                 1 -> exchange.productOwn.price
-                else -> exchange.productChange.price
+                else -> if(boolean) exchange.productChange.price else exchange.productOwn.price
             }
 
             val price2= when (page) {
                 0 -> exchange.productOwn.price
                 1 -> exchange.productChange.price
-                else -> exchange.productOwn.price
+                else -> if(boolean) exchange.productOwn.price else exchange.productChange.price
             }
 
             val status= if (page == 0 && exchange.status == "Pendiente") "Enviado"
@@ -121,25 +127,25 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
             val description= when (page) {
                 0 -> exchange.productChange.description
                 1 -> exchange.productOwn.description
-                else -> exchange.productChange.description
+                else -> if(boolean) exchange.productChange.description else exchange.productOwn.description
             }
 
             val location= when (page) {
-                0 -> viewModel.getLocationString(exchange.productChange.location.districtId)
-                1 -> viewModel.getLocationString(exchange.productOwn.location.districtId)
-                else -> viewModel.getLocationString(exchange.productChange.location.districtId)
+                0 -> viewModel.getLocationString(exchange.productChange.districtId)
+                1 -> viewModel.getLocationString(exchange.productOwn.districtId)
+                else -> viewModel.getLocationString(exchange.productChange.districtId)
             }
 
             val productImage= when (page) {
                 0 -> exchange.productChange.image
                 1 -> exchange.productOwn.image
-                else -> exchange.productChange.image
+                else -> if(boolean) exchange.productChange.image else exchange.productOwn.image
             }
 
             val productImage2= when (page) {
                 0 -> exchange.productOwn.image
                 1 -> exchange.productChange.image
-                else -> exchange.productOwn.image
+                else -> if(boolean) exchange.productOwn.image else exchange.productChange.image
             }
 
             val textUnderImage = when (page) {
@@ -243,14 +249,17 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                     }
                 }
                 HorizontalDivider()
-                BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page)
+                BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id)
             }
         }
     }
 }
 
 @Composable
-fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, price: String, page: Int){
+fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, price: String, page: Int, viewModel: ExchangeViewModel = hiltViewModel(), exchangeId: Int) {
+    var showDialog by remember { mutableStateOf(false) }
+    var showDialog2 by remember { mutableStateOf(false) }
+
     if(page == 0){
         Box(
             modifier = Modifier
@@ -314,7 +323,10 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                     }
                 }
                 Row(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)){
-                    Button(onClick = { },
+                    Button(onClick = {
+                        showDialog=true
+                        viewModel.updateExchangeStatus(exchangeId,"Aceptado")
+                    },
                         modifier = Modifier.weight(0.5f)
                             .height(40.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -330,8 +342,18 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                                 fontFamily = FontFamily.SansSerif)
                         )
                     }
+                    if(showDialog){
+                        DialogApp(
+                            message = "¡Intercambio Aceptado!",
+                            description = "¡Felicidades por completar tu CambiaZo! Ahora puedes comunicarte con el otro usuario para concretar el intercambio.",
+                            labelButton1 = "Aceptar",
+                            onClickButton1 = { showDialog = false }
+                        )
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { },
+                    Button(onClick = {
+                        showDialog2=true
+                    },
                         modifier = Modifier.weight(0.5f)
                             .height(40.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -345,6 +367,16 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.SansSerif)
+                        )
+                    }
+                    if(showDialog2){
+                        DialogApp(
+                            message = "¿Estás seguro de deseas rechazar la oferta?",
+                            description = "Si rechazas la oferta, no podrás volver a verla. ¿Quieres continuar?",
+                            labelButton1 = "Rechazar Oferta",
+                            labelButton2 = "Cancelar",
+                            onClickButton1 = { viewModel.updateExchangeStatus(exchangeId, "Rechazado"); showDialog2 = false; },
+                            onClickButton2 = { showDialog2 = false; }
                         )
                     }
                 }

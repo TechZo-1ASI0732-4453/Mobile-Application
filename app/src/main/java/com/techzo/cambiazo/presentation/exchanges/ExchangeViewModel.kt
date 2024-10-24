@@ -118,4 +118,15 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
         return "${district?.name}, ${department?.name}"
     }
 
+    fun updateExchangeStatus(exchangeId: Int, status: String){
+        viewModelScope.launch {
+            val result = exchangeRepository.updateExchangeStatus(exchangeId, status)
+            if(result is Resource.Success){
+                Log.d("ExchangeViewModel", "updateExchangeStatus: ${result.data}")
+            }else{
+                Log.d("ExchangeViewModel", "updateExchangeStatus: ${result.message}")
+            }
+        }
+    }
+
 }
