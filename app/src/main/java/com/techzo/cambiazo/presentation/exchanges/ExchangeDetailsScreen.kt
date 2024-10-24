@@ -49,9 +49,10 @@ import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.presentation.review.ReviewViewModel
 
 @Composable
-fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), exchangeId:Int, page: Int) {
+fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), reviewViewModel: ExchangeViewModel=hiltViewModel(), exchangeId:Int, page: Int) {
 
     LaunchedEffect(Unit) {
         viewModel.getExchangeById(exchangeId)
@@ -184,6 +185,9 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
 
             val context = LocalContext.current
 
+            val authorId= if(boolean) exchange.userOwn.id else exchange.userChange.id
+            val receptorId = if(boolean) exchange.userChange.id else exchange.userOwn.id
+
             Column{
                 Row(
                     modifier = Modifier
@@ -276,16 +280,18 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                     }
                 }
                 HorizontalDivider()
-                BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id, goBack = goBack)
+                BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id, goBack = goBack, userAuthor = authorId, userReceptor = receptorId)
             }
         }
     }
 }
 
 @Composable
-fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, price: String, page: Int, viewModel: ExchangeViewModel = hiltViewModel(), exchangeId: Int, goBack: () -> Unit) {
+fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, price: String, page: Int, viewModel: ExchangeViewModel = hiltViewModel(), reviewViewModel: ReviewViewModel= hiltViewModel(), exchangeId: Int, goBack: () -> Unit,userAuthor:Int, userReceptor: Int) {
     var showDialog by remember { mutableStateOf(false) }
     var showDialog2 by remember { mutableStateOf(false) }
+    var showDialog3 by remember { mutableStateOf(false) }
+
 
     if(page == 0){
         Box(
@@ -411,6 +417,8 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
         }
     }
     if(page == 2){
+        var review= ""
+        var rating= 0
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -451,7 +459,9 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                             color = Color(0xFFFFD146),
                             fontWeight = FontWeight.Bold
                         )
-                        Button(onClick = { },
+                        Button(onClick = {
+                            showDialog3=true
+                        },
                             modifier = Modifier.fillMaxWidth()
                                 .height(40.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -467,29 +477,25 @@ fun BoxUnderExchange(textUnderImage:String,image:String, productName: String, pr
                                     fontFamily = FontFamily.SansSerif)
                             )
                         }
+                        if(showDialog3){
+                            DialogApp(
+                                message = "Deja tu Reseña",
+                                isNewReview = true,
+                                labelButton1 = "Enviar",
+                                labelButton2 = "Cancelar",
+                                onClickButton1 = { showDialog3=false},
+                                onClickButton2 = {showDialog3=false},
+                                onSubmitReview = { newRating, newReview ->
+                                    rating = newRating
+                                    review = newReview
+                                    reviewViewModel.addReview(review,rating,"Enviado",userAuthor, userReceptor, exchangeId,)
+                                    showDialog3 = false
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
     }
-
-    /*
-    Box(modifier = Modifier.fillMaxWidth()){
-        Column {
-            Text(textUnderImage2)
-            Row {
-                GlideImage(
-                    imageModel = {productImage2},
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                )
-                Column {
-                    Text(productName2)
-                    Text("S/${price2} valor aprox.")
-                }
-            }
-        }
-    }
-     */
 }
