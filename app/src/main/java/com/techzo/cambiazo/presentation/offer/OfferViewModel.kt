@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OfferViewModel @Inject constructor(
-    private val repositoryExchange: ExchangeRepository // No más repositoryProduct aquí
+    private val repositoryExchange: ExchangeRepository
 ) : ViewModel() {
 
     private val _selectedOfferedProduct = mutableStateOf<Product?>(null)
