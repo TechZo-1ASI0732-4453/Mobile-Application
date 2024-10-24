@@ -20,7 +20,7 @@ interface ReviewService {
 
     @Headers("Content-Type: application/json", "Accept: application/json")
     @POST("reviews")
-    suspend fun addReview(@Body reviewDto: ReviewDto): Response<ReviewDto>
+    suspend fun addReview(@Body reviewDto: ReviewRequestDto): Response<ReviewDto>
 
     @Headers("Content-Type: application/json", "Accept: application/json")
     @DELETE("reviews/delete/{reviewId}")
