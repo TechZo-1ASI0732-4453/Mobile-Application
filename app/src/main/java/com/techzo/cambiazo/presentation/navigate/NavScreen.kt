@@ -273,8 +273,16 @@ fun NavScreen() {
                     productId = productId,
                     userId = userId,
                     onBack = { navController.popBackStack() },
-                    onUserClick = { selectedUserId ->
-                        navController.navigate(Routes.Reviews.createRoute(selectedUserId.toString()))
+                    onMakeOffer = { desiredProduct, offeredProduct ->
+                        navController.navigate(
+                            Routes.MakeOffer.createMakeOfferRoute(
+                                desiredProductId = desiredProduct.id.toString(),
+                                offeredProductIds = listOf(offeredProduct.id.toString())
+                            )
+                        )
+                    },
+                    onUserClick = {
+                        navController.navigate(Routes.Reviews.createRoute(userId.toString()))
                     }
                 )
             }
@@ -294,11 +302,9 @@ fun NavScreen() {
             val desiredProductId = desiredProductIdString?.toIntOrNull()
             val offeredProductIds = offeredProductIdsString?.split(",")?.mapNotNull { it.toIntOrNull() }
 
-            // Reutilizando ExplorerViewModel
             val explorerViewModel: ExplorerListViewModel = hiltViewModel()
             val offerViewModel: OfferViewModel = hiltViewModel()
 
-            // Obtenemos los productos directamente desde el ExplorerViewModel sin volver a hacer la solicitud
             if (desiredProductId != null && offeredProductIds != null && offeredProductIds.isNotEmpty()) {
                 val desiredProduct = explorerViewModel.getProductById(desiredProductId)
                 val offeredProduct = explorerViewModel.getProductById(offeredProductIds.first())

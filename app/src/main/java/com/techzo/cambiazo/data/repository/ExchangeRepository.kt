@@ -2,6 +2,7 @@ package com.techzo.cambiazo.data.repository
 
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeDto
+import com.techzo.cambiazo.data.remote.exchanges.ExchangeRequestDto
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeStatusRequestDto
 import com.techzo.cambiazo.data.remote.exchanges.toExchange
@@ -93,10 +94,10 @@ class ExchangeRepository(private val exchangeService: ExchangeService
         }
     }
 
-    suspend fun createExchange(exchangeDto: ExchangeDto): Resource<Boolean> {
+    suspend fun createExchange(exchangeRequestDto: ExchangeRequestDto): Resource<Boolean> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = exchangeService.createExchange(exchangeDto)
+                val response = exchangeService.createExchange(exchangeRequestDto)
                 if (response.isSuccessful) {
                     Resource.Success(true)
                 } else {

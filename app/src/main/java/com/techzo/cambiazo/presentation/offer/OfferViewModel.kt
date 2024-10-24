@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Resource
-import com.techzo.cambiazo.data.remote.exchanges.ExchangeDto
+import com.techzo.cambiazo.data.remote.exchanges.ExchangeRequestDto
 import com.techzo.cambiazo.data.repository.ExchangeRepository
 import com.techzo.cambiazo.domain.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,7 +32,6 @@ class OfferViewModel @Inject constructor(
         _selectedOfferedProduct.value = offeredProduct
     }
 
-    // Realizar la oferta
     fun makeOffer(
         desiredProduct: Product,
         offeredProduct: Product,
@@ -41,14 +40,13 @@ class OfferViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                val newExchange = ExchangeDto(
-                    id = 0,
+                val newExchangeRequest = ExchangeRequestDto(
                     productOwnId = offeredProduct.id,
                     productChangeId = desiredProduct.id,
                     status = "Pendiente"
                 )
 
-                val result = repositoryExchange.createExchange(newExchange)
+                val result = repositoryExchange.createExchange(newExchangeRequest)
 
                 if (result is Resource.Success) {
                     onSuccess()
