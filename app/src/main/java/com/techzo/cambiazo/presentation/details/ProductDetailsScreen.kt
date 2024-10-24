@@ -37,8 +37,10 @@ import com.techzo.cambiazo.domain.*
 fun ProductDetailsScreen(
     productId: Int,
     userId: Int,
+    viewModel: ProductDetailsViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    onUserClick: (Int) -> Unit
+    onUserClick: () -> Unit,
+    onMakeOffer: (desiredProduct: Product, offeredProduct: Product) -> Unit
 ) {
     val viewModel: ProductDetailsViewModel = hiltViewModel()
     val productState = viewModel.product.value
@@ -66,7 +68,8 @@ fun ProductDetailsScreen(
                             onFavoriteToggle = { isCurrentlyFavorite ->
                                 viewModel.toggleFavoriteStatus(productId, isCurrentlyFavorite)
                             },
-                            onUserClick = { onUserClick(product.user.id) },
+                            onUserClick = { onUserClick() },
+                            onMakeOffer = onMakeOffer,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 360.dp)
@@ -75,6 +78,7 @@ fun ProductDetailsScreen(
                         )
                     }
                 } else if (productState.isLoading) {
+                    // Show loading indicator
                 } else {
                     Text(
                         text = productState.message ?: "Error al cargar detalles del producto",
@@ -150,6 +154,7 @@ fun ProductDetails(
     isFavoriteState: UIState<Boolean>,
     onFavoriteToggle: (Boolean) -> Unit,
     onUserClick: () -> Unit,
+    onMakeOffer: (desiredProduct: Product, offeredProduct: Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -173,9 +178,9 @@ fun ProductDetails(
                         modifier = Modifier
                             .size(60.dp)
                             .clip(CircleShape)
-                            .background(Color.LightGray)
+                            .background(Color.LightGray),
+                        contentScale = ContentScale.Crop
                     )
-
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
@@ -271,13 +276,12 @@ fun ProductDetails(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        val currentUserId = Constants.user?.id
+        ButtonApp(
+            text = "Intercambiar",
+            onClick = {
+                onMakeOffer(product, product)
+            }
+        )
 
-        if (product.user.id != currentUserId) {
-            ButtonApp(
-                text = "Intercambiar",
-                onClick = { /* Acción para intercambio */ }
-            )
-        }
     }
 }

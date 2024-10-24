@@ -6,19 +6,29 @@ import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.articles.PublishScreen
 import com.techzo.cambiazo.presentation.details.ProductDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
+import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 import com.techzo.cambiazo.presentation.filter.FilterScreen
 import com.techzo.cambiazo.presentation.login.SignInScreen
+import com.techzo.cambiazo.presentation.offer.ConfirmationOfferScreen
+import com.techzo.cambiazo.presentation.offer.MakeOfferScreen
+import com.techzo.cambiazo.presentation.offer.OfferViewModel
 import com.techzo.cambiazo.presentation.profile.ProfileScreen
 import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileScreen
 import com.techzo.cambiazo.presentation.profile.favorites.FavoritesScreen
@@ -78,6 +88,18 @@ sealed class Routes(val route: String) {
     object Reviews : Routes("ReviewsScreen/{userId}") {
         fun createRoute(userId: String) = "ReviewsScreen/$userId"
     }
+
+    object MakeOffer : Routes("MakeOfferScreen/{desiredProductId}/{offeredProductIds}") {
+        fun createMakeOfferRoute(desiredProductId: String, offeredProductIds: List<String>) =
+            "MakeOfferScreen/$desiredProductId/${offeredProductIds.joinToString(",")}"
+    }
+
+    object ConfirmationOffer : Routes("ConfirmationOfferScreen/{desiredProductId}/{offeredProductId}") {
+        fun createConfirmationOfferRoute(desiredProductId: String, offeredProductId: String) =
+            "ConfirmationOfferScreen/$desiredProductId/$offeredProductId"
+    }
+
+
     object EditProfile : Routes("EditProfileScreen")
     object MyReviews : Routes("MyReviewsScreen")
     object Publish : Routes("PublishScreen")
@@ -264,5 +286,64 @@ fun NavScreen() {
                 openMyArticles = {navController.navigate(Routes.Article.route)}
             )
         }
+
+        composable(route = Routes.MakeOffer.route) { backStackEntry ->
+            val desiredProductIdString = backStackEntry.arguments?.getString("desiredProductId")
+            val offeredProductIdsString = backStackEntry.arguments?.getString("offeredProductIds")
+
+            val desiredProductId = desiredProductIdString?.toIntOrNull()
+            val offeredProductIds = offeredProductIdsString?.split(",")?.mapNotNull { it.toIntOrNull() }
+
+            // Reutilizando ExplorerViewModel
+            val explorerViewModel: ExplorerListViewModel = hiltViewModel()
+            val offerViewModel: OfferViewModel = hiltViewModel()
+
+            // Obtenemos los productos directamente desde el ExplorerViewModel sin volver a hacer la solicitud
+            if (desiredProductId != null && offeredProductIds != null && offeredProductIds.isNotEmpty()) {
+                val desiredProduct = explorerViewModel.getProductById(desiredProductId)
+                val offeredProduct = explorerViewModel.getProductById(offeredProductIds.first())
+
+                if (desiredProduct != null && offeredProduct != null) {
+                    LaunchedEffect(key1 = desiredProduct, key2 = offeredProduct) {
+                        offerViewModel.initProducts(desiredProduct, offeredProduct)
+                    }
+
+                    MakeOfferScreen(
+                        desiredProduct = desiredProduct,
+                        onOfferMade = { /* Lógica para manejar oferta */ },
+                        onBack = { navController.popBackStack() },
+                        onPublish = { navController.navigate(Routes.Publish.route) },
+                        navController = navController
+                    )
+                }
+            }
+        }
+
+
+        composable(route = Routes.ConfirmationOffer.route) { backStackEntry ->
+            val desiredProductId = backStackEntry.arguments?.getString("desiredProductId")?.toIntOrNull()
+            val offeredProductId = backStackEntry.arguments?.getString("offeredProductId")?.toIntOrNull()
+
+            val explorerViewModel: ExplorerListViewModel = hiltViewModel()
+            val offerViewModel: OfferViewModel = hiltViewModel()
+
+            if (desiredProductId != null && offeredProductId != null) {
+                val desiredProduct = explorerViewModel.getProductById(desiredProductId)
+                val offeredProduct = explorerViewModel.getProductById(offeredProductId)
+
+                if (desiredProduct != null && offeredProduct != null) {
+                    LaunchedEffect(key1 = desiredProduct, key2 = offeredProduct) {
+                        offerViewModel.initProducts(desiredProduct, offeredProduct)
+                    }
+
+                    ConfirmationOfferScreen(
+                        navController = navController,
+                        desiredProduct = desiredProduct,
+                        offeredProduct = offeredProduct
+                    )
+                }
+            }
+        }
+
     }
 }

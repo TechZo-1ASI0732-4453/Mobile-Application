@@ -1,11 +1,7 @@
 package com.techzo.cambiazo.data.remote.exchanges
 
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Headers
-import retrofit2.http.PUT
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface ExchangeService {
 
@@ -29,9 +25,14 @@ interface ExchangeService {
     @GET("exchanges/{exchangeId}")
     suspend fun getExchangeById(@Path("exchangeId") exchangeId: Int): Response<ExchangeDto>
 
+    @Headers("Content-Type: application/json", "Accept: application/json")
+    @POST("exchanges")
+    suspend fun createExchange(@Body exchange: ExchangeDto): Response<Void>
+  
     @Headers("Content-Type: application/json",
         "Accept: application/json")
     @PUT("exchanges/status/{exchangeId}")
     suspend fun updateExchangeStatus(@Path("exchangeId") exchangeId: Int, @Body status: ExchangeStatusRequestDto):Response<ExchangeDto>
+
 
 }
