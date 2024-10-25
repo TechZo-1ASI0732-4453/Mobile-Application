@@ -2,21 +2,19 @@ package com.techzo.cambiazo.presentation.navigate
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SyncAlt
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.outlined.Label
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.SyncAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.articles.PublishScreen
 import com.techzo.cambiazo.presentation.details.ProductDetailsScreen
@@ -37,35 +35,41 @@ import com.techzo.cambiazo.presentation.register.SignUpScreen
 import com.techzo.cambiazo.presentation.register.TermsAndConditionsScreen
 import com.techzo.cambiazo.presentation.review.ReviewScreen
 
-sealed class ItemsScreens(val icon: ImageVector, val title: String, val navigate: () -> Unit = {}) {
+sealed class ItemsScreens(val icon: ImageVector, val title: String,val route: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        icon = Icons.Filled.Search,
+        icon = Icons.Outlined.Search,
         title = "Explorar",
-        navigate = onNavigate
+        navigate = onNavigate,
+        route = Routes.Explorer.route
+
     )
 
     data class Exchange(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        icon = Icons.Filled.SyncAlt,
+        icon = Icons.Outlined.SyncAlt,
         title = "Intercambios",
-        navigate = onNavigate
+        navigate = onNavigate,
+        route = Routes.Exchange.route
     )
 
     data class Articles(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        icon = Icons.Filled.Label,
+        icon = Icons.Outlined.Label,
         title = "Mis Artículos",
-        navigate = onNavigate
+        navigate = onNavigate,
+        route = Routes.Article.route
     )
 
     data class Donation(val onNavigate: () -> Unit = {}) : ItemsScreens(
         icon = Icons.Filled.FavoriteBorder,
         title = "Donaciones",
-        navigate = onNavigate
+        navigate = onNavigate,
+        route = Routes.Donation.route
     )
 
     data class Profile(val onNavigate: () -> Unit = {}) : ItemsScreens(
         icon = Icons.Filled.Person,
         title = "Perfil",
-        navigate = onNavigate
+        navigate = onNavigate,
+        route = Routes.Profile.route
     )
 }
 
@@ -109,6 +113,8 @@ sealed class Routes(val route: String) {
 @Composable
 fun NavScreen() {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route?:""
 
     val items = listOf(
         ItemsScreens.Explorer(onNavigate = { navController.navigate(Routes.Explorer.route) }),
@@ -136,7 +142,7 @@ fun NavScreen() {
 
         composable(route = Routes.Explorer.route) {
             ExplorerScreen(
-                bottomBar = { BottomBarNavigation(items) },
+                bottomBar = { BottomBarNavigation(items,currentRoute) },
                 onFilter = { navController.navigate(Routes.Filter.route) },
                 onProductClick = { productId, userId ->
                     navController.navigate(
@@ -158,7 +164,7 @@ fun NavScreen() {
 
         composable(route = Routes.Exchange.route) {
             ExchangeScreen(
-                bottomBar = { BottomBarNavigation(items) },
+                bottomBar = { BottomBarNavigation(items,currentRoute) },
                 goToDetailsScreen = { exchangeId, page ->
                     navController.navigate(
                         Routes.ExchangeDetails.createExchangeDetailsRoute(
@@ -172,7 +178,7 @@ fun NavScreen() {
 
         composable(route = Routes.Article.route) {
             ArticlesScreen(
-                bottomBar = { BottomBarNavigation(items) },
+                bottomBar = { BottomBarNavigation(items,currentRoute) },
                 onPublish = {navController.navigate(Routes.Publish.route)},
                 onProductClick = { productId, userId ->
                     navController.navigate(
@@ -208,7 +214,7 @@ fun NavScreen() {
                 openMyReviews = { navController.navigate(Routes.MyReviews.route) },
                 openEditProfile = { navController.navigate(Routes.EditProfile.route) },
                 openFavorites = { navController.navigate(Routes.Favorites.route) },
-                bottomBar = { BottomBarNavigation(items) }
+                bottomBar = { BottomBarNavigation(items,currentRoute) }
             )
         }
 

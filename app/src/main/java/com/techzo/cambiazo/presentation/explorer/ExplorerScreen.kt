@@ -130,13 +130,10 @@ fun ExplorerScreen(
         }
 
         LazyColumn{
-
             items(state.data ?: emptyList()) { product ->
                 Products(product, onProductClick)
             }
-            item {
-                Spacer(modifier = Modifier.height(30.dp))
-            }
+
         }
     }
 }
