@@ -41,6 +41,7 @@ import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.FieldTextApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import com.techzo.cambiazo.presentation.profile.ProfileOption
 import java.text.SimpleDateFormat
@@ -135,14 +136,17 @@ fun EditProfileScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        Text(text = "Nombre", fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 5.dp))
+                        SubTitleText(subTittle = "Nombre")
                         FieldTextApp(name, "Nombre", onValueChange = { viewModel.onNameChange(it) })
+                        Spacer(modifier =Modifier.height(20.dp))
 
-                        Text(text = "Correo electrónico", fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 5.dp, top = 20.dp))
+                        SubTitleText(subTittle = "Correo electrónico")
                         FieldTextApp(username, "Correo electrónico", onValueChange = { viewModel.onUsernameChange(it) })
+                        Spacer(modifier =Modifier.height(20.dp))
 
-                        Text(text = "Número de  teléfono", fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 5.dp, top = 20.dp))
+                        SubTitleText(subTittle = "Número de  teléfono")
                         FieldTextApp(phoneNumber, "Número de  teléfono", onValueChange = { viewModel.onPhoneNumberChange(it) })
+                        Spacer(modifier =Modifier.height(20.dp))
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
