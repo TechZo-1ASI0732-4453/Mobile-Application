@@ -65,12 +65,12 @@ fun SignUpScreen(
 
 
     MainScaffoldApp(
-        paddingCard = PaddingValues(horizontal = 40.dp, vertical = 25.dp),
+        paddingCard = PaddingValues(horizontal = 40.dp),
         contentsHeader = {
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 35.dp),
+                    .padding(top = 10.dp ,bottom = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -79,21 +79,21 @@ fun SignUpScreen(
             }
         }
     ) {
-        Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.size(42.dp))
         CustomInput(
             value = name ,
             type = "Text",
             placeHolder = "Nombre",
             onValueChange = { viewModel.onNameChange(it) }
         )
-        Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.size(19.dp))
         CustomInput(
             value = phoneNumber ,
             type = "Number",
             placeHolder = "Numero de Telefono",
             onValueChange = { viewModel.onPhoneNumberChange(it) }
         )
-        Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.size(19.dp))
         CustomInput(
             value = email ,
             type = "Text",
@@ -103,7 +103,7 @@ fun SignUpScreen(
 
         OutlinedTextField(
             modifier = Modifier
-                .padding(top = 20.dp)
+                .padding(top = 19.dp)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(10.dp))
                 .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
@@ -127,7 +127,7 @@ fun SignUpScreen(
 
         OutlinedTextField(
             modifier = Modifier
-                .padding(top = 20.dp)
+                .padding(top = 19.dp)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(10.dp))
                 .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
@@ -173,7 +173,12 @@ fun SignUpScreen(
 
 
         state.message.let {
-            Text(text = it, color = Color.Red)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(text = it, color = Color.Red)
+            }
         }
 
         if (state.isLoading) {
@@ -187,7 +192,7 @@ fun SignUpScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 20.dp, top = 15.dp),
+                .padding(bottom = 20.dp, top = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             HorizontalDivider(
