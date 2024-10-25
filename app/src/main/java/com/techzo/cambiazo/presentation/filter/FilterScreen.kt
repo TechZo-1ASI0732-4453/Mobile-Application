@@ -27,6 +27,7 @@ import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.DropdownList
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.MoneyFieldApp
+import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import dagger.hilt.android.scopes.ViewModelScoped
 
@@ -60,7 +61,9 @@ fun FilterScreen(
         paddingCard = PaddingValues(start=30.dp,end=30.dp,top=25.dp),
         contentsHeader = {
             Column(
-                Modifier.padding(bottom = 30.dp).fillMaxWidth(),
+                Modifier
+                    .padding(bottom = 30.dp)
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ){
 
@@ -74,11 +77,7 @@ fun FilterScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
 
-        Box( modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Ubicacion", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-
-        }
-
+        SubTitleText("Ubicacion")
         DropdownList(
             label = "Selecciona un Pais",
             selectedOption = countrySelected ,
@@ -107,11 +106,7 @@ fun FilterScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Box( modifier = Modifier
-            .fillMaxWidth()) {
-            Text(text = "Valor Aproximado", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 6.dp))
-
-        }
+        SubTitleText(subTittle = "Valor aproximado")
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,

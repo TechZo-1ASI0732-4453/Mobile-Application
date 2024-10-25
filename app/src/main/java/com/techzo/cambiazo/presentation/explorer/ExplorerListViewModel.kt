@@ -51,7 +51,9 @@
                 } else {
                     _state.value = UIState(message = result.message ?: "Ocurrió un error")
                 }
+                applyFilter()
             }
+
         }
 
         fun onProductCategorySelected(id: Int) {

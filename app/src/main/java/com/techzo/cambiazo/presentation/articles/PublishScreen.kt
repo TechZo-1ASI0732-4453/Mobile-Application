@@ -57,6 +57,7 @@ import com.techzo.cambiazo.common.components.CustomDropDownSelect
 import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 
 @Composable
@@ -118,11 +119,10 @@ fun PublishScreen(
 
         LazyColumn {
             item {
-                Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Imagen", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
-                }
 
 
+
+                SubTitleText(subTittle = "Imagen")
                 image?.let { uri ->
                     Box {
                         Image(
@@ -201,10 +201,7 @@ fun PublishScreen(
             //----------------TITULO------------------
             item{
 
-                Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Título", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
-
-                }
+                SubTitleText(subTittle = "Título")
                 CustomInput(
                     value = name,
                     placeHolder = "Nombre del objeto",
@@ -218,9 +215,7 @@ fun PublishScreen(
             //----------------CATEGORY------------------//
 
             item {
-                Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Categoría", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
-                }
+                SubTitleText(subTittle = "Categoría")
 
                 CustomDropDownSelect(
                     selectedOption = categorySelected,
@@ -236,10 +231,7 @@ fun PublishScreen(
 
             //----------------DESCRIPTION ------------------//
             item{
-                Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Descripción", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
-
-                }
+                SubTitleText(subTittle = "Descripción")
                 CustomInput(value = description,
                     placeHolder = "Descripción del objeto" ,
                     type = "TextArea",
@@ -251,11 +243,7 @@ fun PublishScreen(
             }
             //----------------LOCATION------------------//
             item {
-                Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Ubicación", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
-
-                }
-
+                SubTitleText(subTittle = "Ubicación")
                 CustomDropDownSelect(
                     selectedOption = countrySelected,
                     label ="Seeleccione un País",
@@ -290,11 +278,8 @@ fun PublishScreen(
             //----------------OBJECT TO CHANGE------------------//
             item{
 
-                Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "¿Que quieres a Cambio?", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
 
-                }
-
+                SubTitleText(subTittle = "¿Que quieres a Cambio?")
                 CustomInput(
                     value = objectToChange,
                     type = "TextArea",
@@ -307,11 +292,9 @@ fun PublishScreen(
             }
             //------------------PRICE--------------------------//
             item{
-                Box( modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Valor Apróximado", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
 
-                }
 
+                SubTitleText(subTittle = "Valor aproximado")
                 CustomInput(
                     value = price,
                     placeHolder = "Precio",
@@ -333,7 +316,7 @@ fun PublishScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Column(modifier = Modifier.fillMaxSize()) {
-                            Text(text = "Boost de Visibilidad", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
+                            SubTitleText(subTittle = "Boost de Visibilidad")
                             Text(modifier = Modifier.fillMaxWidth(),
                                 text = "¡Activa tu boost y destaca tu producto un día en la página principal para más ofertas!",
                                 color = Color.Gray)

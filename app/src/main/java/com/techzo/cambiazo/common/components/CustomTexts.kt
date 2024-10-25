@@ -2,6 +2,7 @@ package com.techzo.cambiazo.common.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -57,4 +58,14 @@ fun TextTitleHeaderApp(text: String){
             fontFamily = FontFamily.SansSerif
         ),
     )
+}
+
+@Composable
+fun SubTitleText(subTittle: String){
+    Box( modifier = Modifier.fillMaxWidth()) {
+        Text(text = subTittle,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 2.dp))
+    }
 }
