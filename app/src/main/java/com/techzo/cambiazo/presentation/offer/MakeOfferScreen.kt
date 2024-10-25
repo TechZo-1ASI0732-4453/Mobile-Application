@@ -55,7 +55,7 @@ fun MakeOfferScreen(
     explorerViewModel: ExplorerListViewModel = hiltViewModel()
 ) {
     val userProducts = explorerViewModel.state.value.data?.filter {
-        it.user.id == Constants.user!!.id
+        it.user.id == Constants.user!!.id && it.available
     } ?: emptyList()
 
     MainScaffoldApp(

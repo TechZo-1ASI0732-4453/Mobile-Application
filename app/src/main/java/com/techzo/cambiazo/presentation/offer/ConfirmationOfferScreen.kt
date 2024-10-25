@@ -74,7 +74,7 @@ fun ConfirmationOfferScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 16.dp),
+                    .padding(top = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 ArticleExchange(
@@ -82,6 +82,8 @@ fun ConfirmationOfferScreen(
                     productRight = offeredProduct,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                Spacer(modifier = Modifier.height(10.dp))
 
                 ButtonApp(
                     text = "Listo",

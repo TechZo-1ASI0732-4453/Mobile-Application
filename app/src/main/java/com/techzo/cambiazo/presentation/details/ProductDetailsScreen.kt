@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
@@ -111,17 +112,17 @@ fun ProductHeader(product: Product, onBack: () -> Unit) {
             onClick = { onBack() },
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(16.dp)
+                .padding(15.dp)
                 .background(
                     color = Color.Black.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(50)
                 )
         ) {
             Icon(
-                Icons.Default.ArrowBack,
+                Icons.Filled.ArrowBack,
                 contentDescription = "Back",
                 tint = Color.White,
-                modifier = Modifier.size(30.dp)
+                modifier = Modifier.size(25.dp)
             )
         }
 
@@ -139,7 +140,7 @@ fun ProductHeader(product: Product, onBack: () -> Unit) {
                 text = "S/${product.price} valor aprox.",
                 color = Color(0xFFFFD146),
                 fontWeight = FontWeight.Bold,
-                fontSize = 19.sp
+                fontSize = 18.sp
             )
         }
     }
@@ -159,7 +160,8 @@ fun ProductDetails(
 ) {
     Column(
         modifier = modifier
-            .padding(20.dp)
+            .padding(horizontal = 20.dp)
+            .padding(top = 20.dp)
     ) {
         user?.let {
             if (it.name.isNotEmpty() && it.profilePicture.isNotEmpty()) {
@@ -181,32 +183,32 @@ fun ProductDetails(
                             .background(Color.LightGray),
                         contentScale = ContentScale.Crop
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = it.name,
+                            modifier = Modifier.padding(start = 2.dp),
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
                         )
 
-                        Spacer(modifier = Modifier.height(4.5.dp))
-
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            StarRating(rating = averageRating, size = 24.dp)
+                            StarRating(rating = averageRating, size = 22.dp)
                             Spacer(modifier = Modifier.width(4.dp))
                             Box(
                                 modifier = Modifier
-                                    .background(Color.Black, shape = RoundedCornerShape(44))
-                                    .size(height = 21.3.dp, width = 29.dp)
-                                    .wrapContentSize(Alignment.Center)
+                                    .background(Color.Black, shape = CircleShape)
+                                    .offset(y = (-3).dp)
+                                    .height(18.dp)
+                                    .padding(horizontal = 8.dp),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "$countReviews",
+                                    text ="$countReviews",
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp,
-                                    textAlign = TextAlign.Center
+                                    fontSize = 12.sp
                                 )
                             }
                         }
@@ -223,7 +225,7 @@ fun ProductDetails(
                                 ),
                                 shape = CircleShape
                             )
-                            .padding(8.dp)
+                            .padding(4.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.FavoriteBorder,
@@ -235,23 +237,23 @@ fun ProductDetails(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
-        Text(text = product.name, fontWeight = FontWeight.Bold, fontSize = 26.sp)
-        Spacer(modifier = Modifier.height(6.dp))
+        Text(text = product.name, lineHeight = 26.sp,fontWeight = FontWeight.Bold, fontSize = 26.sp)
+        Spacer(modifier = Modifier.height(5.dp))
 
-        Text(text = product.description, fontSize = 18.sp, color = Color.Gray)
+        Text(text = product.description, fontSize = 16.sp, color = Color.Gray)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
         if (product.location.districtName.isNotEmpty() && product.location.departmentName.isNotEmpty()) {
             Text(
                 text = "¿Dónde puedo intercambiar este objeto?",
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = 18.sp
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -260,28 +262,32 @@ fun ProductDetails(
                     tint = Color(0xFFFFD146),
                     modifier = Modifier.size(22.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(2.dp))
                 Text(
                     text = "Disponible en ${product.location.districtName}, ${product.location.departmentName}",
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     color = Color.Gray
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(text = "Le interesa:", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text(text = product.desiredObject, fontSize = 18.sp , color = Color.Gray)
-
         Spacer(modifier = Modifier.weight(1f))
 
-        ButtonApp(
-            text = "Intercambiar",
-            onClick = {
-                onMakeOffer(product, product)
-            }
-        )
+        Text(text = "Le interesa:", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text(text = product.desiredObject, fontSize = 16.sp , color = Color.Gray)
+
+        Spacer(modifier = Modifier.weight(6f))
+
+        val currentUserId = Constants.user?.id
+
+        if(product.user.id != currentUserId ) {
+            ButtonApp(
+                text = "Intercambiar",
+                onClick = {
+                    onMakeOffer(product, product)
+                }
+            )
+        }
 
     }
 }

@@ -98,10 +98,8 @@ fun ProfileScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
-
-                        StarRating(rating = averageRating ?: 0.0, 24.dp)
-                        Spacer(modifier = Modifier.width(4.dp))
-
+                    StarRating(rating = averageRating ?: 0.0, 24.dp)
+                    Spacer(modifier = Modifier.width(4.dp))
 
                     Box(
                         modifier = Modifier

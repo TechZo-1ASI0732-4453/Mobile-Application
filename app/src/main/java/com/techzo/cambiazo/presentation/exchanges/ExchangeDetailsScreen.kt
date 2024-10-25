@@ -3,6 +3,7 @@ package com.techzo.cambiazo.presentation.exchanges
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -193,7 +195,7 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(10.dp),
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -239,7 +241,8 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                                 .fillMaxWidth()
                                 .padding(10.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .height(300.dp)
+                                .border(0.2.dp, Color(0xFFDCDCDC), RoundedCornerShape(10.dp))
+                                .height(260.dp)
                         )
 
                         Box(
@@ -259,10 +262,10 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                             )
                         }
                     }
-                    Box(modifier=Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp)){
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)){
+                    Box(modifier=Modifier.fillMaxWidth().padding(horizontal = 10.dp)){
+                        Column(verticalArrangement = Arrangement.spacedBy(5.dp)){
                             if(textUnderImage!=null){
-                                Text(textUnderImage, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color(0xFF6D6D6D))
+                                Text(textUnderImage, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color(0xFF6D6D6D))
                             }
                             Text(productName, fontWeight = FontWeight.Bold, fontSize = 26.sp)
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -277,7 +280,7 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                                     modifier = Modifier.padding(start = 1.dp)
                                 )
                             }
-                            Text(description)
+                            Text(text = description, fontSize = 16.sp, lineHeight = 20.sp)
                         }
                     }
 
@@ -313,10 +316,10 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp)
-                .padding(bottom = 15.dp)
+                .padding(bottom = 10.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(textUnderImage, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color(0xFF6D6D6D))
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(textUnderImage, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color(0xFF6D6D6D))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -327,7 +330,8 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                         imageModel = { image },
                         modifier = Modifier
                             .fillMaxWidth(0.5f)
-                            .height(140.dp)
+                            .height(130.dp)
+                            .border(0.2.dp, Color(0xFFDCDCDC), RoundedCornerShape(10.dp))
                             .clip(RoundedCornerShape(10.dp))
                     )
                     Spacer(modifier = Modifier.width(5.dp))
@@ -345,8 +349,8 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                 .fillMaxWidth()
                 .padding(10.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(textUnderImage, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color(0xFF6D6D6D))
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(textUnderImage, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color(0xFF6D6D6D))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -356,7 +360,8 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                         imageModel = { image },
                         modifier = Modifier
                             .fillMaxWidth(0.5f)
-                            .height(110.dp)
+                            .height(100.dp)
+                            .border(0.2.dp, Color(0xFFDCDCDC), RoundedCornerShape(10.dp))
                             .clip(RoundedCornerShape(10.dp))
                     )
                     Spacer(modifier = Modifier.width(5.dp))
@@ -435,8 +440,8 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                 .padding(10.dp)
                 .padding(bottom = 20.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(textUnderImage, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color(0xFF6D6D6D))
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(textUnderImage, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color(0xFF6D6D6D))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -447,6 +452,7 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                         modifier = Modifier
                             .fillMaxWidth(0.45f)
                             .height(140.dp)
+                            .border(0.2.dp, Color(0xFFDCDCDC), RoundedCornerShape(10.dp))
                             .clip(RoundedCornerShape(10.dp))
                     )
                     Spacer(modifier = Modifier.width(5.dp))

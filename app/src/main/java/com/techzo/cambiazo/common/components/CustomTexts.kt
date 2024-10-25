@@ -51,7 +51,7 @@ fun TextLink(text1:String = "",
 fun TextTitleHeaderApp(text: String){
     Text(
         text = text,
-        fontSize = 40.sp,
+        fontSize = 30.sp,
         style = MaterialTheme.typography.bodyLarge.copy(
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.SansSerif

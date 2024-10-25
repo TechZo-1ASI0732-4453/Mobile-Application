@@ -54,9 +54,9 @@ fun ReviewScreen(
         contentsHeader = {
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp)) {
+                .padding(start = 15.dp)) {
                 IconButton(onClick = { onBack() }) {
-                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = null)
+                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(30.dp))
                 }
             }
         },
@@ -68,7 +68,7 @@ fun ReviewScreen(
                 ProfileImage(
                     url = it.profilePicture,
                     shape = CircleShape,
-                    size = 120.dp
+                    size = 110.dp
                 )
             }
         },
@@ -79,7 +79,7 @@ fun ReviewScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 60.dp),
+                        .padding(top = 55.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     val user = reviewsState.data?.firstOrNull()?.userReceptor
@@ -108,8 +108,9 @@ fun ReviewScreen(
 
 
                         val averageRating = reviewAverageUser.averageRating ?: 0.0
-                        StarRating(rating = averageRating, size = 26.dp)
-                        Spacer(modifier = Modifier.width(6.dp))
+                        StarRating(rating = averageRating, size = 24.dp)
+
+                        Spacer(modifier = Modifier.width(4.dp))
 
                         Box(
                             modifier = Modifier
@@ -178,8 +179,11 @@ fun ReviewScreen(
                             modifier = Modifier.padding(horizontal = 15.dp)
                                 .fillMaxWidth()
                         ) {
-                            items(reviewsState.data!!) { review ->
+                            itemsIndexed(reviewsState.data!!) { index, review ->
                                 ReviewItem(review, onUserClick, dividerUp = false)
+                                if (index != reviewsState.data!!.size - 1) {
+                                    HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
+                                }
                             }
                         }
                     } else if (reviewsState.data != null && reviewsState.data!!.isEmpty()) {

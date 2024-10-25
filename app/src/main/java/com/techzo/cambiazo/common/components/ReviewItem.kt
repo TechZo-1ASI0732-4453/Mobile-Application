@@ -77,6 +77,5 @@ fun ReviewItem(review: Review, OnUserClick: (Int) -> Unit, dividerUp: Boolean = 
         Spacer(modifier = Modifier.height(20.dp))
     }
 
-    if (!dividerUp) HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
 
 }

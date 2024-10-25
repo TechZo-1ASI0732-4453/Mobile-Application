@@ -1,10 +1,24 @@
 package com.techzo.cambiazo.presentation.navigate
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Diversity1
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Handshake
+import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material.icons.outlined.Apps
+import androidx.compose.material.icons.outlined.Diversity1
+import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material.icons.outlined.Label
+import androidx.compose.material.icons.outlined.LocalOffer
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.SyncAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.articles.PublishScreen
 import com.techzo.cambiazo.presentation.details.ProductDetailsScreen
+import com.techzo.cambiazo.presentation.donations.DonationsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
@@ -35,9 +50,10 @@ import com.techzo.cambiazo.presentation.register.SignUpScreen
 import com.techzo.cambiazo.presentation.register.TermsAndConditionsScreen
 import com.techzo.cambiazo.presentation.review.ReviewScreen
 
-sealed class ItemsScreens(val icon: ImageVector, val title: String,val route: String, val navigate: () -> Unit = {}) {
+sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, val title: String,val route: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        icon = Icons.Outlined.Search,
+        iconSelected = Icons.Outlined.Search,
+        icon = Icons.Filled.Search,
         title = "Explorar",
         navigate = onNavigate,
         route = Routes.Explorer.route
@@ -45,28 +61,32 @@ sealed class ItemsScreens(val icon: ImageVector, val title: String,val route: St
     )
 
     data class Exchange(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        icon = Icons.Outlined.SyncAlt,
+        iconSelected = Icons.Filled.SwapHoriz,
+        icon = Icons.Outlined.SwapHoriz,
         title = "Intercambios",
         navigate = onNavigate,
         route = Routes.Exchange.route
     )
 
     data class Articles(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        icon = Icons.Outlined.Label,
+        iconSelected = Icons.Filled.LocalOffer,
+        icon = Icons.Outlined.LocalOffer,
         title = "Mis Artículos",
         navigate = onNavigate,
         route = Routes.Article.route
     )
 
     data class Donation(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        icon = Icons.Filled.FavoriteBorder,
+        iconSelected = Icons.Filled.Handshake,
+        icon = Icons.Outlined.Handshake,
         title = "Donaciones",
         navigate = onNavigate,
         route = Routes.Donation.route
     )
 
     data class Profile(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        icon = Icons.Filled.Person,
+        iconSelected = Icons.Filled.Person,
+        icon = Icons.Outlined.Person,
         title = "Perfil",
         navigate = onNavigate,
         route = Routes.Profile.route
@@ -102,7 +122,6 @@ sealed class Routes(val route: String) {
         fun createConfirmationOfferRoute(desiredProductId: String, offeredProductId: String) =
             "ConfirmationOfferScreen/$desiredProductId/$offeredProductId"
     }
-
 
     object EditProfile : Routes("EditProfileScreen")
     object MyReviews : Routes("MyReviewsScreen")
@@ -214,6 +233,12 @@ fun NavScreen() {
                 openMyReviews = { navController.navigate(Routes.MyReviews.route) },
                 openEditProfile = { navController.navigate(Routes.EditProfile.route) },
                 openFavorites = { navController.navigate(Routes.Favorites.route) },
+                bottomBar = { BottomBarNavigation(items,currentRoute) }
+            )
+        }
+
+        composable(route = Routes.Donation.route) {
+            DonationsScreen(
                 bottomBar = { BottomBarNavigation(items,currentRoute) }
             )
         }

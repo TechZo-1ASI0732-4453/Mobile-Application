@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.common.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import coil.compose.AsyncImage
+import com.techzo.cambiazo.R
 import com.techzo.cambiazo.domain.Product
 
 @Composable
@@ -157,11 +160,10 @@ fun ArticleExchange(
         ) {
             Text(
                 text = "Quieres",
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Gray,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 2.dp)
             )
             ArticlesOwn(
                 product = productLeft,
@@ -170,12 +172,10 @@ fun ArticleExchange(
             )
         }
 
-        Icon(
-            imageVector = Icons.Filled.SwapHoriz,
-            contentDescription = "Intercambio",
-            modifier = Modifier
-                .size(60.dp),
-            tint = Color(0xFFFFD146)
+        Image(
+            painter = painterResource(id = R.drawable.exchange_image),
+            contentDescription = "exchange image",
+            modifier = Modifier.size(50.dp)
         )
 
         Column(
@@ -184,11 +184,10 @@ fun ArticleExchange(
         ) {
             Text(
                 text = "Ofreces",
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Gray,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 2.dp)
             )
             ArticlesOwn(
                 product = productRight,

@@ -261,19 +261,18 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
             )
         }
         Spacer(modifier = Modifier.height(35.dp))
-
     }
 }
 
 @Composable
 fun ExchangeProductCard(productImageUrl: String, productName: String, tag: String) {
-    Column(modifier = Modifier.width(165.dp)) {
+    Column(modifier = Modifier.width(150.dp)) {
         Text(
             text = tag,
             color = Color(0xFF6D6D6D),
             modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp),
             textAlign = TextAlign.Center,
-            fontSize = 15.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
         )
         GlideImage(
@@ -301,11 +300,12 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
             Text(
                 text = productName,
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth().padding(horizontal = 5.dp),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
+                fontSize = 16.sp,
                 overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
             )
         }
     }

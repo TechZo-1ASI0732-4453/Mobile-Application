@@ -36,7 +36,7 @@ fun BottomBarNavigation(items: List<ItemsScreens>,currentScreen: String) {
 
         NavigationBar(
             modifier = Modifier
-                .height(75.dp)
+                .height(90.dp)
                 .shadow(elevation = 15.dp,
                     spotColor = Color.Black,
                     ambientColor = Color.Black,
@@ -49,10 +49,11 @@ fun BottomBarNavigation(items: List<ItemsScreens>,currentScreen: String) {
             items.forEach { screen ->
                 val isCurrentScreen = currentScreen == screen.route
                 val color = if (isCurrentScreen) Color(0xFFFFD146) else Color.Gray.copy(alpha = 1f)
+                val icon = if (isCurrentScreen) screen.iconSelected else screen.icon
+
                 NavigationBarItem(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 8.dp)
+                        .padding(top = 10.dp)
                         .drawBehind {
                             drawRect(
                                 color = if (isCurrentScreen) Color(0xFFFFD146) else Color.Transparent,
@@ -60,22 +61,22 @@ fun BottomBarNavigation(items: List<ItemsScreens>,currentScreen: String) {
                                 size = Size(size.width, 10f),
                             )
                         },
-                    alwaysShowLabel = true,
+                    alwaysShowLabel = isCurrentScreen,
                     selected = false,
                     onClick = { screen.navigate() },
                     icon = {
                         Icon(
-                            imageVector = screen.icon,
+                            imageVector = icon,
                             contentDescription = screen.title,
                             tint = color,
-                            modifier = Modifier.size(27.dp)
+                            modifier = Modifier.size(30.dp)
                         )
                     },
                     label = {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
                             text = screen.title,
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             maxLines = 1,
                             color = color,
                             letterSpacing = 0.001.sp,
