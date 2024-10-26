@@ -165,7 +165,7 @@ fun ExplorerScreen(
         }
 
         LazyColumn{
-            items(availableProducts) { product ->
+            items(availableProducts.reversed()) { product ->
                 Products(product, onProductClick)
             }
             item { Spacer(modifier = Modifier.height(15.dp)) }

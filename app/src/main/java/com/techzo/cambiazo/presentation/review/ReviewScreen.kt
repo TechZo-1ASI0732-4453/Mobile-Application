@@ -34,7 +34,7 @@ fun ReviewScreen(
     userId: Int,
     viewModel: ReviewViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    onProductClick: (Int,Int) -> Unit,
+    onProductClick: (Int, Int) -> Unit,
     onUserClick: (Int) -> Unit
 ) {
     val selectedTabIndex = remember { mutableStateOf(0) }
@@ -47,7 +47,6 @@ fun ReviewScreen(
     val reviewsState = viewModel.reviews.value
     val articlesState = viewModel.articles.value
     val errorMessage = viewModel.errorMessage.value
-
 
     MainScaffoldApp(
         paddingCard = PaddingValues(horizontal = 15.dp, vertical = 8.dp),
@@ -101,12 +100,9 @@ fun ReviewScreen(
                         fontWeight = FontWeight.Normal
                     )
 
-
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-
-
                         val averageRating = reviewAverageUser.averageRating ?: 0.0
                         StarRating(rating = averageRating, size = 24.dp)
 
@@ -121,7 +117,7 @@ fun ReviewScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text =  "${reviewsState.data?.size ?: 0}",
+                                text = "${reviewsState.data?.size ?: 0}",
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
@@ -141,21 +137,19 @@ fun ReviewScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 if (selectedTabIndex.value == 0) {
-                    if (articlesState.data != null && articlesState.data!!.isNotEmpty()) {
-                        LazyColumn( modifier = Modifier.fillMaxWidth()) {
-
-                            itemsIndexed(articlesState.data!!.chunked(2)) { _, rowProducts ->
+                    val availableArticles = articlesState.data?.filter { it.available } ?: emptyList()
+                    if (availableArticles.isNotEmpty()) {
+                        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                            itemsIndexed(availableArticles.chunked(2)) { _, rowProducts ->
                                 Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     rowProducts.forEach { product ->
-
                                         ArticlesOwn(
                                             modifier = Modifier.weight(1f),
                                             product = product,
-                                            onClick = {productId, userId -> onProductClick(productId,userId) },
+                                            onClick = { productId, userId -> onProductClick(productId, userId) },
                                         )
                                     }
                                     if (rowProducts.size < 2) {
@@ -176,7 +170,8 @@ fun ReviewScreen(
                 if (selectedTabIndex.value == 1) {
                     if (reviewsState.data != null && reviewsState.data!!.isNotEmpty()) {
                         LazyColumn(
-                            modifier = Modifier.padding(horizontal = 15.dp)
+                            modifier = Modifier
+                                .padding(horizontal = 15.dp)
                                 .fillMaxWidth()
                         ) {
                             itemsIndexed(reviewsState.data!!) { index, review ->
