@@ -2,6 +2,7 @@ package com.techzo.cambiazo.common.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,15 +55,20 @@ fun LoginGoogleApp(){
 }
 
 @Composable
-fun ButtonApp(text:String,onClick: ()-> Unit){
+fun ButtonApp(text:String,
+              bgColor: Color = Color(0xFFFFD146),
+              fColor: Color = Color.Black,
+              bColor: Color = Color(0xFFFFD146),
+              onClick: ()-> Unit){
     Button(
         onClick = { onClick() },
         modifier = Modifier
             .fillMaxWidth().height(65.dp)
-            .padding(bottom = 10.dp, top = 10.dp),
+            .padding(bottom = 10.dp, top = 10.dp)
+            .border(1.5.dp,color = bColor,RoundedCornerShape(10.dp)),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFFFD146),
-            contentColor = Color.Black
+            containerColor = bgColor,
+            contentColor = fColor
         ),
         shape = RoundedCornerShape(10.dp),
     ) {
@@ -75,6 +82,7 @@ fun ButtonApp(text:String,onClick: ()-> Unit){
     }
 
 }
+
 @Composable
 fun ButtonIconHeaderApp(iconVector: ImageVector, onClick: () -> Unit, iconSize: Dp = 35.dp){
     Column(
@@ -93,3 +101,29 @@ fun ButtonIconHeaderApp(iconVector: ImageVector, onClick: () -> Unit, iconSize: 
         }
     }
 }
+
+
+@Composable
+fun FloatingButtonApp(text: String,modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
+    FloatingActionButton(
+        onClick = onClick,
+        modifier = modifier
+            .padding(vertical = 5.dp)
+            .fillMaxWidth()
+            .height(65.dp)
+            .padding(bottom = 10.dp, top = 10.dp)
+            .border(1.5.dp, color = Color(0xFFFFD146), RoundedCornerShape(10.dp)),
+        containerColor = Color(0xFFFFD146),
+        contentColor = Color.Black,
+        shape = RoundedCornerShape(10.dp),
+    ) {
+        Text(
+            text = text,
+            fontSize = 18.sp,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif)
+        )
+    }
+}
+

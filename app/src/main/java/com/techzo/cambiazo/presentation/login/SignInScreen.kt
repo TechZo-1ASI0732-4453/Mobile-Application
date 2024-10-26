@@ -5,11 +5,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveRedEye
@@ -18,6 +21,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -33,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.components.ButtonApp
@@ -43,9 +48,9 @@ import com.techzo.cambiazo.common.components.TextLink
 
 @Composable
 fun SignInScreen(openRegister: () -> Unit = {},
-                openApp: () -> Unit = {},
-                openForgotPassword: () -> Unit = {},
-                viewModel: SignInViewModel = viewModel()){
+                 openApp: () -> Unit = {},
+                 openForgotPassword: () -> Unit = {},
+                 viewModel: SignInViewModel = hiltViewModel()){
 
 
     val state = viewModel.state.value
@@ -54,15 +59,23 @@ fun SignInScreen(openRegister: () -> Unit = {},
     val showPassword = viewModel.showPassword.value
 
     MainScaffoldApp(
-        paddingCard = PaddingValues(horizontal = 40.dp , vertical = 70.dp),
+        paddingCard = PaddingValues(start = 40.dp , end = 40.dp,top = 70.dp),
         contentsHeader = {
-            Image(
-                painter = painterResource(R.drawable.cambiazo_logo_name),
-                contentDescription = "logo gmail",
-                modifier = Modifier.fillMaxWidth().height(65.dp)
-            )
+            Column(modifier = Modifier
+                .fillMaxWidth().height(250.dp),
+                verticalArrangement = Arrangement.Center) {
+                Image(
+                    painter = painterResource(R.drawable.cambiazo_logo_name),
+                    contentDescription = "logo gmail",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(65.dp)
+                )
+            }
+
         }
     ) {
+
         Text(
             text = "Iniciar Sesión",
             fontSize = 35.sp,
@@ -71,21 +84,15 @@ fun SignInScreen(openRegister: () -> Unit = {},
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.SansSerif),
-
         )
 
 
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
-            shape = RoundedCornerShape(10.dp),
-            value = username,
-            placeholder = {
-                Text("Correo electrónico")},
-            onValueChange = { viewModel.onUsernameChange(it)}
+        FieldTextApp(
+            username,
+            "Correo electrónico",
+            onValueChange = { viewModel.onUsernameChange(it) }
         )
+
 
         OutlinedTextField(
             modifier = Modifier
@@ -95,10 +102,10 @@ fun SignInScreen(openRegister: () -> Unit = {},
                 .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
             shape = RoundedCornerShape(10.dp),
             value = password,
-            placeholder = { Text("Contraseña")},
+            placeholder = { Text("Contraseña",color = Color.Gray)},
             onValueChange = { viewModel.onPasswordChange(it) },
             visualTransformation =
-                if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+            if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = {
                     viewModel.onShowPasswordChange(!showPassword)
@@ -113,14 +120,25 @@ fun SignInScreen(openRegister: () -> Unit = {},
 
         TextLink("","Olvidé mi contraseña", clickable = {openForgotPassword()},Arrangement.End)
 
-        ButtonApp("Iniciar Sesion", onClick = {
-            viewModel.signIn()
-        })
+
         state.data?.let {
             openApp()
         }
         if (state.isLoading) {
-            CircularProgressIndicator()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp, bottom = 31.dp)
+            ) {
+                LinearProgressIndicator(
+                    color = Color(0xFFFFD146),
+                    modifier = Modifier.align(Alignment.Center).fillMaxWidth()
+                )
+            }
+        }else{
+            ButtonApp("Iniciar Sesion", onClick = {
+                viewModel.signIn()
+            })
         }
 
         Row(
@@ -157,10 +175,5 @@ fun SignInScreen(openRegister: () -> Unit = {},
     }
 }
 
-@Preview
-@Composable
-fun PreviewSignInScreen(){
-    SignInScreen()
-}
 
 
