@@ -2,6 +2,7 @@ package com.techzo.cambiazo.presentation.explorer.productdetails
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Resource
@@ -18,6 +19,7 @@ import kotlinx.coroutines.async
 
 @HiltViewModel
 class ProductDetailsViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val repository: ProductDetailsRepository,
     private val productRepository: ProductRepository,
     private val reviewRepository: ReviewRepository
@@ -37,6 +39,24 @@ class ProductDetailsViewModel @Inject constructor(
 
     private val _countReviews = mutableStateOf<Int?>(null)
     val countReviews: State<Int?> get() = _countReviews
+
+    private val _userId = mutableStateOf<Int?>(null)
+    val userId: State<Int?> get() = _userId
+
+    init {
+        val productIdString: String? = savedStateHandle["productId"]
+        val userIdString: String? = savedStateHandle["userId"]
+
+        val productId = productIdString?.toIntOrNull()
+        val userId = userIdString?.toIntOrNull()
+
+        if (productId != null && userId != null) {
+            _userId.value = userId
+            loadProductDetails(productId, userId)
+        } else {
+            _product.value = UIState(message = "Invalid product ID or user ID")
+        }
+    }
 
     fun loadProductDetails(productId: Int, userId: Int) {
         _product.value = UIState(isLoading = true)

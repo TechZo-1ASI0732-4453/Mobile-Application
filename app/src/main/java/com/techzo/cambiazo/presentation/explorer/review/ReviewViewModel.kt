@@ -3,6 +3,7 @@ package com.techzo.cambiazo.presentation.explorer.review
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Resource
@@ -23,15 +24,12 @@ import javax.inject.Inject
 @HiltViewModel
 class ReviewViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
-    private val userRepository: UserRepository,
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    var reviewAverageUser = mutableStateOf<ReviewAverageUser?>(null)
-        private set
-
-    private val _user = mutableStateOf(UIState<User>())
-    val user: State<UIState<User>> = _user
+    private val _reviewAverageUser = mutableStateOf<ReviewAverageUser?>(null)
+    val reviewAverageUser: State<ReviewAverageUser?> = _reviewAverageUser
 
     private val _reviews = mutableStateOf(UIState<List<Review>>())
     val reviews: State<UIState<List<Review>>> = _reviews
@@ -39,57 +37,40 @@ class ReviewViewModel @Inject constructor(
     private val _articles = mutableStateOf(UIState<List<Product>>())
     val articles: State<UIState<List<Product>>> = _articles
 
-    var errorMessage = mutableStateOf<String?>(null)
-        private set
+    private val _errorMessage = mutableStateOf<String?>(null)
+    val errorMessage: State<String?> = _errorMessage
 
-    // Cache para almacenar los flujos de usuarios por userId
-    private val userCache = mutableMapOf<Int, StateFlow<UIState<User>>>()
+    private val _userId = mutableStateOf<Int?>(null)
+    val userId: State<Int?> get() = _userId
+
+    init {
+        val userIdString: String? = savedStateHandle["userId"]
+        val userId = userIdString?.toIntOrNull()
+        if (userId != null) {
+            _userId.value = userId
+            getReviewAverageByUserId(userId)
+        } else {
+            _errorMessage.value = "Invalid user ID"
+        }
+    }
 
     fun getReviewAverageByUserId(userId: Int) {
         viewModelScope.launch {
-            // Ejecutar todas las llamadas en paralelo
             val reviewAverageDeferred =
                 async { reviewRepository.getAverageRatingAndReviewsByUserId(userId) }
-            val userDeferred = async { userRepository.getUserById(userId) }
-            val reviewsDeferred = async { reviewRepository.getReviewsByUserId(userId) }
             val articlesDeferred = async { productRepository.getProductsByUserId(userId) }
 
-            // Esperar a que todas las llamadas terminen
             val reviewAverageResult = reviewAverageDeferred.await()
-            val userResult = userDeferred.await()
-            val reviewsResult = reviewsDeferred.await()
             val articlesResult = articlesDeferred.await()
 
-            // Procesar los resultados
             when (reviewAverageResult) {
-                is Resource.Success<Pair<ReviewAverageUser, List<Review>>> -> {
-                    reviewAverageUser.value = reviewAverageResult.data?.first
+                is Resource.Success -> {
+                    _reviewAverageUser.value = reviewAverageResult.data?.first
                     _reviews.value = UIState(data = reviewAverageResult.data?.second)
-                    errorMessage.value = null
+                    _errorMessage.value = null
                 }
-
                 is Resource.Error -> {
-                    errorMessage.value = reviewAverageResult.message
-                }
-            }
-
-            when (userResult) {
-                is Resource.Success -> {
-                    _user.value = UIState(data = userResult.data)
-                }
-
-                is Resource.Error -> {
-                    _user.value = UIState(message = userResult.message ?: "Unknown error")
-                }
-            }
-
-            when (reviewsResult) {
-                is Resource.Success -> {
-                    _reviews.value = UIState(data = reviewsResult.data)
-                }
-
-                is Resource.Error -> {
-                    _reviews.value = UIState(message = reviewsResult.message ?: "Unknown error")
+                    _errorMessage.value = reviewAverageResult.message
                 }
             }
 
@@ -97,28 +78,10 @@ class ReviewViewModel @Inject constructor(
                 is Resource.Success -> {
                     _articles.value = UIState(data = articlesResult.data)
                 }
-
                 is Resource.Error -> {
                     _articles.value = UIState(message = articlesResult.message ?: "Unknown error")
                 }
             }
-        }
-    }
-
-    fun getUserById(userId: Int): StateFlow<UIState<User>> {
-        return userCache.getOrPut(userId) {
-            flow {
-                emit(UIState(isLoading = false)) // Eliminamos el estado de carga
-                when (val result = userRepository.getUserById(userId)) {
-                    is Resource.Success -> {
-                        emit(UIState(data = result.data))
-                    }
-
-                    is Resource.Error -> {
-                        emit(UIState(message = result.message ?: "Unknown error"))
-                    }
-                }
-            }.stateIn(viewModelScope, SharingStarted.Lazily, UIState(isLoading = false))
         }
     }
 

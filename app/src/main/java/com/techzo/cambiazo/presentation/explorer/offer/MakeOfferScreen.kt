@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,8 +24,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,95 +35,90 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.ArticlesOwn
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
-import com.techzo.cambiazo.domain.Product
-import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.navigate.Routes
 
 @Composable
 fun MakeOfferScreen(
-    desiredProduct: Product,
     navController: NavController,
-    onOfferMade: (Product) -> Unit,
-    onBack: () -> Unit,
-    onPublish: () -> Unit,
-    viewModel: OfferViewModel = hiltViewModel(),
-    explorerViewModel: ExplorerListViewModel = hiltViewModel()
+    viewModel: MakeOfferViewModel = hiltViewModel()
 ) {
-    val userProducts = explorerViewModel.state.value.data?.filter {
-        it.user.id == Constants.user!!.id && it.available
-    } ?: emptyList()
+    val desiredProduct by viewModel.desiredProduct.collectAsState()
+    val userProducts by viewModel.userProducts.collectAsState()
+    val error by viewModel.error.collectAsState()
 
-    MainScaffoldApp(
-        paddingCard = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
-        contentsHeader = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 20.dp)
-            ) {
-                ButtonIconHeaderApp(
-                    iconVector = Icons.Filled.ArrowBack,
-                    onClick = { onBack() },
-                    iconSize = 35.dp,
-                )
-                Column(
+    if (error != null) {
+        Text(text = error ?: "Unknown error")
+    } else if (desiredProduct != null) {
+        MainScaffoldApp(
+            paddingCard = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
+            contentsHeader = {
+                Box(
                     modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(top = 30.dp)
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp)
                 ) {
-                    Text(
-                        text = "¿Qué ofreces a",
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                    ButtonIconHeaderApp(
+                        iconVector = Icons.Filled.ArrowBack,
+                        onClick = { navController.popBackStack() },
+                        iconSize = 35.dp,
                     )
-                    Text(
-                        text = "cambio?",
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(top = 30.dp)
+                    ) {
+                        Text(
+                            text = "¿Qué ofreces a",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Text(
+                            text = "cambio?",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
-            }
-        },
-        content = {
-            Spacer(modifier = Modifier.height(8.dp))
+            },
+            content = {
+                Spacer(modifier = Modifier.height(8.dp))
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                verticalArrangement = Arrangement.spacedBy(0.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(userProducts) { product ->
-                    ArticlesOwn(
-                        product = product,
-                        onClick = { selectedProductId, _ ->
-                            viewModel.selectOfferedProduct(product)
-
-                            navController.navigate(
-                                Routes.ConfirmationOffer.createConfirmationOfferRoute(
-                                    desiredProduct.id.toString(),
-                                    selectedProductId.toString()
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(userProducts) { product ->
+                        ArticlesOwn(
+                            product = product,
+                            onClick = { selectedProductId, _ ->
+                                navController.navigate(
+                                    Routes.ConfirmationOffer.createConfirmationOfferRoute(
+                                        desiredProduct!!.id.toString(),
+                                        selectedProductId.toString()
+                                    )
                                 )
-                            )
-                        }
-                    )
-                }
-                item {
-                    AddProductButton(onPublish = onPublish)
+                            }
+                        )
+                    }
+                    item {
+                        AddProductButton(onPublish = { navController.navigate(Routes.Publish.route) })
+                    }
                 }
             }
-        }
-    )
+        )
+    } else {
+        // Loading state
+    }
 }
-
 
 @Composable
 fun AddProductButton(onPublish: () -> Unit) {
@@ -152,7 +146,6 @@ fun AddProductButton(onPublish: () -> Unit) {
         }
     }
 }
-
 
 
 

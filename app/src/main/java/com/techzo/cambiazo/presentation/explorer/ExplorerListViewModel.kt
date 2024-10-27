@@ -7,7 +7,6 @@
     import com.techzo.cambiazo.common.Constants
     import com.techzo.cambiazo.common.Resource
     import com.techzo.cambiazo.common.UIState
-    import com.techzo.cambiazo.data.repository.LocationRepository
     import com.techzo.cambiazo.data.repository.ProductCategoryRepository
     import com.techzo.cambiazo.data.repository.ProductRepository
     import com.techzo.cambiazo.domain.Product
@@ -112,9 +111,5 @@
                     _productCategories.value = UIState(message = result.message?:"Ocurrió un error")
                 }
             }
-        }
-
-        fun getProductById(productId: Int): Product? {
-            return _allProducts.value.find { it.id == productId }
         }
     }

@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,31 +24,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.StarRating
 import com.techzo.cambiazo.domain.*
+import com.techzo.cambiazo.presentation.navigate.Routes
 
 @Composable
 fun ProductDetailsScreen(
-    productId: Int,
-    userId: Int,
-    viewModel: ProductDetailsViewModel = hiltViewModel(),
-    onBack: () -> Unit,
-    onUserClick: () -> Unit,
-    onMakeOffer: (desiredProduct: Product, offeredProduct: Product) -> Unit
+    navController: NavController,
+    viewModel: ProductDetailsViewModel = hiltViewModel()
 ) {
-    val viewModel: ProductDetailsViewModel = hiltViewModel()
     val productState = viewModel.product.value
     val averageRating = viewModel.averageRating.value
     val countReviews = viewModel.countReviews.value
     val isFavoriteState = viewModel.isFavorite.value
-
-    LaunchedEffect(productId, userId) {
-        viewModel.loadProductDetails(productId, userId)
-    }
+    val userId = viewModel.userId.value
 
     Scaffold(
         content = { paddingValues ->
@@ -57,7 +50,7 @@ fun ProductDetailsScreen(
                 val product = productState.data
                 if (product != null) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        ProductHeader(product = product, onBack = onBack)
+                        ProductHeader(product = product, onBack = { navController.popBackStack() })
                         ProductDetails(
                             product = product,
                             user = product.user,
@@ -65,10 +58,21 @@ fun ProductDetailsScreen(
                             countReviews = countReviews ?: 0,
                             isFavoriteState = isFavoriteState,
                             onFavoriteToggle = { isCurrentlyFavorite ->
-                                viewModel.toggleFavoriteStatus(productId, isCurrentlyFavorite)
+                                viewModel.toggleFavoriteStatus(product.id, isCurrentlyFavorite)
                             },
-                            onUserClick = { onUserClick() },
-                            onMakeOffer = onMakeOffer,
+                            onUserClick = {
+                                if (userId != null) {
+                                    navController.navigate(Routes.Reviews.createRoute(userId.toString()))
+                                }
+                            },
+                            onMakeOffer = { desiredProduct, offeredProduct ->
+                                navController.navigate(
+                                    Routes.MakeOffer.createMakeOfferRoute(
+                                        desiredProductId = desiredProduct.id.toString(),
+                                        offeredProductIds = listOf(offeredProduct.id.toString())
+                                    )
+                                )
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 360.dp)
@@ -76,8 +80,6 @@ fun ProductDetailsScreen(
                                 .background(Color.White)
                         )
                     }
-                } else if (productState.isLoading) {
-                    // Show loading indicator
                 } else {
                     Text(
                         text = productState.message ?: "Error al cargar detalles del producto",

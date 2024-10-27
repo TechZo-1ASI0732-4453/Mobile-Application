@@ -32,7 +32,6 @@ import com.techzo.cambiazo.presentation.explorer.filter.FilterScreen
 import com.techzo.cambiazo.presentation.auth.login.SignInScreen
 import com.techzo.cambiazo.presentation.explorer.offer.ConfirmationOfferScreen
 import com.techzo.cambiazo.presentation.explorer.offer.MakeOfferScreen
-import com.techzo.cambiazo.presentation.explorer.offer.OfferViewModel
 import com.techzo.cambiazo.presentation.profile.ProfileScreen
 import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileScreen
 import com.techzo.cambiazo.presentation.profile.favorites.FavoritesScreen
@@ -266,48 +265,14 @@ fun NavScreen() {
             )
         }
 
-        composable(route = Routes.Reviews.route) { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
-            if (userId != null) {
-                ReviewScreen(
-                    userId = userId,
-                    onBack = { navController.popBackStack() },
-                    onProductClick = { productId,productUserid ->
-                        navController.navigate(
-                            Routes.ProductDetails.createProductDetailsRoute(
-                                productId.toString(),
-                                productUserid.toString()
-                            )
-                        )
-                    },
-                    onUserClick = { selectedUserId ->
-                        navController.navigate(Routes.Reviews.createRoute(selectedUserId.toString()))
-                    }
-                )
-            }
+        composable(route = Routes.Reviews.route) {
+            ReviewScreen(navController = navController)
         }
 
-        composable(route = Routes.ProductDetails.route) { backStackEntry ->
-            val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull()
-            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
-            if (productId != null && userId != null) {
-                ProductDetailsScreen(
-                    productId = productId,
-                    userId = userId,
-                    onBack = { navController.popBackStack() },
-                    onMakeOffer = { desiredProduct, offeredProduct ->
-                        navController.navigate(
-                            Routes.MakeOffer.createMakeOfferRoute(
-                                desiredProductId = desiredProduct.id.toString(),
-                                offeredProductIds = listOf(offeredProduct.id.toString())
-                            )
-                        )
-                    },
-                    onUserClick = {
-                        navController.navigate(Routes.Reviews.createRoute(userId.toString()))
-                    }
-                )
-            }
+        composable(route = Routes.ProductDetails.route) {
+            ProductDetailsScreen(
+                navController = navController
+            )
         }
 
         composable(route = Routes.Publish.route){
@@ -317,60 +282,16 @@ fun NavScreen() {
             )
         }
 
-        composable(route = Routes.MakeOffer.route) { backStackEntry ->
-            val desiredProductIdString = backStackEntry.arguments?.getString("desiredProductId")
-            val offeredProductIdsString = backStackEntry.arguments?.getString("offeredProductIds")
-
-            val desiredProductId = desiredProductIdString?.toIntOrNull()
-            val offeredProductIds = offeredProductIdsString?.split(",")?.mapNotNull { it.toIntOrNull() }
-
-            val explorerViewModel: ExplorerListViewModel = hiltViewModel()
-            val offerViewModel: OfferViewModel = hiltViewModel()
-
-            if (desiredProductId != null && offeredProductIds != null && offeredProductIds.isNotEmpty()) {
-                val desiredProduct = explorerViewModel.getProductById(desiredProductId)
-                val offeredProduct = explorerViewModel.getProductById(offeredProductIds.first())
-
-                if (desiredProduct != null && offeredProduct != null) {
-                    LaunchedEffect(key1 = desiredProduct, key2 = offeredProduct) {
-                        offerViewModel.initProducts(desiredProduct, offeredProduct)
-                    }
-
-                    MakeOfferScreen(
-                        desiredProduct = desiredProduct,
-                        onOfferMade = { /* Lógica para manejar oferta */ },
-                        onBack = { navController.popBackStack() },
-                        onPublish = { navController.navigate(Routes.Publish.route) },
-                        navController = navController
-                    )
-                }
-            }
+        composable(route = Routes.MakeOffer.route) {
+            MakeOfferScreen(
+                navController = navController
+            )
         }
 
-
-        composable(route = Routes.ConfirmationOffer.route) { backStackEntry ->
-            val desiredProductId = backStackEntry.arguments?.getString("desiredProductId")?.toIntOrNull()
-            val offeredProductId = backStackEntry.arguments?.getString("offeredProductId")?.toIntOrNull()
-
-            val explorerViewModel: ExplorerListViewModel = hiltViewModel()
-            val offerViewModel: OfferViewModel = hiltViewModel()
-
-            if (desiredProductId != null && offeredProductId != null) {
-                val desiredProduct = explorerViewModel.getProductById(desiredProductId)
-                val offeredProduct = explorerViewModel.getProductById(offeredProductId)
-
-                if (desiredProduct != null && offeredProduct != null) {
-                    LaunchedEffect(key1 = desiredProduct, key2 = offeredProduct) {
-                        offerViewModel.initProducts(desiredProduct, offeredProduct)
-                    }
-
-                    ConfirmationOfferScreen(
-                        navController = navController,
-                        desiredProduct = desiredProduct,
-                        offeredProduct = offeredProduct
-                    )
-                }
-            }
+        composable(route = Routes.ConfirmationOffer.route) {
+            ConfirmationOfferScreen(
+                navController = navController
+            )
         }
     }
 }
