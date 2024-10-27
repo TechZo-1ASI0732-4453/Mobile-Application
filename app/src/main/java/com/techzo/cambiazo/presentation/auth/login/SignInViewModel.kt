@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.presentation.login
+package com.techzo.cambiazo.presentation.auth.login
 
 import android.util.Log
 import androidx.compose.runtime.State

@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.presentation.review
+package com.techzo.cambiazo.presentation.explorer.review
 
 import android.util.Log
 import androidx.compose.runtime.State

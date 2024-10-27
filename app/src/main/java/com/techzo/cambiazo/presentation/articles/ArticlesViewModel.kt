@@ -31,11 +31,11 @@ class ArticlesViewModel  @Inject constructor(
             val result = productRepository.getProductsByUserId(Constants.user!!.id)
 
             if (result is Resource.Success) {
-                _products.value = UIState(data = result.data)
+                val availableProducts = result.data?.filter { it.available }
+                _products.value = UIState(data = availableProducts)
             } else {
-                _products.value = UIState(message = result.message ?: "Ocurrió un error")
+                _products.value = UIState(message = result.message ?: "OcurriÃ³ un error")
             }
-
         }
     }
 

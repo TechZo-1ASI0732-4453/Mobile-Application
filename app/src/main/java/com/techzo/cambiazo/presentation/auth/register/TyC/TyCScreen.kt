@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.presentation.register
+package com.techzo.cambiazo.presentation.auth.register.TyC
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

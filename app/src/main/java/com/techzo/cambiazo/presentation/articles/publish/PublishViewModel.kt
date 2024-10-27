@@ -1,8 +1,7 @@
-package com.techzo.cambiazo.presentation.articles
+package com.techzo.cambiazo.presentation.articles.publish
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel

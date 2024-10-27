@@ -1,25 +1,16 @@
 package com.techzo.cambiazo.presentation.navigate
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Diversity1
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Handshake
-import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.SyncAlt
-import androidx.compose.material.icons.outlined.Apps
-import androidx.compose.material.icons.outlined.Diversity1
 import androidx.compose.material.icons.outlined.Handshake
-import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SwapHoriz
-import androidx.compose.material.icons.outlined.SyncAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,25 +21,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
-import com.techzo.cambiazo.presentation.articles.PublishScreen
-import com.techzo.cambiazo.presentation.details.ProductDetailsScreen
+import com.techzo.cambiazo.presentation.articles.publish.PublishScreen
+import com.techzo.cambiazo.presentation.explorer.productdetails.ProductDetailsScreen
 import com.techzo.cambiazo.presentation.donations.DonationsScreen
-import com.techzo.cambiazo.presentation.exchanges.ExchangeDetailsScreen
+import com.techzo.cambiazo.presentation.exchanges.exchangedetails.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
-import com.techzo.cambiazo.presentation.filter.FilterScreen
-import com.techzo.cambiazo.presentation.login.SignInScreen
-import com.techzo.cambiazo.presentation.offer.ConfirmationOfferScreen
-import com.techzo.cambiazo.presentation.offer.MakeOfferScreen
-import com.techzo.cambiazo.presentation.offer.OfferViewModel
+import com.techzo.cambiazo.presentation.explorer.filter.FilterScreen
+import com.techzo.cambiazo.presentation.auth.login.SignInScreen
+import com.techzo.cambiazo.presentation.explorer.offer.ConfirmationOfferScreen
+import com.techzo.cambiazo.presentation.explorer.offer.MakeOfferScreen
+import com.techzo.cambiazo.presentation.explorer.offer.OfferViewModel
 import com.techzo.cambiazo.presentation.profile.ProfileScreen
 import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileScreen
 import com.techzo.cambiazo.presentation.profile.favorites.FavoritesScreen
 import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
-import com.techzo.cambiazo.presentation.register.SignUpScreen
-import com.techzo.cambiazo.presentation.register.TermsAndConditionsScreen
-import com.techzo.cambiazo.presentation.review.ReviewScreen
+import com.techzo.cambiazo.presentation.auth.register.SignUpScreen
+import com.techzo.cambiazo.presentation.auth.register.TyC.TermsAndConditionsScreen
+import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
 
 sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, val title: String,val route: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -381,6 +372,5 @@ fun NavScreen() {
                 }
             }
         }
-
     }
 }

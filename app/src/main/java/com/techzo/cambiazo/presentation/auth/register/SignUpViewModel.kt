@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.presentation.register
+package com.techzo.cambiazo.presentation.auth.register
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf

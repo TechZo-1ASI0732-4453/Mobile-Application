@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.presentation.review
+package com.techzo.cambiazo.presentation.explorer.review
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

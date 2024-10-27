@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.presentation.exchanges
+package com.techzo.cambiazo.presentation.exchanges.exchangedetails
 
 import android.content.Intent
 import android.net.Uri
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -38,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -51,10 +49,11 @@ import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
-import com.techzo.cambiazo.presentation.review.ReviewViewModel
+import com.techzo.cambiazo.presentation.exchanges.ExchangeViewModel
+import com.techzo.cambiazo.presentation.explorer.review.ReviewViewModel
 
 @Composable
-fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), reviewViewModel: ExchangeViewModel=hiltViewModel(), exchangeId:Int, page: Int) {
+fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), reviewViewModel: ExchangeViewModel =hiltViewModel(), exchangeId:Int, page: Int) {
 
     LaunchedEffect(Unit) {
         viewModel.getExchangeById(exchangeId)
@@ -305,7 +304,7 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
 }
 
 @Composable
-fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, price: String, page: Int, viewModel: ExchangeViewModel = hiltViewModel(), reviewViewModel: ReviewViewModel= hiltViewModel(), exchangeId: Int, goBack: () -> Unit,userAuthor:Int, userReceptor: Int) {
+fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, price: String, page: Int, viewModel: ExchangeViewModel = hiltViewModel(), reviewViewModel: ReviewViewModel = hiltViewModel(), exchangeId: Int, goBack: () -> Unit, userAuthor:Int, userReceptor: Int) {
     var showDialog by remember { mutableStateOf(false) }
     var showDialog2 by remember { mutableStateOf(false) }
     var showDialog3 by remember { mutableStateOf(false) }
