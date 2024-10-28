@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.presentation.register
+package com.techzo.cambiazo.presentation.auth.register
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +26,9 @@ class SignUpViewModel @Inject constructor (private val authRepository: AuthRepos
     private val _password = mutableStateOf("")
     val password: State<String> get() = _password
 
+    private val _isChecked = mutableStateOf(false)
+    val isChecked: State<Boolean> get() = _isChecked
+
     private val _repitePassword = mutableStateOf("")
     val repitePassword: State<String> get() = _repitePassword
 
@@ -38,6 +41,9 @@ class SignUpViewModel @Inject constructor (private val authRepository: AuthRepos
     private val _name = mutableStateOf("")
     val name: State<String> get() = _name
 
+    private val _successDialog = mutableStateOf(false)
+    val successDialog: State<Boolean> get() = _successDialog
+
     private val _phoneNumber = mutableStateOf("")
     val phoneNumber: State<String> get() = _phoneNumber
 
@@ -45,20 +51,49 @@ class SignUpViewModel @Inject constructor (private val authRepository: AuthRepos
 
     private val roles = listOf(Constants.DEFAULT_ROLE)
 
+
     fun signUp() {
         _state.value = UIState(isLoading = true)
+
+        if(_username.value.isEmpty() ||
+            _password.value.isEmpty() ||
+            _name.value.isEmpty() ||
+            _phoneNumber.value.isEmpty()
+        ){
+            _state.value = UIState(message = "Por favor llene todos los campos")
+            return
+        }
+        if(_phoneNumber.value.length != 9){
+            _state.value = UIState(message = "Por favor ingrese un numero de telefono valido")
+            return
+        }
+
+        if (!_username.value.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))){
+
+            _state.value = UIState(message = "Por favor ingrese un correo valido")
+            return
+        }
         if(_password.value != _repitePassword.value){
             _state.value = UIState(message = "Las contraseñas no coinciden")
             return
         }
-        if(_username.value.isEmpty() || _password.value.isEmpty() || _name.value.isEmpty() || _phoneNumber.value.isEmpty()){
-            _state.value = UIState(message = "Por favor llene todos los campos")
+
+        if (!isChecked.value){
+            _state.value = UIState(message = "Por favor acepte los terminos y condiciones")
             return
         }
+
+
+//        if(!_password.value.matches(Regex("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}\$"))){
+//            _state.value = UIState(message = "La contraseña debe tener al menos 8 caracteres, una letra y un numero")
+//            return
+//        }
+
         viewModelScope.launch {
             val result = authRepository.signUp(_username.value, _password.value, _name.value, _phoneNumber.value, profilePicture, roles)
             if (result is Resource.Success) {
                 _state.value = UIState(data = result.data)
+                _successDialog.value = true
             } else {
                 _state.value = UIState(message =result.message?:"Error")
             }
@@ -92,5 +127,13 @@ class SignUpViewModel @Inject constructor (private val authRepository: AuthRepos
 
     fun onShowPasswordRepeatChange(showPasswordRepeat: Boolean) {
         _showPasswordRepeat.value = showPasswordRepeat
+    }
+
+    fun onCheckedChange(isChecked: Boolean){
+        _isChecked.value = isChecked
+    }
+
+    fun hideSuccessDialog(){
+        _successDialog.value = false
     }
 }

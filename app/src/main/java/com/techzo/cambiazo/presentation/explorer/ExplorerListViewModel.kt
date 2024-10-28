@@ -7,7 +7,6 @@
     import com.techzo.cambiazo.common.Constants
     import com.techzo.cambiazo.common.Resource
     import com.techzo.cambiazo.common.UIState
-    import com.techzo.cambiazo.data.repository.LocationRepository
     import com.techzo.cambiazo.data.repository.ProductCategoryRepository
     import com.techzo.cambiazo.data.repository.ProductRepository
     import com.techzo.cambiazo.domain.Product
@@ -20,8 +19,7 @@
     @HiltViewModel
     class ExplorerListViewModel @Inject constructor (
         private val productRepository: ProductRepository,
-        private val productCategoryRepository: ProductCategoryRepository,
-        private val locationRepository: LocationRepository) : ViewModel() {
+        private val productCategoryRepository: ProductCategoryRepository) : ViewModel() {
 
         private val _allProducts = mutableStateOf<List<Product>>(emptyList())
         private val _state = mutableStateOf(UIState<List<Product>>())
@@ -30,7 +28,6 @@
         private val _name = mutableStateOf("")
         val name: State<String> get() = _name
 
-        //category id
         private val _categoryId = mutableStateOf<Int?>(Constants.filterValues.categoryId)
         val categoryId: State<Int?> get() = _categoryId
 
@@ -43,31 +40,19 @@
             applyFilter()
         }
 
-        fun getProducts() {
+        private fun getProducts() {
             _state.value = UIState(isLoading = true)
             viewModelScope.launch {
-                val districtResources = locationRepository.getDistricts()
-                val districts = districtResources.data?: emptyList()
-                val departmentResources = locationRepository.getDepartments()
-                val departments = departmentResources.data?: emptyList()
-                val countryResources = locationRepository.getCountries()
-                val countries = countryResources.data?: emptyList()
-
                 val result = productRepository.getProducts()
-                if(result is Resource.Success){
-                    val products = result.data?: emptyList()
-                    products.forEach { product ->
-                        product.district = districts.find { it.id == product.districtId }
-                        product.department = departments.find { it.id == product.district?.departmentId }
-                        product.country = countries.find { it.id == product.department?.countryId }
-                    }
-                    _allProducts.value = products
-                    _state.value = UIState(data = products, isLoading = false)
-                }else{
-                    _state.value = UIState(message = result.message?:"Ocurrió un error")
+                if (result is Resource.Success) {
+                    _allProducts.value = result.data ?: emptyList()
+                    _state.value = UIState(data = result.data ?: emptyList(), isLoading = false)
+                } else {
+                    _state.value = UIState(message = result.message ?: "Ocurrió un error")
                 }
                 applyFilter()
             }
+
         }
 
         fun onProductCategorySelected(id: Int) {
@@ -88,19 +73,19 @@
                 val matchesName = product.name.contains(_name.value, ignoreCase = true)
 
                 val matchesCategory = Constants.filterValues.categoryId?.let { categoryId ->
-                    product.productCategoryId == categoryId
+                    product.productCategory.id == categoryId
                 } ?: true
 
                 val matchesCountry = Constants.filterValues.countryId?.let { countryId ->
-                    product.department?.countryId == countryId
+                    product.location.countryId == countryId
                 } ?: true
 
                 val matchesDepartment = Constants.filterValues.departmentId?.let { departmentId ->
-                    product.district?.departmentId == departmentId
+                    product.location.departmentId == departmentId
                 } ?: true
 
                 val matchesDistrictId = Constants.filterValues.districtId?.let { districtId ->
-                    product.districtId == districtId
+                    product.location.districtId == districtId
                 } ?: true
 
                 val matchesMinPrice = Constants.filterValues.minPrice?.let { minPrice ->

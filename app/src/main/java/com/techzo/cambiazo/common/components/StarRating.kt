@@ -13,13 +13,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 
 @Composable
-fun StarRating(rating: Double, size : Dp) {
+fun StarRating(rating: Double, size: Dp) {
     val fullStars = rating.toInt()
     val partialStar = rating - fullStars
-    val emptyStars = 5 - fullStars - if (partialStar > 0) 1 else 0
+    val halfStar = if (partialStar >= 0.25 && partialStar < 0.75) 1 else 0
+    val fullStarsWithPartial = fullStars + if (partialStar >= 0.75) 1 else 0
+    val emptyStars = 5 - fullStarsWithPartial - halfStar
 
-    Row() {
-        repeat(fullStars) {
+    Row {
+        repeat(fullStarsWithPartial) {
             Icon(
                 imageVector = Icons.Filled.Star,
                 contentDescription = null,
@@ -28,7 +30,7 @@ fun StarRating(rating: Double, size : Dp) {
             )
         }
 
-        if (partialStar > 0) {
+        if (halfStar == 1) {
             Icon(
                 imageVector = Icons.TwoTone.StarHalf,
                 contentDescription = null,

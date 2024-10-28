@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.presentation.filter
+package com.techzo.cambiazo.presentation.explorer.filter
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
