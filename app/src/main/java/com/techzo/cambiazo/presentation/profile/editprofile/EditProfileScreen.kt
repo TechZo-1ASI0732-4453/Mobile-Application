@@ -178,11 +178,7 @@ fun EditProfileScreen(
 
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
 
-                    ProfileOption(
-                        icon = Icons.Filled.Delete,
-                        text = "Eliminar Cuenta",
-                        onClick = { }
-                    )
+
                 } else {
                     Text(text = state.message, fontSize = 16.sp)
                 }
