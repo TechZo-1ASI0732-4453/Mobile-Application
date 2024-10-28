@@ -29,43 +29,8 @@ class ProfileViewModel@Inject constructor(private val reviewRepository: ReviewRe
     private val _state = mutableStateOf(UIState<Pair<ReviewAverageUser, List<Review>>>())
     val state: State<UIState<Pair<ReviewAverageUser, List<Review>>>> get() = _state
 
-    private val _userState = mutableStateOf(UIState<User>())
-    val userState: State<UIState<User>> get() = _userState
-
-
-    private val _user = mutableStateOf<User?>(null)
-    val user: State<User?> get() = _user
-
-    private fun loadUserData() {
-        viewModelScope.launch {
-            val user = userRepository.getUserById(Constants.user!!.id)
-            if (user is Resource.Success) {
-                _user.value = user.data
-            }
-        }
-    }
-
-    fun refreshUserData() {
-        loadUserData()
-    }
-
     init {
         getReviewData()
-        getUserData()
-    }
-
-
-
-    private fun getUserData() {
-        _userState.value = UIState(isLoading = true)
-        viewModelScope.launch {
-            val user = userRepository.getUserById(Constants.user!!.id)
-            if (user is Resource.Success) {
-                _userState.value = UIState(data = user.data)
-            } else {
-                _userState.value = UIState(message = user.message ?: "Error")
-            }
-        }
     }
 
 

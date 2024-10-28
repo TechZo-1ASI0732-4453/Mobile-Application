@@ -40,6 +40,10 @@
             applyFilter()
         }
 
+        fun loadProducts() {
+            getProducts()
+        }
+
         private fun getProducts() {
             _state.value = UIState(isLoading = true)
             viewModelScope.launch {

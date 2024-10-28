@@ -34,6 +34,22 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
     val state: State<UIState<User>> get() = _state
 
 
+    private val _token = mutableStateOf(Constants.token?:"")
+    val token: State<String> get() = _token
+
+    private fun updateToken(newToken: String) {
+        _token.value = newToken
+        Constants.token = newToken
+    }
+
+    private val _user = mutableStateOf(Constants.user!!)
+    val user: State<UserSignIn> get() = _user
+
+    private fun updateUser(updatedUser: UserSignIn) {
+        _user.value = updatedUser
+        Constants.user = updatedUser
+    }
+
 
     fun onProfilePictureChanged(newUrl: String) {
         _profilePicture.value = newUrl
@@ -88,9 +104,11 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
             val result = userRepository.updateUserById(Constants.user!!.id, updatedUser)
             if (result is Resource.Success) {
                 _editState.value = UIState(data = result.data)
-                result.data?.let{
-                    Constants.user = it
+                result.data?.let {
+                    updateUser(it)
+                    updateToken(it.token)
                 }
+
             } else {
                 _editState.value = UIState(message = result.message ?: "Error")
             }

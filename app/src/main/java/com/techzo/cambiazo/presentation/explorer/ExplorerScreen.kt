@@ -7,22 +7,28 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.ElectricBolt
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -30,8 +36,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.common.components.Products
 import com.techzo.cambiazo.domain.Product
 
 @Composable
@@ -39,22 +49,46 @@ fun ExplorerScreen(
     viewModel: ExplorerListViewModel = hiltViewModel(),
     bottomBar: @Composable () -> Unit = {},
     onFilter: () -> Unit = {},
-    onProductClick: (String, String) -> Unit) {
+    onProductClick: (String, String) -> Unit
+) {
     val searcher = viewModel.name.value
     val categories = viewModel.productCategories.value
     val state = viewModel.state.value
 
-    val availableProducts = state.data?.filter { it.available } ?: emptyList()
+    val boostProducts = state.data?.filter { it.available && it.boost } ?: emptyList()
+    val availableProducts = state.data?.filter { it.available && !it.boost } ?: emptyList()
 
+    val isRefreshing = remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+    val rowState = rememberLazyListState()
+
+    fun refreshData() {
+        isRefreshing.value = true
+        viewModel.loadProducts()
+    }
+
+    LaunchedEffect(isRefreshing.value) {
+        if (isRefreshing.value) {
+            listState.scrollToItem(0)
+            rowState.scrollToItem(0)
+            isRefreshing.value = false
+        }
+    }
+
+
+    LaunchedEffect(viewModel.categoryId.value) {
+        listState.scrollToItem(0)
+        rowState.scrollToItem(0)
+    }
 
     MainScaffoldApp(
         bottomBar = bottomBar,
-        paddingCard = PaddingValues(top = 10.dp),
+        paddingCard = PaddingValues(top = 5.dp),
         contentsHeader = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 29.dp, horizontal = 20.dp),
+                    .padding(horizontal = 20.dp, vertical = 15.dp),
             ) {
                 BasicTextField(
                     value = searcher,
@@ -69,7 +103,7 @@ fun ExplorerScreen(
                     maxLines = 1,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Normal,
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         color = Color.Black
                     ),
                     decorationBox = { innerTextField ->
@@ -95,7 +129,7 @@ fun ExplorerScreen(
                                         color = Color.Gray,
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             fontWeight = FontWeight.Normal,
-                                            fontSize = 18.sp
+                                            fontSize = 16.sp
                                         )
                                     )
                                 }
@@ -104,7 +138,7 @@ fun ExplorerScreen(
                         }
                     }
                 )
-                IconButton(onClick = {onFilter()},
+                IconButton(onClick = { onFilter() },
                     modifier = Modifier
                         .padding(start = 10.dp)
                         .background(Color.Black, RoundedCornerShape(8.dp))
@@ -123,8 +157,7 @@ fun ExplorerScreen(
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .padding(top = 15.dp, bottom = 15.dp)
+                .padding(horizontal = 20.dp, vertical = 15.dp)
         ) {
             items(categories.data ?: emptyList()) { category ->
                 val isSelected = viewModel.categoryId.value == category.id
@@ -148,117 +181,169 @@ fun ExplorerScreen(
                         text = category.name,
                         color = Color.Black,
                         fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp)
+                        fontSize = 14.sp
+                    )
                 }
             }
         }
-
-        LazyColumn{
-            items(availableProducts.reversed()) { product ->
-                Products(product, onProductClick)
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing.value),
+            onRefresh = { refreshData() },
+            refreshTriggerDistance = 35.dp,
+            indicator = { state, refreshTrigger ->
+                SwipeRefreshIndicator(
+                    state = state,
+                    refreshTriggerDistance = refreshTrigger,
+                    contentColor = Color(0xFFFFD146),
+                    backgroundColor = Color.Black.copy(alpha = 0.5f)
+                )
             }
-            item { Spacer(modifier = Modifier.height(15.dp)) }
+        ) {
+            LazyColumn(state = listState) {
+                if (boostProducts.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Productos destacados",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp)
+                                .padding(bottom = 10.dp)
+                        )
+                        LazyRow(state = rowState) {
+                            item { Spacer(modifier = Modifier.width(20.dp)) }
+                            items(boostProducts.reversed()) { product ->
+                                ProductsRow(product, onProductClick)
+                            }
+                            item { Spacer(modifier = Modifier.width(10.dp)) }
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
+                if (availableProducts.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Productos Recientes",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp)
+                        )
+                    }
+                    items(availableProducts.reversed()) { product ->
+                        Products(product, onProductClick)
+                    }
+                    item { Spacer(modifier = Modifier.height(15.dp)) }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun Products(product: Product,
-             onProductClick: (String, String) -> Unit,
-             icon: ImageVector?=null,
-             onClickIcon: () -> Unit = {}) {
+fun ProductsRow(product: Product, onProductClick: (String, String) -> Unit,
+) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .fillMaxHeight()
+            .width(380.dp)
+            .padding(end = 10.dp)
             .border(0.dp, Color.Transparent, RoundedCornerShape(15.dp))
-            .shadow(elevation = 12.dp, RoundedCornerShape(15.dp))
+            .shadow(elevation = 12.dp, shape = RoundedCornerShape(15.dp))
             .clickable { onProductClick(product.id.toString(), product.user.id.toString()) },
     ) {
-        Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp)
+        ) {
+            GlideImage(
+                imageModel = { product.image },
+                modifier = Modifier.fillMaxSize(),
+            )
+
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(190.dp)
-                    .background(Color.Transparent)
+                    .align(Alignment.TopEnd)
+                    .padding(10.dp)
+                    .size(35.dp)
+                    .background(
+                        Color.Black.copy(alpha = 0.6f),
+                        RoundedCornerShape(50.dp)
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                GlideImage(
-                    imageModel = { product.image },
-                    modifier = Modifier.fillMaxSize()
+                Icon(
+                    imageVector = Icons.Outlined.ElectricBolt,
+                    contentDescription = null,
+                    tint = Color(0xFFFFD146)
                 )
-
-                icon?.let {
-                    Box(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .align(Alignment.TopEnd)
-                            .size(45.dp)
-                            .background(
-                                Color.Black.copy(alpha = 0.6f), RoundedCornerShape(50.dp)
-                            )
-                    ) {
-                        IconButton(onClick = onClickIcon) {
-                            Icon(imageVector = icon,
-                                contentDescription = null,
-                                tint = Color(0xFFFFD146))
-                        }
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(8.dp)
-                        .background(
-                            Color.Black.copy(alpha = 0.7f), RoundedCornerShape(13.dp)
-                        )
-                        .padding(horizontal = 14.dp)
-                        .padding(vertical = 4.dp),
-                ) {
-                    Text(
-                        text = "S/${product.price} aprox.",
-                        color = Color(0xFFFFD146),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                }
             }
 
-            Column(
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(15.dp)
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)),
+                            startY = 0f,
+                            endY = Float.POSITIVE_INFINITY
+                        )
+                    )
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(8.dp)
+                    .padding(bottom = 70.dp)
+                    .background(
+                        Color.Black.copy(alpha = 0.4f), RoundedCornerShape(13.dp)
+                    )
+                    .padding(horizontal = 14.dp)
+                    .padding(vertical = 4.dp),
             ) {
                 Text(
-                    text = product.name,
+                    text = "S/${product.price} aprox.",
+                    color = Color(0xFFFFD146),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp,
-                    lineHeight = 24.sp,
+                    fontSize = 16.sp
                 )
-                Spacer(modifier = Modifier.height(3.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.LocationOn,
-                        contentDescription = "Ubicación",
-                        tint = Color(0xFFFFD146),
-                        modifier = Modifier.size(18.dp)
-                    )
+            }
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp, vertical = 15.dp)
+            ) {
+                Column {
                     Text(
-                        text = "${product.location.districtName}, ${product.location.departmentName}",
-                        color = Color(0xFF9F9C9C),
-                        modifier = Modifier.padding(start = 1.dp),
-                        fontSize = 16.sp
+                        text = product.name,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.LocationOn,
+                            contentDescription = "Ubicación",
+                            tint = Color(0xFFFFD146),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = "${product.location.districtName}, ${product.location.departmentName}",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = product.description,
-                    color = Color.Black,
-                    fontSize = 16.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
             }
         }
     }

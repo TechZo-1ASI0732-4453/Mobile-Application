@@ -83,4 +83,17 @@ class ProductRepository(private val productService: ProductService) {
         }
     }
 
+    suspend fun getProductsByIds(ids: Set<Int>): Resource<List<Product>> = withContext(Dispatchers.IO) {
+        val products = mutableListOf<Product>()
+        ids.forEach { id ->
+            val response = getProductById(id)
+            if (response is Resource.Success) {
+                response.data?.let { product -> products.add(product) }
+            } else {
+                return@withContext Resource.Error("Error loading product with ID $id: ${response.message}")
+            }
+        }
+        return@withContext Resource.Success(data = products)
+    }
+
 }

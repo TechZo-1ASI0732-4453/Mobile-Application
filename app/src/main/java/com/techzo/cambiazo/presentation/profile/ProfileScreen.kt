@@ -52,11 +52,7 @@ fun ProfileScreen(
     val averageRating = viewModel.averageRating.value
     val countReviews = viewModel.countReviews.value
 
-    val user = viewModel.user.value
-
-    LaunchedEffect(Unit) {
-        viewModel.refreshUserData()
-    }
+    val user = Constants.user
 
     MainScaffoldApp(
         bottomBar = bottomBar,

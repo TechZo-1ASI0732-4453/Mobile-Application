@@ -11,4 +11,9 @@ object Constants {
     var user: UserSignIn? = null
 
     val filterValues = FilterValues()
+    
+
+    fun updateUser(user: UserSignIn) {
+        this.user = user
+    }
 }

@@ -5,11 +5,13 @@ import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -56,8 +58,8 @@ sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, v
     )
 
     data class Articles(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        iconSelected = Icons.Filled.LocalOffer,
-        icon = Icons.Outlined.LocalOffer,
+        iconSelected = Icons.Filled.Sell,
+        icon = Icons.Outlined.Sell,
         title = "Mis Artículos",
         navigate = onNavigate,
         route = Routes.Article.route
