@@ -7,9 +7,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -21,6 +23,7 @@ import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.presentation.navigate.Routes
 
 @Composable
 fun ConfirmationOfferScreen(
@@ -29,92 +32,84 @@ fun ConfirmationOfferScreen(
 ) {
     val desiredProduct by viewModel.desiredProduct.collectAsState()
     val offeredProduct by viewModel.offeredProduct.collectAsState()
-    val error by viewModel.error.collectAsState()
     val offerSuccess by viewModel.offerSuccess.collectAsState()
 
-    if (error != null) {
-        Text(text = error ?: "Unknown error")
-    } else if (desiredProduct != null && offeredProduct != null) {
-        MainScaffoldApp(
-            paddingCard = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
-            contentsHeader = {
-                Box(
+    MainScaffoldApp(
+        paddingCard = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
+        contentsHeader = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp)
+            ) {
+                ButtonIconHeaderApp(
+                    iconVector = Icons.Filled.ArrowBack,
+                    onClick = { navController.popBackStack() },
+                    iconSize = 35.dp,
+                )
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 20.dp)
+                        .align(Alignment.Center)
+                        .padding(top = 30.dp)
                 ) {
-                    ButtonIconHeaderApp(
-                        iconVector = Icons.Filled.ArrowBack,
-                        onClick = { navController.popBackStack() },
-                        iconSize = 35.dp,
+                    Text(
+                        text = "¿Listo para enviar",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(top = 30.dp)
-                    ) {
-                        Text(
-                            text = "¿Listo para enviar",
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Text(
-                            text = "tu oferta?",
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
+                    Text(
+                        text = "tu oferta?",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        },
+        content = {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                desiredProduct?.let { productLeft ->
+                    offeredProduct?.let { productRight ->
+                        ArticleExchange(
+                            productLeft = productLeft,
+                            productRight = productRight,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
-            },
-            content = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    ArticleExchange(
-                        productLeft = desiredProduct!!,
-                        productRight = offeredProduct!!,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                Spacer(modifier = Modifier.height(10.dp))
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                ButtonApp(
+                    text = "Listo",
+                    onClick = {
+                        viewModel.makeOffer()
+                    }
+                )
 
-                    ButtonApp(
-                        text = "Listo",
-                        onClick = {
-                            viewModel.makeOffer()
-                        }
-                    )
+                offerSuccess.takeIf { it }?.let {
+                    var showDialog by remember { mutableStateOf(true) }
 
-                    if (offerSuccess) {
+                    showDialog.takeIf { it }?.let {
                         DialogApp(
                             message = "¡Oferta Enviada!",
                             description = "Te notificaremos el estado de tu solicitud. Ya sea que el otro usuario acepte o decline tu oferta.",
                             labelButton1 = "Volver",
                             onClickButton1 = {
-                                navController.popBackStack()
+                                navController.popBackStack(Routes.ProductDetails.route, inclusive = false)
+                                showDialog = false
                             }
-                        )
-                    }
-
-                    error?.let { message ->
-                        Text(
-                            text = message,
-                            color = Color.Red,
-                            modifier = Modifier.padding(top = 16.dp),
-                            textAlign = TextAlign.Center
                         )
                     }
                 }
             }
-        )
-    } else {
-        // Loading state
-    }
+        }
+    )
 }

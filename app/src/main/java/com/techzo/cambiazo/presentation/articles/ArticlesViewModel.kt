@@ -1,7 +1,5 @@
 package com.techzo.cambiazo.presentation.articles
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
@@ -10,16 +8,19 @@ import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.ProductRepository
 import com.techzo.cambiazo.domain.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ArticlesViewModel  @Inject constructor(
+class ArticlesViewModel @Inject constructor(
     private val productRepository: ProductRepository
 ) : ViewModel() {
 
-    private val _products = mutableStateOf(UIState<List<Product>>())
-    val products: State<UIState<List<Product>>> = _products
+    private val _products = MutableStateFlow(UIState<List<Product>>())
+    val products: StateFlow<UIState<List<Product>>> get() = _products
 
     init {
         fetchProducts()
@@ -27,25 +28,22 @@ class ArticlesViewModel  @Inject constructor(
 
     private fun fetchProducts() {
         _products.value = UIState(isLoading = true)
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val result = productRepository.getProductsByUserId(Constants.user!!.id)
-
-            if (result is Resource.Success) {
-                val availableProducts = result.data?.filter { it.available }
-                _products.value = UIState(data = availableProducts)
+            _products.value = if (result is Resource.Success) {
+                UIState(data = result.data)
             } else {
-                _products.value = UIState(message = result.message ?: "OcurriÃ³ un error")
+                UIState(message = result.message ?: "Ocurrió un error")
             }
         }
     }
 
     fun deleteProduct(productId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val result = productRepository.deleteProduct(productId)
             if (result is Resource.Success) {
                 _products.value = UIState(data = _products.value.data?.filter { it.id != productId })
             }
         }
     }
-
 }

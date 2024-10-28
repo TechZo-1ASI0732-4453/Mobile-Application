@@ -8,6 +8,8 @@ import com.techzo.cambiazo.data.remote.exchanges.ExchangeStatusRequestDto
 import com.techzo.cambiazo.data.remote.exchanges.toExchange
 import com.techzo.cambiazo.domain.Exchange
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 
 class ExchangeRepository(private val exchangeService: ExchangeService
@@ -108,5 +110,32 @@ class ExchangeRepository(private val exchangeService: ExchangeService
             }
         }
     }
+
+    suspend fun checkIfExchangeExists(userId: Int, productOwnId: Int, productChangeId: Int): Resource<Boolean> =
+        withContext(Dispatchers.IO) {
+            try {
+                coroutineScope {
+                    val responseOwnDeferred = async { exchangeService.getExchangesByUserOwnId(userId) }
+                    val responseChangeDeferred = async { exchangeService.getExchangesByUserChangeId(userId) }
+
+                    val responseOwn = responseOwnDeferred.await()
+                    val responseChange = responseChangeDeferred.await()
+
+                    if (responseOwn.isSuccessful && responseChange.isSuccessful) {
+                        val exchangesDto = (responseOwn.body() ?: emptyList()) + (responseChange.body() ?: emptyList())
+                        val exists = exchangesDto.any { exchange ->
+                            exchange.status == "Pendiente" &&
+                                    ((exchange.productOwn.id == productOwnId && exchange.productChange.id == productChangeId) ||
+                                            (exchange.productOwn.id == productChangeId && exchange.productChange.id == productOwnId))
+                        }
+                        Resource.Success(exists)
+                    } else {
+                        Resource.Error("No se pudieron obtener las ofertas")
+                    }
+                }
+            } catch (e: Exception) {
+                Resource.Error(e.message ?: "Ocurrió un error")
+            }
+        }
 
 }

@@ -65,12 +65,9 @@ fun ProductDetailsScreen(
                                     navController.navigate(Routes.Reviews.createRoute(userId.toString()))
                                 }
                             },
-                            onMakeOffer = { desiredProduct, offeredProduct ->
+                            onMakeOffer = { desiredProduct ->
                                 navController.navigate(
-                                    Routes.MakeOffer.createMakeOfferRoute(
-                                        desiredProductId = desiredProduct.id.toString(),
-                                        offeredProductIds = listOf(offeredProduct.id.toString())
-                                    )
+                                    Routes.MakeOffer.createMakeOfferRoute(desiredProduct.id.toString())
                                 )
                             },
                             modifier = Modifier
@@ -155,7 +152,7 @@ fun ProductDetails(
     isFavoriteState: UIState<Boolean>,
     onFavoriteToggle: (Boolean) -> Unit,
     onUserClick: () -> Unit,
-    onMakeOffer: (desiredProduct: Product, offeredProduct: Product) -> Unit,
+    onMakeOffer: (desiredProduct: Product ) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -284,7 +281,7 @@ fun ProductDetails(
             ButtonApp(
                 text = "Intercambiar",
                 onClick = {
-                    onMakeOffer(product, product)
+                    onMakeOffer(product)
                 }
             )
         }

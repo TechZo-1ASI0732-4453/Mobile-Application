@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ConfirmationOfferViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val productRepository: ProductRepository,
     private val exchangeRepository: ExchangeRepository
 ) : ViewModel() {
@@ -27,37 +27,21 @@ class ConfirmationOfferViewModel @Inject constructor(
     private val _offeredProduct = MutableStateFlow<Product?>(null)
     val offeredProduct: StateFlow<Product?> get() = _offeredProduct
 
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> get() = _error
-
-    private val _offerSuccess = MutableStateFlow<Boolean>(false)
+    private val _offerSuccess = MutableStateFlow(false)
     val offerSuccess: StateFlow<Boolean> get() = _offerSuccess
 
     init {
-        val desiredProductIdString: String? = savedStateHandle["desiredProductId"]
-        val offeredProductIdString: String? = savedStateHandle["offeredProductId"]
+        viewModelScope.launch {
+            val desiredProductId: Int? = savedStateHandle.get<String>("desiredProductId")?.toIntOrNull()
+            val offeredProductId: Int? = savedStateHandle.get<String>("offeredProductId")?.toIntOrNull()
 
-        val desiredProductId = desiredProductIdString?.toIntOrNull()
-        val offeredProductId = offeredProductIdString?.toIntOrNull()
+            if (desiredProductId != null && offeredProductId != null) {
+                val desiredProdResource = productRepository.getProductById(desiredProductId)
+                val offeredProdResource = productRepository.getProductById(offeredProductId)
 
-        if (desiredProductId != null && offeredProductId != null) {
-            viewModelScope.launch {
-                try {
-                    val desiredProdResource = productRepository.getProductById(desiredProductId)
-                    val offeredProdResource = productRepository.getProductById(offeredProductId)
-
-                    if (desiredProdResource is Resource.Success && offeredProdResource is Resource.Success) {
-                        _desiredProduct.value = desiredProdResource.data
-                        _offeredProduct.value = offeredProdResource.data
-                    } else {
-                        _error.value = "Failed to load products"
-                    }
-                } catch (e: Exception) {
-                    _error.value = e.message
-                }
+                _desiredProduct.value = (desiredProdResource as? Resource.Success)?.data
+                _offeredProduct.value = (offeredProdResource as? Resource.Success)?.data
             }
-        } else {
-            _error.value = "Invalid product IDs"
         }
     }
 
@@ -65,28 +49,15 @@ class ConfirmationOfferViewModel @Inject constructor(
         val desiredProduct = _desiredProduct.value
         val offeredProduct = _offeredProduct.value
 
-        if (desiredProduct != null && offeredProduct != null) {
-            viewModelScope.launch {
-                try {
-                    val newExchangeRequest = ExchangeRequestDto(
-                        productOwnId = offeredProduct.id,
-                        productChangeId = desiredProduct.id,
-                        status = "Pendiente"
-                    )
+        viewModelScope.launch {
+            val newExchangeRequest = ExchangeRequestDto(
+                productOwnId = offeredProduct!!.id,
+                productChangeId = desiredProduct!!.id,
+                status = "Pendiente"
+            )
 
-                    val result = exchangeRepository.createExchange(newExchangeRequest)
-
-                    if (result is Resource.Success) {
-                        _offerSuccess.value = true
-                    } else {
-                        _error.value = result.message ?: "Error al enviar la oferta"
-                    }
-                } catch (e: Exception) {
-                    _error.value = e.message ?: "Ocurrió un error inesperado"
-                }
-            }
-        } else {
-            _error.value = "Productos no disponibles"
+            val result = exchangeRepository.createExchange(newExchangeRequest)
+            if (result is Resource.Success) _offerSuccess.value = true
         }
     }
 }

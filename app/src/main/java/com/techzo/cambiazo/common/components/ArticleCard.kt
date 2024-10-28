@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -46,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import com.techzo.cambiazo.R
 import com.techzo.cambiazo.domain.Product
 
@@ -56,10 +56,11 @@ fun ArticlesOwn(
     iconActions: Boolean = false,
     deleteProduct: (Int) -> Unit = {},
     editProduct: (Int) -> Unit = {},
-    onClick: (Int,Int) -> Unit = {_,_->}
+    onClick: (Int, Int) -> Unit = { _, _ -> }
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var showActions by remember { mutableStateOf(false) }
+
     if (showDialog) {
         DialogApp(
             message = "¿Estás seguro de eliminar esta publicación?",
@@ -78,7 +79,7 @@ fun ArticlesOwn(
             .height(180.dp)
             .background(Color.White)
             .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp))
-            .clickable { onClick(product.id,product.user.id) },
+            .clickable { onClick(product.id, product.user.id) },
         colors = CardDefaults.cardColors(
             containerColor = Color.White,
             contentColor = Color.Black
@@ -90,10 +91,12 @@ fun ArticlesOwn(
             contentAlignment = Alignment.TopEnd
         ) {
             AsyncImage(
-                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
                 model = product.image,
                 contentDescription = product.name,
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(12.dp))
             )
 
             if (iconActions) {
@@ -112,7 +115,7 @@ fun ArticlesOwn(
                         ) {
                             IconsAction(icon = Icons.Outlined.Edit, onclick = { editProduct(product.id); showActions = false })
                             Spacer(modifier = Modifier.size(15.dp))
-                            IconsAction(icon = Icons.Outlined.Delete, onclick = {showDialog = true})
+                            IconsAction(icon = Icons.Outlined.Delete, onclick = { showDialog = true })
                             Spacer(modifier = Modifier.size(15.dp))
                             IconsAction(icon = Icons.Outlined.Close, onclick = { showActions = false })
                         }
@@ -121,14 +124,13 @@ fun ArticlesOwn(
                     IconsAction(icon = Icons.Filled.MoreVert, margin = 5.dp, onclick = { showActions = true })
                 }
             }
-
         }
 
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp) ,
+                .padding(horizontal = 8.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -139,7 +141,6 @@ fun ArticlesOwn(
                 textAlign = TextAlign.Center
             )
         }
-
     }
 }
 

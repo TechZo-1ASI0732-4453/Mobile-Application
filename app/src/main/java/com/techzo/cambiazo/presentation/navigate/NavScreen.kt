@@ -12,10 +12,8 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -26,7 +24,6 @@ import com.techzo.cambiazo.presentation.explorer.productdetails.ProductDetailsSc
 import com.techzo.cambiazo.presentation.donations.DonationsScreen
 import com.techzo.cambiazo.presentation.exchanges.exchangedetails.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
-import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 import com.techzo.cambiazo.presentation.explorer.filter.FilterScreen
 import com.techzo.cambiazo.presentation.auth.login.SignInScreen
@@ -103,9 +100,9 @@ sealed class Routes(val route: String) {
         fun createRoute(userId: String) = "ReviewsScreen/$userId"
     }
 
-    object MakeOffer : Routes("MakeOfferScreen/{desiredProductId}/{offeredProductIds}") {
-        fun createMakeOfferRoute(desiredProductId: String, offeredProductIds: List<String>) =
-            "MakeOfferScreen/$desiredProductId/${offeredProductIds.joinToString(",")}"
+    object MakeOffer : Routes("MakeOfferScreen/{desiredProductId}") {
+        fun createMakeOfferRoute(desiredProductId: String) =
+            "MakeOfferScreen/$desiredProductId"
     }
 
     object ConfirmationOffer : Routes("ConfirmationOfferScreen/{desiredProductId}/{offeredProductId}") {
