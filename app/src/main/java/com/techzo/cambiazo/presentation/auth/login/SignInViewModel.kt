@@ -29,10 +29,19 @@ class SignInViewModel @Inject constructor(private val authRepository: AuthReposi
     private val _password = mutableStateOf("")
     val password: State<String> get() = _password
 
-    private val _showPassword = mutableStateOf(false)
-    val showPassword: State<Boolean> get() = _showPassword
+    private val _errorUsername =  mutableStateOf(UIState<Boolean>(data = false))
+    val errorUsername: State<UIState<Boolean>> get() = _errorUsername
 
+    private val _errorPassword =  mutableStateOf(UIState<Boolean>(data = false))
+    val errorPassword: State<UIState<Boolean>> get() = _errorPassword
+
+    fun validateUser():Boolean{
+        _errorUsername.value = UIState(message = "Usuario requerido", data =_username.value.isEmpty() )
+        _errorPassword.value = UIState(message = "Contraseña requerida", data =_password.value.isEmpty() )
+        return !_errorUsername.value.data!! && !_errorPassword.value.data!!
+    }
     fun signIn() {
+        if (!validateUser()) return
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
             val result = authRepository.signIn(_username.value, _password.value)
@@ -43,20 +52,21 @@ class SignInViewModel @Inject constructor(private val authRepository: AuthReposi
                     Constants.user = it
                 }
             } else {
-                _state.value = UIState(message =result.message?:"Error")
+                _state.value = UIState(message = "Datos de usuario incorrectos")
             }
         }
     }
 
     fun onUsernameChange(username: String) {
+        _errorUsername.value = UIState(data = false)
+        _state.value = UIState()
         _username.value = username
     }
 
     fun onPasswordChange(password: String) {
+        _errorPassword.value = UIState(data = false)
+        _state.value = UIState()
         _password.value = password
     }
 
-    fun onShowPasswordChange(showPassword: Boolean) {
-        _showPassword.value = showPassword
-    }
 }
