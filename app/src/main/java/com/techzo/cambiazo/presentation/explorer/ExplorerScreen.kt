@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -20,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -46,20 +48,36 @@ fun ExplorerScreen(
     viewModel: ExplorerListViewModel = hiltViewModel(),
     bottomBar: @Composable () -> Unit = {},
     onFilter: () -> Unit = {},
-    onProductClick: (String, String) -> Unit) {
-
+    onProductClick: (String, String) -> Unit
+) {
     val searcher = viewModel.name.value
     val categories = viewModel.productCategories.value
     val state = viewModel.state.value
 
-    val availableProducts = state.data?.filter { it.available } ?: emptyList()
+    val boostProducts = state.data?.filter { it.available && it.boost } ?: emptyList()
+    val availableProducts = state.data?.filter { it.available && !it.boost } ?: emptyList()
 
     val isRefreshing = remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+    val rowState = rememberLazyListState()
 
     fun refreshData() {
         isRefreshing.value = true
         viewModel.loadProducts()
-        isRefreshing.value = false
+    }
+
+    LaunchedEffect(isRefreshing.value) {
+        if (isRefreshing.value) {
+            listState.scrollToItem(0)
+            rowState.scrollToItem(0)
+            isRefreshing.value = false
+        }
+    }
+
+
+    LaunchedEffect(viewModel.categoryId.value) {
+        listState.scrollToItem(0)
+        rowState.scrollToItem(0)
     }
 
     MainScaffoldApp(
@@ -119,7 +137,7 @@ fun ExplorerScreen(
                         }
                     }
                 )
-                IconButton(onClick = {onFilter()},
+                IconButton(onClick = { onFilter() },
                     modifier = Modifier
                         .padding(start = 10.dp)
                         .background(Color.Black, RoundedCornerShape(8.dp))
@@ -162,7 +180,8 @@ fun ExplorerScreen(
                         text = category.name,
                         color = Color.Black,
                         fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp)
+                        fontSize = 14.sp
+                    )
                 }
             }
         }
@@ -179,8 +198,29 @@ fun ExplorerScreen(
                 )
             }
         ) {
-            LazyColumn() {
-                if(availableProducts.isNotEmpty()) {
+            LazyColumn(state = listState) {
+                if (boostProducts.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Productos destacados",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp)
+                                .padding(bottom = 10.dp)
+                        )
+                        LazyRow(state = rowState) {
+                            item { Spacer(modifier = Modifier.width(20.dp)) }
+                            items(boostProducts.reversed()) { product ->
+                                ProductsRow(product, onProductClick)
+                            }
+                            item { Spacer(modifier = Modifier.width(10.dp)) }
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
+                if (availableProducts.isNotEmpty()) {
                     item {
                         Text(
                             text = "Productos Recientes",
@@ -195,6 +235,113 @@ fun ExplorerScreen(
                         Products(product, onProductClick)
                     }
                     item { Spacer(modifier = Modifier.height(15.dp)) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductsRow(product: Product, onProductClick: (String, String) -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(380.dp)
+            .padding(end = 10.dp)
+            .border(0.dp, Color.Transparent, RoundedCornerShape(15.dp))
+            .shadow(elevation = 12.dp, shape = RoundedCornerShape(15.dp))
+            .clickable { onProductClick(product.id.toString(), product.user.id.toString()) },
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp)
+        ) {
+            GlideImage(
+                imageModel = { product.image },
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(10.dp)
+                    .size(35.dp)
+                    .background(
+                        Color.Black.copy(alpha = 0.6f),
+                        RoundedCornerShape(50.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ElectricBolt,
+                    contentDescription = null,
+                    tint = Color(0xFFFFD146)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)),
+                            startY = 0f,
+                            endY = Float.POSITIVE_INFINITY
+                        )
+                    )
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(8.dp)
+                    .padding(bottom = 70.dp)
+                    .background(
+                        Color.Black.copy(alpha = 0.4f), RoundedCornerShape(13.dp)
+                    )
+                    .padding(horizontal = 14.dp)
+                    .padding(vertical = 4.dp),
+            ) {
+                Text(
+                    text = "S/${product.price} aprox.",
+                    color = Color(0xFFFFD146),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp, vertical = 15.dp)
+            ) {
+                Column {
+                    Text(
+                        text = product.name,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.LocationOn,
+                            contentDescription = "Ubicación",
+                            tint = Color(0xFFFFD146),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = "${product.location.districtName}, ${product.location.departmentName}",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
                 }
             }
         }
