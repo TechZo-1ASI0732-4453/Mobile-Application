@@ -115,8 +115,6 @@ fun PublishScreen(
         LazyColumn {
             item {
 
-
-
                 SubTitleText(subTittle = "Imagen")
                 image?.let { uri ->
                     Box {

@@ -236,12 +236,6 @@ class PublishViewModel @Inject constructor(
                 _allDistricts.value = districtResult.data ?: emptyList()
             }
 
-            _departmentSelected.value =
-                _allDepartments.value.find { it.id == Constants.filterValues.departmentId }
-            _countrySelected.value =
-                _allCountries.value.find { it.id == Constants.filterValues.countryId }
-            _districtSelected.value =
-                _allDistricts.value.find { it.id == Constants.filterValues.districtId }
         }
 
 
