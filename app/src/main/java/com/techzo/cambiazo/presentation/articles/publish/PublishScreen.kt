@@ -48,9 +48,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
-import com.techzo.cambiazo.common.components.CustomDropDownSelect
 import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.DialogApp
+import com.techzo.cambiazo.common.components.DropdownList
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
@@ -89,7 +89,7 @@ fun PublishScreen(
 
     val image = viewModel.image.value
 
-    val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent(),) { uri ->
+    val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.selectImage(uri)
     }
 
@@ -114,8 +114,6 @@ fun PublishScreen(
 
         LazyColumn {
             item {
-
-
 
                 SubTitleText(subTittle = "Imagen")
                 image?.let { uri ->
@@ -212,7 +210,7 @@ fun PublishScreen(
             item {
                 SubTitleText(subTittle = "Categoría")
 
-                CustomDropDownSelect(
+                DropdownList(
                     selectedOption = categorySelected,
                     label ="Seleccione una Categoria",
                     itemList = categories.data ?: emptyList(),
@@ -239,7 +237,7 @@ fun PublishScreen(
             //----------------LOCATION------------------//
             item {
                 SubTitleText(subTittle = "Ubicación")
-                CustomDropDownSelect(
+                DropdownList(
                     selectedOption = countrySelected,
                     label ="Seeleccione un País",
                     itemList = countries.data ?: emptyList(),
@@ -249,7 +247,7 @@ fun PublishScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                CustomDropDownSelect(
+                DropdownList(
                     selectedOption = departmentSelected,
                     label ="Seeleccione un Departamento",
                     itemList = departments.data ?: emptyList(),
@@ -259,7 +257,7 @@ fun PublishScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                CustomDropDownSelect(
+                DropdownList(
                     selectedOption = districtSelected,
                     label ="Seeleccione un Distrito",
                     itemList = districts.data ?: emptyList(),
@@ -293,7 +291,7 @@ fun PublishScreen(
                 CustomInput(
                     value = price,
                     placeHolder = "Precio",
-                    type = "Money",
+                    type = "Number",
                     isError = errorPrice,
                     onValueChange = { viewModel.onChangePrice(it) }
                 )

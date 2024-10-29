@@ -17,13 +17,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
-import com.techzo.cambiazo.common.components.FieldTextApp
+import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
@@ -61,6 +58,12 @@ fun EditProfileScreen(
     val name = viewModel.name.value
     val phoneNumber = viewModel.phoneNumber.value
     val profilePicture = viewModel.profilePicture.value
+    val errorUsername = viewModel.errorUsername.value
+    val errorName = viewModel.errorName.value
+    val errorPhoneNumber = viewModel.errorPhoneNumber.value
+    val estateButton = viewModel.estateButton.value
+
+
 
     if (showDialog) {
         ImageUploadDialog(
@@ -73,14 +76,7 @@ fun EditProfileScreen(
         )
     }
 
-    LaunchedEffect(state.data) {
-        state.data?.let { user ->
-            viewModel.onUsernameChange(user.username)
-            viewModel.onNameChange(user.name)
-            viewModel.onPhoneNumberChange(user.phoneNumber)
-            viewModel.onProfilePicture(user.profilePicture)
-        }
-    }
+
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 20.dp),
@@ -137,21 +133,41 @@ fun EditProfileScreen(
                             .fillMaxWidth()
                     ) {
                         SubTitleText(subTittle = "Nombre")
-                        FieldTextApp(name, "Nombre", onValueChange = { viewModel.onNameChange(it) })
+                        CustomInput(
+                            value = name,
+                            type = "Text", 
+                            placeHolder = "Nombre",
+                            isError = errorName.data ?: false,
+                            messageError = errorName.message,
+                            onValueChange = { viewModel.onNameChange(it) }
+                        )
                         Spacer(modifier =Modifier.height(20.dp))
 
                         SubTitleText(subTittle = "Correo electrónico")
-                        FieldTextApp(username, "Correo electrónico", onValueChange = { viewModel.onUsernameChange(it) })
+                        CustomInput(
+                            value = username,
+                            type = "Email",
+                            placeHolder = "Correo electrónico",
+                            isError = errorUsername.data ?: false,
+                            messageError = errorUsername.message,
+                            onValueChange = { viewModel.onUsernameChange(it) }
+                        )
                         Spacer(modifier =Modifier.height(20.dp))
 
                         SubTitleText(subTittle = "Número de  teléfono")
-                        FieldTextApp(phoneNumber, "Número de  teléfono", onValueChange = { viewModel.onPhoneNumberChange(it) })
+                        CustomInput(
+                            value = phoneNumber,
+                            type = "Phone",
+                            placeHolder = "Número de  teléfono",
+                            isError = errorPhoneNumber.data ?: false,
+                            messageError = errorPhoneNumber.message,
+                            onValueChange = { viewModel.onPhoneNumberChange(it) }
+                        )
                         Spacer(modifier =Modifier.height(20.dp))
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
-
-                    ButtonApp("Guardar Cambios", onClick = { viewModel.saveProfile() })
+                    ButtonApp("Guardar Cambios", enable = estateButton, onClick = { viewModel.saveProfile() })
 
 
                     val dateFormat = SimpleDateFormat("d MMM yyyy", Locale("es", "ES"))

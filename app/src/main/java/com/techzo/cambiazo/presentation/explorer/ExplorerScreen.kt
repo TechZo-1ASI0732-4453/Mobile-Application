@@ -40,6 +40,8 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.skydoves.landscapist.glide.GlideImage
+import com.skydoves.landscapist.glide.GlideImage
+import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.Products
 import com.techzo.cambiazo.domain.Product
@@ -90,13 +92,14 @@ fun ExplorerScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 15.dp),
             ) {
+
                 BasicTextField(
                     value = searcher,
                     onValueChange = { viewModel.onNameChanged(it) },
                     modifier = Modifier
                         .shadow(10.dp, RoundedCornerShape(10.dp))
                         .weight(1f)
-                        .height(50.dp)
+                        .height(45.dp)
                         .background(Color.White, RoundedCornerShape(8.dp))
                         .border(9.dp, Color.Transparent, RoundedCornerShape(8.dp)),
                     singleLine = true,
@@ -143,7 +146,7 @@ fun ExplorerScreen(
                         .padding(start = 10.dp)
                         .background(Color.Black, RoundedCornerShape(8.dp))
                         .shadow(10.dp, RoundedCornerShape(10.dp))
-                        .size(50.dp)
+                        .size(45.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Tune,

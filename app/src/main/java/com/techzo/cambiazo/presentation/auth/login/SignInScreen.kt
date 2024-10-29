@@ -1,47 +1,32 @@
 package com.techzo.cambiazo.presentation.auth.login
 
-import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.RemoveRedEye
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.components.ButtonApp
-import com.techzo.cambiazo.common.components.FieldTextApp
+import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.LoginGoogleApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextLink
@@ -54,15 +39,17 @@ fun SignInScreen(openRegister: () -> Unit = {},
 
 
     val state = viewModel.state.value
+    val errorUsername = viewModel.errorUsername.value
+    val errorPassword = viewModel.errorPassword.value
     val username = viewModel.username.value
     val password = viewModel.password.value
-    val showPassword = viewModel.showPassword.value
 
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 40.dp , end = 40.dp,top = 70.dp),
         contentsHeader = {
             Column(modifier = Modifier
-                .fillMaxWidth().height(250.dp),
+                .fillMaxWidth()
+                .height(250.dp),
                 verticalArrangement = Arrangement.Center) {
                 Image(
                     painter = painterResource(R.drawable.cambiazo_logo_name),
@@ -87,37 +74,27 @@ fun SignInScreen(openRegister: () -> Unit = {},
         )
 
 
-        FieldTextApp(
-            username,
-            "Correo electrónico",
-            onValueChange = { viewModel.onUsernameChange(it) }
-        )
-
-
-        OutlinedTextField(
-            modifier = Modifier
-                .padding(top = 20.dp)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
-            shape = RoundedCornerShape(10.dp),
+        CustomInput(
+            value = username,
+            placeHolder = "Correo electrónico",
+            type = "Email",
+            isError = errorUsername.data ?: false,
+            messageError = errorUsername.message
+        ) {
+            viewModel.onUsernameChange(it)
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+        CustomInput(
             value = password,
-            placeholder = { Text("Contraseña",color = Color.Gray)},
-            onValueChange = { viewModel.onPasswordChange(it) },
-            visualTransformation =
-            if(showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                IconButton(onClick = {
-                    viewModel.onShowPasswordChange(!showPassword)
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.Visibility,
-                        contentDescription = "Visible"
-                    )
-                }
-            }
-        )
+            placeHolder = "Contraseña",
+            type = "Password",
+            isError = errorPassword.data ?: false,
+            messageError = errorPassword.message
+        ) {
+            viewModel.onPasswordChange(it)
+        }
 
+        state.message.let{Text(text = state.message, color = Color.Red, fontSize = 12.sp, modifier = Modifier.fillMaxWidth())}
         TextLink("","Olvidé mi contraseña", clickable = {openForgotPassword()},Arrangement.End)
 
 
@@ -132,7 +109,9 @@ fun SignInScreen(openRegister: () -> Unit = {},
             ) {
                 LinearProgressIndicator(
                     color = Color(0xFFFFD146),
-                    modifier = Modifier.align(Alignment.Center).fillMaxWidth()
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth()
                 )
             }
         }else{
