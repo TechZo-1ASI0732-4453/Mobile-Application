@@ -15,16 +15,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
-import com.techzo.cambiazo.common.components.CustomDropDownSelect
+import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.DropdownList
 import com.techzo.cambiazo.common.components.MainScaffoldApp
-import com.techzo.cambiazo.common.components.MoneyFieldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 
@@ -109,12 +109,11 @@ fun FilterScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-
-            MoneyFieldApp(minPrice,"Min", Modifier.weight(1f)){
+            CustomInput(value = minPrice,type = "Number", placeHolder = "Min", modifier = Modifier.width(140.dp)){
                 viewModel.onChangeMinPrice(it)
             }
             Text("a",modifier = Modifier.padding(horizontal = 20.dp))
-            MoneyFieldApp(maxPrice,"Max", Modifier.weight(1f)){
+            CustomInput(value = maxPrice,type = "Number", placeHolder = "Max", modifier = Modifier.width(140.dp)){
                 viewModel.onChangeMaxPrice(it)
             }
 

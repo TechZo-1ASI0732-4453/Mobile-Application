@@ -17,13 +17,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +37,6 @@ import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.CustomInput
-import com.techzo.cambiazo.common.components.FieldTextApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
@@ -161,7 +157,7 @@ fun EditProfileScreen(
                         SubTitleText(subTittle = "Número de  teléfono")
                         CustomInput(
                             value = phoneNumber,
-                            type = "Number",
+                            type = "Phone",
                             placeHolder = "Número de  teléfono",
                             isError = errorPhoneNumber.data ?: false,
                             messageError = errorPhoneNumber.message,

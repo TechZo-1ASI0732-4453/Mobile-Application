@@ -48,7 +48,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
-import com.techzo.cambiazo.common.components.CustomDropDownSelect
 import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.DropdownList
@@ -90,7 +89,7 @@ fun PublishScreen(
 
     val image = viewModel.image.value
 
-    val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent(),) { uri ->
+    val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.selectImage(uri)
     }
 
@@ -294,7 +293,7 @@ fun PublishScreen(
                 CustomInput(
                     value = price,
                     placeHolder = "Precio",
-                    type = "Money",
+                    type = "Number",
                     isError = errorPrice,
                     onValueChange = { viewModel.onChangePrice(it) }
                 )
