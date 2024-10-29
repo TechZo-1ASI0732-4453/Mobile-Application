@@ -11,7 +11,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,7 +50,7 @@ fun SignInScreen(openRegister: () -> Unit = {},
     val password = viewModel.password.value
 
     MainScaffoldApp(
-        paddingCard = PaddingValues(start = 40.dp , end = 40.dp,top = 70.dp),
+        paddingCard = PaddingValues(start = 40.dp , end = 40.dp,top = 50.dp),
         contentsHeader = {
             Column(modifier = Modifier
                 .fillMaxWidth()
@@ -65,9 +70,9 @@ fun SignInScreen(openRegister: () -> Unit = {},
 
         Text(
             text = "Iniciar Sesión",
-            fontSize = 35.sp,
+            fontSize = 32.sp,
             modifier = Modifier
-                .padding(bottom =35.dp),
+                .padding(bottom = 30.dp),
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.SansSerif),
@@ -83,7 +88,8 @@ fun SignInScreen(openRegister: () -> Unit = {},
         ) {
             viewModel.onUsernameChange(it)
         }
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(10.dp))
+
         CustomInput(
             value = password,
             placeHolder = "Contraseña",
@@ -94,9 +100,25 @@ fun SignInScreen(openRegister: () -> Unit = {},
             viewModel.onPasswordChange(it)
         }
 
-        state.message.let{Text(text = state.message, color = Color.Red, fontSize = 12.sp, modifier = Modifier.fillMaxWidth())}
+
         TextLink("","Olvidé mi contraseña", clickable = {openForgotPassword()},Arrangement.End)
 
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        if (state.message.isEmpty()){
+            Spacer(modifier = Modifier.height(22.dp))
+        }else{
+            Row(verticalAlignment = Alignment.CenterVertically , modifier = Modifier
+                .fillMaxWidth()
+                .height(22.dp)) {
+                Icon(imageVector = Icons.Filled.Error, contentDescription = null, tint = Color.Red, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(3.dp))
+                Text(text = state.message, color = Color.Red, fontSize = 14.sp, modifier = Modifier
+                    .fillMaxWidth())
+            }
+
+        }
 
         state.data?.let {
             openApp()
@@ -123,24 +145,24 @@ fun SignInScreen(openRegister: () -> Unit = {},
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 20.dp, top = 30.dp),
+                .padding(bottom = 20.dp, top = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             HorizontalDivider(
-                color = Color.Gray,
+                color = Color(0xFF888888),
                 thickness = 1.dp,
                 modifier = Modifier.weight(1f)
             )
 
             Text(
                 text = "o Inicia Sesion con",
+                color = Color(0xFF888888),
                 modifier = Modifier.padding(horizontal = 16.dp),
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = FontFamily.SansSerif)
+                    fontWeight = FontWeight.Normal)
             )
             HorizontalDivider(
-                color = Color.Gray,
+                color = Color(0xFF888888),
                 thickness = 1.dp,
                 modifier = Modifier.weight(1f)
             )
@@ -149,7 +171,10 @@ fun SignInScreen(openRegister: () -> Unit = {},
 
         LoginGoogleApp()
 
+        Spacer(modifier = Modifier.height(20.dp))
+
         TextLink("¿Todavía no tienes cuenta?"," Regístrate", clickable = {openRegister()})
+
 
     }
 }
