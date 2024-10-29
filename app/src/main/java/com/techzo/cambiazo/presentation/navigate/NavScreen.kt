@@ -246,6 +246,11 @@ fun NavScreen() {
         }
         composable(route = Routes.EditProfile.route) {
             EditProfileScreen(
+                deleteAccount = {
+                    navController.navigate(Routes.SignIn.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
                 back = { navController.popBackStack() }
             )
         }

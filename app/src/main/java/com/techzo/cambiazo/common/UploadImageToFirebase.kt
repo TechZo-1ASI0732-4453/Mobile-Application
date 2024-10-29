@@ -31,3 +31,17 @@ fun uploadImageToFirebase(
         onFailure()
     }
 }
+
+fun deleteImageFromFirebase(
+    imageUrl: String,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
+) {
+    val storageReference: StorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl)
+
+    storageReference.delete().addOnSuccessListener {
+        onSuccess()
+    }.addOnFailureListener {
+        onFailure()
+    }
+}

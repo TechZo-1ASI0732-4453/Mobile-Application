@@ -5,6 +5,7 @@ import com.techzo.cambiazo.domain.UserEdit
 import com.techzo.cambiazo.domain.UserSignIn
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.PUT
@@ -27,5 +28,9 @@ interface UserService {
     @PUT("users/edit/profile/{id}")
     suspend fun updateUserById(@Path("id") id: Int, @Body user: UserEdit): Response<UserSignIn>
 
+    @Headers("Content-Type: application/json",
+        "Accept: application/json")
+    @DELETE("users/delete/{userId}")
+    suspend fun deleteUser(@Path("userId") userId: Int): Response<Unit>
 
 }
