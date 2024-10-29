@@ -12,6 +12,7 @@ import com.techzo.cambiazo.domain.User
 import com.techzo.cambiazo.domain.UserEdit
 import com.techzo.cambiazo.domain.UserSignIn
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -151,5 +152,19 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
             }
         }
     }
+
+    fun deleteAccount() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val userId = Constants.user!!.id
+            val result = userRepository.deleteUser(userId)
+            if (result is Resource.Success) {
+                updateUser(UserSignIn(0, "", "", "", "", ""))
+                updateToken("")
+            }
+        }
+    }
+
+
+
 
 }

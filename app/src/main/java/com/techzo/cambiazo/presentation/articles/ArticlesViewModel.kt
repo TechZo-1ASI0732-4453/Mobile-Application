@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.common.deleteImageFromFirebase
 import com.techzo.cambiazo.data.repository.ProductRepository
 import com.techzo.cambiazo.domain.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,11 +39,12 @@ class ArticlesViewModel @Inject constructor(
         }
     }
 
-    fun deleteProduct(productId: Int) {
+    fun deleteProduct(productId: Int, imageUrl: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val result = productRepository.deleteProduct(productId)
             if (result is Resource.Success) {
                 _products.value = UIState(data = _products.value.data?.filter { it.id != productId })
+                deleteImageFromFirebase(imageUrl = imageUrl, onSuccess = {}, onFailure = {})
             }
         }
     }

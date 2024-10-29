@@ -34,9 +34,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.skydoves.landscapist.glide.GlideImage
+import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.CustomInput
+import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
@@ -46,11 +48,13 @@ import java.util.Locale
 
 @Composable
 fun EditProfileScreen(
+    deleteAccount: () -> Unit = {},
     back: () -> Unit = {},
     viewModel: EditProfileViewModel = hiltViewModel()
 ) {
-
     var showDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showSaveDialog by remember { mutableStateOf(false) }
 
     val state = viewModel.state.value
 
@@ -76,7 +80,37 @@ fun EditProfileScreen(
         )
     }
 
+    if (showDeleteDialog) {
+        DialogApp(
+            message = "Confirmación",
+            description = "¿Está seguro de que desea eliminar tu cuenta?",
+            labelButton1 = "Aceptar",
+            labelButton2 = "Cancelar",
+            onDismissRequest = { showDeleteDialog = false },
+            onClickButton1 = {
+                viewModel.deleteAccount()
+                showDeleteDialog = false
+                deleteAccount()
+            },
+            onClickButton2 = { showDeleteDialog = false }
+        )
+    }
 
+    if (showSaveDialog) {
+        DialogApp(
+            message = "Éxito",
+            description = "Cambios guardados exitosamente.",
+            labelButton1 = "Aceptar",
+            onDismissRequest = {
+                showSaveDialog = false
+                back()
+            },
+            onClickButton1 = {
+                showSaveDialog = false
+                back()
+            }
+        )
+    }
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 20.dp),
@@ -101,7 +135,6 @@ fun EditProfileScreen(
                             .padding(top = 15.dp, bottom = 15.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-
                         Box {
                             GlideImage(
                                 imageModel = { profilePicture ?: user.profilePicture },
@@ -166,15 +199,20 @@ fun EditProfileScreen(
                         Spacer(modifier =Modifier.height(20.dp))
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
-                    ButtonApp("Guardar Cambios", enable = estateButton, onClick = { viewModel.saveProfile() })
 
+                    ButtonApp(
+                        "Guardar Cambios",
+                        onClick = {
+                            viewModel.saveProfile()
+                            showSaveDialog = true
+                                  },
+                        enable = estateButton)
 
                     val dateFormat = SimpleDateFormat("d MMM yyyy", Locale("es", "ES"))
                     val formattedDate = dateFormat.format(user.createdAt)
 
                     Row(
-                        modifier = Modifier.padding(top = 15.dp),
+                        modifier = Modifier.padding(top = 10.dp),
                     ) {
                         Text(
                             text = "En Cambiazo desde ",
@@ -194,7 +232,13 @@ fun EditProfileScreen(
 
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
 
-
+                    ProfileOption(
+                        icon = Icons.Filled.Delete,
+                        text = "Eliminar Cuenta",
+                        onClick = {
+                            showDeleteDialog = true
+                        }
+                    )
                 } else {
                     Text(text = state.message, fontSize = 16.sp)
                 }

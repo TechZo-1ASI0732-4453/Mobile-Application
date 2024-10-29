@@ -32,7 +32,7 @@ fun ArticlesScreen(
     onProductClick: (Int, Int) -> Unit,
 ) {
     val productsState = viewModel.products.collectAsState()
-    val products = productsState.value
+    val products = productsState.value.data?.filter { it.available } ?: emptyList()
 
     MainScaffoldApp(
         bottomBar = bottomBar,
@@ -47,7 +47,7 @@ fun ArticlesScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(products.data?.chunked(2) ?: emptyList()) { rowItems ->
+                items(products.chunked(2) ?: emptyList()) { rowItems ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -59,7 +59,9 @@ fun ArticlesScreen(
                                 product = it,
                                 Modifier.weight(1f),
                                 iconActions = true,
-                                deleteProduct = { productId -> viewModel.deleteProduct(productId) },
+                                deleteProduct = { productId ->
+                                    viewModel.deleteProduct( productId, it.image)
+                                },
                                 editProduct = {},
                                 onClick = onProductClick
                             )
