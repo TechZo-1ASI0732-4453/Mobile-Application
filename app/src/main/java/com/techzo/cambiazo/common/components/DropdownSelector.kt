@@ -117,7 +117,7 @@ fun  <T> DropdownList(
                         }
                         innerTextField()
                     }
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { showDropdown = !showDropdown }) {
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
                             contentDescription = null,
@@ -224,7 +224,7 @@ fun <T> CustomDropDownMenu(
             Popup(
                 alignment = Alignment.TopCenter,
                 properties = PopupProperties(excludeFromSystemGesture = true),
-                onDismissRequest = {hideMenu()  },
+                onDismissRequest = { },
             ) {
                 LazyColumn (
                     modifier = Modifier
