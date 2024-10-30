@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.data.remote.products
 
 import com.techzo.cambiazo.domain.Product
+import com.techzo.cambiazo.domain.ProductCategory
 import com.techzo.cambiazo.domain.User
 
 data class ProductDto(

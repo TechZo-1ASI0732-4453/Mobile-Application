@@ -31,6 +31,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,11 +55,13 @@ import com.techzo.cambiazo.common.components.DropdownList
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
+import com.techzo.cambiazo.domain.Product
 
 @Composable
 fun PublishScreen(
     viewModel: PublishViewModel = hiltViewModel(),
     back : () -> Unit = {},
+    product: Product? = null,
     openMyArticles: () -> Unit = {}
 ) {
 
@@ -96,6 +99,13 @@ fun PublishScreen(
     val productState = viewModel.productState.value
     val context = LocalContext.current
     val spaceHeight = 20.dp
+
+
+
+
+    LaunchedEffect(key1 = product) {
+        product?.let {viewModel.productDataToEdit(it)}
+    }
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
         contentsHeader = {

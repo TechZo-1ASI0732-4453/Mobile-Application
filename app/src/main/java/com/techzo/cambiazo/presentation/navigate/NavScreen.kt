@@ -1,14 +1,14 @@
 package com.techzo.cambiazo.presentation.navigate
 
+import android.net.Uri
+import android.os.Parcelable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Handshake
-import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.outlined.Handshake
-import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Sell
@@ -16,10 +16,13 @@ import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.articles.publish.PublishScreen
 import com.techzo.cambiazo.presentation.explorer.productdetails.ProductDetailsScreen
@@ -187,7 +190,10 @@ fun NavScreen() {
         composable(route = Routes.Article.route) {
             ArticlesScreen(
                 bottomBar = { BottomBarNavigation(items,currentRoute) },
-                onPublish = {navController.navigate(Routes.Publish.route)},
+                onPublish = {
+                    navController.currentBackStackEntry?.savedStateHandle?.set("product", it)
+                    navController.navigate(Routes.Publish.route)
+                            },
                 onProductClick = { productId, userId ->
                     navController.navigate(
                         Routes.ProductDetails.createProductDetailsRoute(
@@ -279,10 +285,13 @@ fun NavScreen() {
             )
         }
 
-        composable(route = Routes.Publish.route){
+        composable(
+            route = Routes.Publish.route,
+        ){
             PublishScreen(
                 back = {navController.popBackStack()},
-                openMyArticles = {navController.navigate(Routes.Article.route)}
+                openMyArticles = {navController.navigate(Routes.Article.route)},
+                product = navController.previousBackStackEntry?.savedStateHandle?.get<Product>("product")
             )
         }
 
@@ -299,3 +308,4 @@ fun NavScreen() {
         }
     }
 }
+

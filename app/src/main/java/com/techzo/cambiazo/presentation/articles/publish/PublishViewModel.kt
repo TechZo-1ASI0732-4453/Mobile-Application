@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
@@ -17,6 +18,7 @@ import com.techzo.cambiazo.data.repository.ProductRepository
 import com.techzo.cambiazo.domain.Country
 import com.techzo.cambiazo.domain.Department
 import com.techzo.cambiazo.domain.District
+import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.domain.ProductCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -25,6 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PublishViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val productCategoryRepository: ProductCategoryRepository,
     private val locationRepository: LocationRepository,
     private val productRepository: ProductRepository
@@ -106,6 +109,29 @@ class PublishViewModel @Inject constructor(
     val productState: State<UIState<Any>> get() = _productState
 
 
+    fun productDataToEdit(product: Product){
+        _name.value = product.name
+        _description.value = product.description
+        _price.value = product.price.toString()
+        _objectChange.value = product.desiredObject
+        _categorySelected.value = product.productCategory
+        _countrySelected.value = Country(
+            id = product.location.countryId,
+            name = product.location.countryName
+        )
+        _departmentSelected.value = Department(
+            id = product.location.departmentId,
+            name = product.location.departmentName,
+            countryId = product.location.countryId
+        )
+        _districtSelected.value = District(
+            id = product.location.districtId,
+            name = product.location.districtName,
+            departmentId = product.location.departmentId
+        )
+        _image.value = Uri.parse(product.image)
+    }
+
     init {
         getCategories()
         getLocations()
@@ -144,13 +170,17 @@ class PublishViewModel @Inject constructor(
     fun selectCountry(country: Country?) {
         if (country != null) _errorCountry.value = false
         _countrySelected.value = country
-        _departments.value =
-            UIState(data = _allDepartments.value.filter { it.countryId == country?.id })
+        _departmentSelected.value = null
+        _districtSelected.value = null
+
+        _departments.value =  UIState(data = _allDepartments.value.filter { it.countryId == country?.id })
     }
 
     fun selectDepartment(department: Department?) {
         if (department != null) _errorDepartment.value = false
         _departmentSelected.value = department
+        _districtSelected.value = null
+
         _districts.value =
             UIState(data = _allDistricts.value.filter { it.departmentId == department?.id })
     }

@@ -23,12 +23,13 @@ import com.techzo.cambiazo.common.components.ArticlesOwn
 import com.techzo.cambiazo.common.components.FloatingButtonApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
+import com.techzo.cambiazo.domain.Product
 
 @Composable
 fun ArticlesScreen(
     viewModel: ArticlesViewModel = hiltViewModel(),
     bottomBar: @Composable () -> Unit = {},
-    onPublish: () -> Unit = {},
+    onPublish: (Product?) -> Unit = {},
     onProductClick: (Int, Int) -> Unit,
 ) {
     val productsState = viewModel.products.collectAsState()
@@ -54,15 +55,15 @@ fun ArticlesScreen(
                             .background(Color.White),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        rowItems.forEach {
+                        rowItems.forEach {product->
                             ArticlesOwn(
-                                product = it,
+                                product = product,
                                 Modifier.weight(1f),
                                 iconActions = true,
                                 deleteProduct = { productId ->
-                                    viewModel.deleteProduct( productId, it.image)
+                                    viewModel.deleteProduct( productId, product.image)
                                 },
-                                editProduct = {},
+                                editProduct = {onPublish(it)},
                                 onClick = onProductClick
                             )
                         }
@@ -81,7 +82,7 @@ fun ArticlesScreen(
             FloatingButtonApp(
                 text = "+ Publicar",
                 modifier = Modifier.align(Alignment.BottomCenter)
-            ) { onPublish() }
+            ) { onPublish(null) }
         }
     }
 }
