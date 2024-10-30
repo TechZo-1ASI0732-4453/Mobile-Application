@@ -23,8 +23,7 @@ fun TextLink(text1:String = "",
              horizontal: Arrangement.Horizontal = Arrangement.Center){
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp, bottom = 20.dp),
+            .fillMaxWidth(),
         horizontalArrangement = horizontal,
         ) {
         Text(

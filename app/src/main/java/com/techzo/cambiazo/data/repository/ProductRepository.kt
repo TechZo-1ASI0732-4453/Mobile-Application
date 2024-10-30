@@ -28,25 +28,6 @@ class ProductRepository(private val productService: ProductService) {
         }
     }
 
-    suspend fun getProductsByCategoryId(id: Int): Resource<List<Product>> = withContext(Dispatchers.IO) {
-        try {
-            val response = productService.getProductsByCategoryId(id)
-            if (response.isSuccessful) {
-                response.body()?.let { productsDto ->
-                    val products = mutableListOf<Product>()
-                    productsDto.forEach { productDto ->
-                        products.add(productDto.toProduct())
-                    }
-                    return@withContext Resource.Success(data = products)
-                }
-                return@withContext Resource.Error("No se encontraron productos")
-            }
-            return@withContext Resource.Error(response.message())
-        } catch (e: Exception) {
-            return@withContext Resource.Error(e.message ?: "Ocurrió un error")
-        }
-    }
-
     suspend fun getProductById(id: Int): Resource<Product> = withContext(Dispatchers.IO) {
         try {
             val response = productService.getProductById(id)
@@ -101,7 +82,8 @@ class ProductRepository(private val productService: ProductService) {
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
         }
     }
-    suspend fun getProductsByIds(ids: List<Int>): Resource<List<Product>> = withContext(Dispatchers.IO) {
+
+    suspend fun getProductsByIds(ids: Set<Int>): Resource<List<Product>> = withContext(Dispatchers.IO) {
         val products = mutableListOf<Product>()
         ids.forEach { id ->
             val response = getProductById(id)
@@ -113,6 +95,5 @@ class ProductRepository(private val productService: ProductService) {
         }
         return@withContext Resource.Success(data = products)
     }
-
 
 }

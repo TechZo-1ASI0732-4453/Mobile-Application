@@ -60,4 +60,19 @@ class UserRepository(private val userService: UserService) {
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
         }
     }
+
+    suspend fun deleteUser(userId: Int): Resource<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val response = userService.deleteUser(userId)
+            if (response.isSuccessful) {
+                return@withContext Resource.Success(data = Unit)
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+
+        }
+    }
+
+
 }

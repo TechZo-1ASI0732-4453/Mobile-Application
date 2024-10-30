@@ -5,17 +5,17 @@ import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -26,7 +26,6 @@ import com.techzo.cambiazo.presentation.explorer.productdetails.ProductDetailsSc
 import com.techzo.cambiazo.presentation.donations.DonationsScreen
 import com.techzo.cambiazo.presentation.exchanges.exchangedetails.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
-import com.techzo.cambiazo.presentation.explorer.ExplorerListViewModel
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
 import com.techzo.cambiazo.presentation.explorer.filter.FilterScreen
 import com.techzo.cambiazo.presentation.auth.login.SignInScreen
@@ -59,8 +58,8 @@ sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, v
     )
 
     data class Articles(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        iconSelected = Icons.Filled.LocalOffer,
-        icon = Icons.Outlined.LocalOffer,
+        iconSelected = Icons.Filled.Sell,
+        icon = Icons.Outlined.Sell,
         title = "Mis Artículos",
         navigate = onNavigate,
         route = Routes.Article.route
@@ -103,9 +102,9 @@ sealed class Routes(val route: String) {
         fun createRoute(userId: String) = "ReviewsScreen/$userId"
     }
 
-    object MakeOffer : Routes("MakeOfferScreen/{desiredProductId}/{offeredProductIds}") {
-        fun createMakeOfferRoute(desiredProductId: String, offeredProductIds: List<String>) =
-            "MakeOfferScreen/$desiredProductId/${offeredProductIds.joinToString(",")}"
+    object MakeOffer : Routes("MakeOfferScreen/{desiredProductId}") {
+        fun createMakeOfferRoute(desiredProductId: String) =
+            "MakeOfferScreen/$desiredProductId"
     }
 
     object ConfirmationOffer : Routes("ConfirmationOfferScreen/{desiredProductId}/{offeredProductId}") {
@@ -247,6 +246,11 @@ fun NavScreen() {
         }
         composable(route = Routes.EditProfile.route) {
             EditProfileScreen(
+                deleteAccount = {
+                    navController.navigate(Routes.SignIn.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
                 back = { navController.popBackStack() }
             )
         }

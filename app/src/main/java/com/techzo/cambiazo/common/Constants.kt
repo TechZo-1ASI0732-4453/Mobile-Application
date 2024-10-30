@@ -11,4 +11,5 @@ object Constants {
     var user: UserSignIn? = null
 
     val filterValues = FilterValues()
+
 }
