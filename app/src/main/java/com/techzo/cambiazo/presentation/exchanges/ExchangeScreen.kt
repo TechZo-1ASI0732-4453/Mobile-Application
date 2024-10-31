@@ -1,5 +1,7 @@
 package com.techzo.cambiazo.presentation.exchanges
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +35,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,7 +75,7 @@ fun ExchangeScreen(
 
         val coroutineScope = rememberCoroutineScope()
 
-        val itemTabs= listOf("Enviados", "Recibidos", "Finalizados")
+        val itemTabs= listOf("Enviados", "Recibidos", "Completados")
         CustomTabs(
             selectedTabIndex = pagerState.currentPage,
             itemTabs = itemTabs,
@@ -192,6 +195,12 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
         else -> if(boolean) exchange.productChange.name else exchange.productOwn.name
     }
 
+    val phoneNumber= when (page) {
+        0 -> exchange.userChange.phoneNumber
+        1 -> exchange.userOwn.phoneNumber
+        else -> if(boolean) exchange.userChange.phoneNumber else exchange.userOwn.phoneNumber
+    }
+
 
 
     Column(Modifier.clickable { goToDetailsScreen(exchange.id.toString(), page.toString()) }) {
@@ -219,6 +228,7 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                     fontWeight = FontWeight.Bold
                 )
             }
+            val context = LocalContext.current
 
             Text(
                 text = statusText(),
@@ -226,7 +236,17 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
                     .background(statusBackgroundColor())
-                    .padding(horizontal = 20.dp, vertical = 3.dp),
+                    .padding(horizontal = 20.dp, vertical = 3.dp)
+                    .clickable {
+                        if(page==2){
+                            val formattedNumber = phoneNumber.replace("+", "").replace(" ", "")
+                            val url = "https://wa.me/$formattedNumber"
+                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                data = Uri.parse(url)
+                            }
+                            context.startActivity(intent)
+                        }
+                    },
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp
             )
