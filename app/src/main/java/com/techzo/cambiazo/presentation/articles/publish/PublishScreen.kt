@@ -71,8 +71,6 @@ fun PublishScreen(
     val descriptionMessage = remember { productToEdit?.let { "Tus modificaciones se han guardado correctamente." } ?: "Otros usuarios podrán hacerte ofertas y también podrás ofertar cuando quieras intercambiar algo." }
     val action = remember { productToEdit?.let { "Editar" } ?: "Publicar" }
 
-
-
     val countries = viewModel.countries.value
     val departments = viewModel.departments.value
     val districts = viewModel.districts.value
@@ -99,6 +97,7 @@ fun PublishScreen(
     val errorImage = viewModel.errorImage.value
 
     val image = viewModel.image.value
+    val buttonEdit = viewModel.buttonEdit.value
 
     val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.selectImage(uri)
@@ -108,12 +107,11 @@ fun PublishScreen(
     val context = LocalContext.current
     val spaceHeight = 20.dp
 
-
-
-
-    LaunchedEffect(key1 = product) {
-        product?.let {viewModel.productDataToEdit(it)}
+    LaunchedEffect(Unit) {
+        viewModel.productDataToEdit(product)
     }
+
+
 
 
     MainScaffoldApp(
@@ -357,7 +355,7 @@ fun PublishScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
-            
+
             item {
                 if(productState.isLoading){
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -369,11 +367,11 @@ fun PublishScreen(
                     }else{
                         if (product == null) {
                             ButtonApp(text = action) {
-                                viewModel.validateDataToUploadImage(null, context)
+                                viewModel.validateDataToUploadImage(context)
                             }
                             }else{
-                                ButtonApp(text = action) {
-                                    viewModel.validateDataToUploadImage(product.id, context)
+                                ButtonApp(text = action, enable = buttonEdit) {
+                                    viewModel.validateDataToUploadImage(context)
                                 }
                             }
                     }

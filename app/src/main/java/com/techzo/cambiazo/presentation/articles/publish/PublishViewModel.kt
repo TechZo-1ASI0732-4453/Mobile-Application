@@ -3,6 +3,7 @@ package com.techzo.cambiazo.presentation.articles.publish
 import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -32,7 +33,7 @@ class PublishViewModel @Inject constructor(
     private val productRepository: ProductRepository
 ):ViewModel() {
 
-    private val edit = mutableStateOf(false)
+    private val productToEdit = mutableStateOf<Product?>(null)
 
     private val _allCountries = mutableStateOf<List<Country>>(emptyList())
     private val _allDepartments = mutableStateOf<List<Department>>(emptyList())
@@ -109,9 +110,25 @@ class PublishViewModel @Inject constructor(
     private val _productState = mutableStateOf(UIState<Any>())
     val productState: State<UIState<Any>> get() = _productState
 
+    val buttonEdit = derivedStateOf {
+        !(_name.value == productToEdit.value?.name &&
+                _description.value == productToEdit.value?.description &&
+                _price.value == productToEdit.value?.price.toString() &&
+                _objectChange.value == productToEdit.value?.desiredObject &&
+                _categorySelected.value?.id == productToEdit.value?.productCategory?.id &&
+                _countrySelected.value?.id == productToEdit.value?.location?.countryId &&
+                _departmentSelected.value?.id == productToEdit.value?.location?.departmentId &&
+                _districtSelected.value?.id == productToEdit.value?.location?.districtId &&
+                _image.value.toString() == productToEdit.value?.image &&
+                _boost.value == productToEdit.value?.boost
+                )
+    }
 
-    fun productDataToEdit(product: Product){
-        edit.value = true
+
+
+    fun productDataToEdit(product: Product?){
+
+        productToEdit.value = product?:return
         _name.value = product.name
         _description.value = product.description
         _price.value = product.price.toString()
@@ -201,7 +218,7 @@ class PublishViewModel @Inject constructor(
         _image.value = null
     }
 
-    fun getLocations() {
+    private fun getLocations() {
         viewModelScope.launch {
             val countryResult = locationRepository.getCountries()
 
@@ -227,7 +244,7 @@ class PublishViewModel @Inject constructor(
 
     }
 
-    fun getCategories() {
+    private fun getCategories() {
         viewModelScope.launch {
             val result = productCategoryRepository.getProductCategories()
             if (result is Resource.Success) {
@@ -240,16 +257,23 @@ class PublishViewModel @Inject constructor(
 
 
 
-    fun validateDataToUploadImage(productId: Int? =null,context: Context) {
+    fun validateDataToUploadImage(context: Context) {
 
         if(isEmptyData()) return
 
+        productToEdit.value?.let {product->
+
+            if (_image.value.toString() == product.image) {
+                editProduct(product.id,product.image)
+                return
+            }
+        }
 
         uploadImageToFirebase(
             context = context,
             fileUri = _image.value!!,
             onSuccess = { imageUrl ->
-                productId?.let { editProduct(it,imageUrl) } ?: createProduct(imageUrl)
+                productToEdit.value?.let { editProduct(it.id,imageUrl) } ?: createProduct(imageUrl)
             },
             onFailure = {
             },
@@ -339,11 +363,11 @@ class PublishViewModel @Inject constructor(
         if (_districtSelected.value == null) {
             _errorDistrict.value = true
         }
-        if (_image.value == null) {
+        if (_image.value == null || _image.value.toString() == productToEdit.value?.image) {
             _errorImage.value = true
         }
 
         return _name.value.isEmpty() || _description.value.isEmpty() || _price.value.isEmpty() || _objectChange.value.isEmpty() || _categorySelected.value == null || _countrySelected.value == null || _departmentSelected.value == null || _districtSelected.value == null || _image.value == null
     }
-
+    
 }
