@@ -27,11 +27,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PublishViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val productCategoryRepository: ProductCategoryRepository,
     private val locationRepository: LocationRepository,
     private val productRepository: ProductRepository
 ):ViewModel() {
+
+    private val edit = mutableStateOf(false)
 
     private val _allCountries = mutableStateOf<List<Country>>(emptyList())
     private val _allDepartments = mutableStateOf<List<Department>>(emptyList())
@@ -110,6 +111,7 @@ class PublishViewModel @Inject constructor(
 
 
     fun productDataToEdit(product: Product){
+        edit.value = true
         _name.value = product.name
         _description.value = product.description
         _price.value = product.price.toString()
@@ -190,52 +192,6 @@ class PublishViewModel @Inject constructor(
         _districtSelected.value = district
     }
 
-    fun validatePublish(context: Context) {
-
-        if (_name.value.isEmpty()) {
-            _errorName.value = true
-        }
-        if (_description.value.isEmpty()) {
-            _errorDescription.value = true
-        }
-        if (_price.value.isEmpty()) {
-            _errorPrice.value = true
-        }
-        if (_objectChange.value.isEmpty()) {
-            _errorObjectChange.value = true
-        }
-        if (_categorySelected.value == null) {
-            _errorCategory.value = true
-        }
-        if (_countrySelected.value == null) {
-            _errorCountry.value = true
-        }
-        if (_departmentSelected.value == null) {
-            _errorDepartment.value = true
-        }
-        if (_districtSelected.value == null) {
-            _errorDistrict.value = true
-        }
-        if (_image.value == null) {
-            _errorImage.value = true
-            return
-        }
-
-        uploadImageToFirebase(
-            context = context,
-            fileUri = _image.value!!,
-            onSuccess = { imageUrl ->
-                createProduct(imageUrl)
-            },
-            onFailure = {
-            },
-            onUploadStateChange = {  },
-            path = "products"
-        )
-
-    }
-
-
     fun selectImage(image: Uri?) {
         if (image != null) _errorImage.value = false
         _image.value = image
@@ -282,9 +238,33 @@ class PublishViewModel @Inject constructor(
         }
     }
 
-    fun createProduct(urlImage: String) {
+
+
+    fun validateDataToUploadImage(productId: Int? =null,context: Context) {
+
+        if(isEmptyData()) return
+
+
+        uploadImageToFirebase(
+            context = context,
+            fileUri = _image.value!!,
+            onSuccess = { imageUrl ->
+                productId?.let { editProduct(it,imageUrl) } ?: createProduct(imageUrl)
+            },
+            onFailure = {
+            },
+            onUploadStateChange = {  },
+            path = "products"
+        )
+
+    }
+
+    private  fun createProduct(urlImage: String) {
+
         _productState.value = UIState(isLoading = true)
+
         viewModelScope.launch {
+
             val product = CreateProductDto(
                 available = true,
                 boost = _boost.value,
@@ -299,9 +279,71 @@ class PublishViewModel @Inject constructor(
             )
             val result = productRepository.createProduct(product)
             if (result is Resource.Success) {
+                _productState.value = UIState(isLoading = false)
                 _productState.value = UIState(data = result.data)
+
+            }
+
+        }
+    }
+
+    private  fun editProduct(productId: Int,urlImage: String) {
+        _productState.value = UIState(isLoading = true)
+
+        viewModelScope.launch {
+
+            val product = CreateProductDto(
+                available = true,
+                boost = _boost.value,
+                description = _description.value,
+                desiredObject = _objectChange.value,
+                districtId = _districtSelected.value!!.id,
+                image = urlImage,
+                name = _name.value,
+                price = _price.value.toInt(),
+                productCategoryId = _categorySelected.value!!.id,
+                userId = Constants.user!!.id
+            )
+            val result = productRepository.updateProduct(productId, product)
+            if (result is Resource.Success) {
+                _productState.value = UIState(isLoading = false)
+                _productState.value = UIState(data = result.data)
+
             }
         }
+    }
+
+
+    private fun isEmptyData(): Boolean{
+        if (_name.value.isEmpty()) {
+            _errorName.value = true
+        }
+        if (_description.value.isEmpty()) {
+            _errorDescription.value = true
+        }
+        if (_price.value.isEmpty()) {
+            _errorPrice.value = true
+        }
+        if (_objectChange.value.isEmpty()) {
+            _errorObjectChange.value = true
+        }
+        if (_categorySelected.value == null) {
+            _errorCategory.value = true
+        }
+        if (_countrySelected.value == null) {
+            _errorCountry.value = true
+        }
+        if (_departmentSelected.value == null) {
+            _errorDepartment.value = true
+        }
+        if (_districtSelected.value == null) {
+            _errorDistrict.value = true
+        }
+        if (_image.value == null) {
+            _errorImage.value = true
+        }
+
+        return _name.value.isEmpty() || _description.value.isEmpty() || _price.value.isEmpty() || _objectChange.value.isEmpty() || _categorySelected.value == null || _countrySelected.value == null || _departmentSelected.value == null || _districtSelected.value == null || _image.value == null
     }
 
 }
