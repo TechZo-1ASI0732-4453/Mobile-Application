@@ -31,6 +31,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,13 +56,20 @@ import com.techzo.cambiazo.common.components.DropdownList
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
+import com.techzo.cambiazo.domain.Product
 
 @Composable
 fun PublishScreen(
     viewModel: PublishViewModel = hiltViewModel(),
     back : () -> Unit = {},
+    product: Product? = null,
     openMyArticles: () -> Unit = {}
 ) {
+
+    val productToEdit = remember { product }
+    val messages = remember { productToEdit?.let { "¡Cambios guardados con éxito!" } ?: "¡Publicación exitosa!" }
+    val descriptionMessage = remember { productToEdit?.let { "Tus modificaciones se han guardado correctamente." } ?: "Otros usuarios podrán hacerte ofertas y también podrás ofertar cuando quieras intercambiar algo." }
+    val action = remember { productToEdit?.let { "Editar" } ?: "Publicar" }
 
     val countries = viewModel.countries.value
     val departments = viewModel.departments.value
@@ -88,6 +97,7 @@ fun PublishScreen(
     val errorImage = viewModel.errorImage.value
 
     val image = viewModel.image.value
+    val buttonEdit = viewModel.buttonEdit.value
 
     val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.selectImage(uri)
@@ -96,6 +106,14 @@ fun PublishScreen(
     val productState = viewModel.productState.value
     val context = LocalContext.current
     val spaceHeight = 20.dp
+
+    LaunchedEffect(Unit) {
+        viewModel.productDataToEdit(product)
+    }
+
+
+
+
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
         contentsHeader = {
@@ -107,7 +125,7 @@ fun PublishScreen(
             ){
 
                 ButtonIconHeaderApp(Icons.Filled.Close, onClick = {back()})
-                TextTitleHeaderApp("Publicar")
+                TextTitleHeaderApp(action)
             }
         },
     ) {
@@ -338,7 +356,6 @@ fun PublishScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-
             item {
                 if(productState.isLoading){
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -346,18 +363,17 @@ fun PublishScreen(
                     }
                 }else{
                     if (productState.data != null) {
-
-                        DialogApp(
-                            message = "¡Publicación exitosa!",
-                            description = "Otros usuarios podran hacerte ofertas y tambien podras ofertar cuando quieras intercambiar algo.",
-                            labelButton1 = "Entendido",
-                            onClickButton1 = { openMyArticles() },
-                        )
+                         DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { openMyArticles() },)
                     }else{
-                        ButtonApp(text = "Publicar", onClick = {
-                            viewModel.validatePublish(context)
-                        })
-
+                        if (product == null) {
+                            ButtonApp(text = action) {
+                                viewModel.validateDataToUploadImage(context)
+                            }
+                            }else{
+                                ButtonApp(text = action, enable = buttonEdit) {
+                                    viewModel.validateDataToUploadImage(context)
+                                }
+                            }
                     }
                 }
                 Spacer(modifier =   Modifier.height(30.dp))

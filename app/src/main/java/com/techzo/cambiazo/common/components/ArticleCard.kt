@@ -55,7 +55,7 @@ fun ArticlesOwn(
     modifier: Modifier = Modifier,
     iconActions: Boolean = false,
     deleteProduct: (Int) -> Unit = {},
-    editProduct: (Int) -> Unit = {},
+    editProduct: (Product) -> Unit = {},
     onClick: (Int, Int) -> Unit = { _, _ -> }
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -113,7 +113,7 @@ fun ArticlesOwn(
                                     RoundedCornerShape(25.dp)
                                 ),
                         ) {
-                            IconsAction(icon = Icons.Outlined.Edit, onclick = { editProduct(product.id); showActions = false })
+                            IconsAction(icon = Icons.Outlined.Edit, onclick = { editProduct(product); showActions = false })
                             Spacer(modifier = Modifier.size(15.dp))
                             IconsAction(icon = Icons.Outlined.Delete, onclick = { showDialog = true })
                             Spacer(modifier = Modifier.size(15.dp))

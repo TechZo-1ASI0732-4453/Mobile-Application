@@ -34,9 +34,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
-import com.techzo.cambiazo.common.deleteImageFromFirebase
 import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileViewModel
-import com.techzo.cambiazo.common.uploadImageToFirebase
 
 @Composable
 fun ImageUploadDialog(
@@ -156,28 +154,7 @@ fun ImageUploadDialog(
                             text = "Aceptar",
                             onClick = {
                                 fileUri?.let { uri ->
-                                    val currentProfilePicture = viewModel.profilePicture.value
-                                    deleteImageFromFirebase(
-                                        imageUrl = currentProfilePicture,
-                                        onSuccess = {
-                                            uploadImageToFirebase(
-                                                context = context,
-                                                fileUri = uri,
-                                                onSuccess = { imageUrl ->
-                                                    onImageUploaded(imageUrl)
-                                                    viewModel.onProfilePictureChanged(imageUrl)
-                                                    onDismiss()
-                                                },
-                                                onFailure = {
-                                                    // Handle failure if needed
-                                                },
-                                                onUploadStateChange = { isUploading = it },
-                                                path = "profiles"
-                                            )                                            },
-                                        onFailure = {
-                                            // Handle failure if needed
-                                        }
-                                    )
+                                    viewModel.imageToUploadFromFirebase(uri,context,isUpload = {isUploading = it}, onDismiss = onDismiss)
                                 }
                             }
                         )

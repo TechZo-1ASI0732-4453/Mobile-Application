@@ -4,44 +4,48 @@ import android.net.Uri
 import android.widget.Toast
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
-fun uploadImageToFirebase(
+suspend fun uploadImageToFirebase(
     context: Context,
     fileUri: Uri,
     path: String,
-    onSuccess: (String) -> Unit,
-    onFailure: () -> Unit,
-    onUploadStateChange: (Boolean) -> Unit
+    onSuccess: suspend (String) -> Unit,
+    onFailure: suspend () -> Unit,
+    onUploadStateChange: suspend (Boolean) -> Unit
 ) {
     val uuid = UUID.randomUUID().toString()
     val ref: StorageReference = FirebaseStorage.getInstance().reference.child("$path/$uuid")
 
+    // Cambia el estado de carga a true antes de comenzar
     onUploadStateChange(true)
 
-    ref.putFile(fileUri).addOnSuccessListener {
-        ref.downloadUrl.addOnSuccessListener { downloadUri ->
-            onUploadStateChange(false)
-            val imageUrl = downloadUri.toString()
-            onSuccess(imageUrl)
-        }
-    }.addOnFailureListener {
+    try {
+        ref.putFile(fileUri).await()
+        val downloadUri = ref.downloadUrl.await()
+
         onUploadStateChange(false)
-        Toast.makeText(context, "File Upload Failed...", Toast.LENGTH_LONG).show()
+        onSuccess(downloadUri.toString())
+    } catch (e: Exception) {
+        onUploadStateChange(false)
+        Toast.makeText(context, "Error al subir la imagen...", Toast.LENGTH_LONG).show()
         onFailure()
     }
 }
 
-fun deleteImageFromFirebase(
+suspend fun deleteImageFromFirebase(
     imageUrl: String,
-    onSuccess: () -> Unit,
-    onFailure: () -> Unit
+    onSuccess: suspend () -> Unit,
+    onFailure: suspend () -> Unit
 ) {
     val storageReference: StorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl)
 
-    storageReference.delete().addOnSuccessListener {
+    try {
+        storageReference.delete().await()
         onSuccess()
-    }.addOnFailureListener {
+    } catch (e: Exception) {
+
         onFailure()
     }
 }

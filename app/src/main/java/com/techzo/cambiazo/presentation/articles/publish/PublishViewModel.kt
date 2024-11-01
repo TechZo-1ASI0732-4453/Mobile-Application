@@ -3,12 +3,14 @@ package com.techzo.cambiazo.presentation.articles.publish
 import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.common.deleteImageFromFirebase
 import com.techzo.cambiazo.common.uploadImageToFirebase
 import com.techzo.cambiazo.data.remote.products.CreateProductDto
 import com.techzo.cambiazo.data.repository.LocationRepository
@@ -17,6 +19,7 @@ import com.techzo.cambiazo.data.repository.ProductRepository
 import com.techzo.cambiazo.domain.Country
 import com.techzo.cambiazo.domain.Department
 import com.techzo.cambiazo.domain.District
+import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.domain.ProductCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -29,6 +32,8 @@ class PublishViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val productRepository: ProductRepository
 ):ViewModel() {
+
+    private val productToEdit = mutableStateOf<Product?>(null)
 
     private val _allCountries = mutableStateOf<List<Country>>(emptyList())
     private val _allDepartments = mutableStateOf<List<Department>>(emptyList())
@@ -105,6 +110,46 @@ class PublishViewModel @Inject constructor(
     private val _productState = mutableStateOf(UIState<Any>())
     val productState: State<UIState<Any>> get() = _productState
 
+    val buttonEdit = derivedStateOf {
+        !(_name.value == productToEdit.value?.name &&
+                _description.value == productToEdit.value?.description &&
+                _price.value == productToEdit.value?.price.toString() &&
+                _objectChange.value == productToEdit.value?.desiredObject &&
+                _categorySelected.value?.id == productToEdit.value?.productCategory?.id &&
+                _countrySelected.value?.id == productToEdit.value?.location?.countryId &&
+                _departmentSelected.value?.id == productToEdit.value?.location?.departmentId &&
+                _districtSelected.value?.id == productToEdit.value?.location?.districtId &&
+                _image.value.toString() == productToEdit.value?.image &&
+                _boost.value == productToEdit.value?.boost
+                )
+    }
+
+
+
+    fun productDataToEdit(product: Product?){
+
+        productToEdit.value = product?:return
+        _name.value = product.name
+        _description.value = product.description
+        _price.value = product.price.toString()
+        _objectChange.value = product.desiredObject
+        _categorySelected.value = product.productCategory
+        _countrySelected.value = Country(
+            id = product.location.countryId,
+            name = product.location.countryName
+        )
+        _departmentSelected.value = Department(
+            id = product.location.departmentId,
+            name = product.location.departmentName,
+            countryId = product.location.countryId
+        )
+        _districtSelected.value = District(
+            id = product.location.districtId,
+            name = product.location.districtName,
+            departmentId = product.location.departmentId
+        )
+        _image.value = Uri.parse(product.image)
+    }
 
     init {
         getCategories()
@@ -144,13 +189,17 @@ class PublishViewModel @Inject constructor(
     fun selectCountry(country: Country?) {
         if (country != null) _errorCountry.value = false
         _countrySelected.value = country
-        _departments.value =
-            UIState(data = _allDepartments.value.filter { it.countryId == country?.id })
+        _departmentSelected.value = null
+        _districtSelected.value = null
+
+        _departments.value =  UIState(data = _allDepartments.value.filter { it.countryId == country?.id })
     }
 
     fun selectDepartment(department: Department?) {
         if (department != null) _errorDepartment.value = false
         _departmentSelected.value = department
+        _districtSelected.value = null
+
         _districts.value =
             UIState(data = _allDistricts.value.filter { it.departmentId == department?.id })
     }
@@ -160,8 +209,155 @@ class PublishViewModel @Inject constructor(
         _districtSelected.value = district
     }
 
-    fun validatePublish(context: Context) {
+    fun selectImage(image: Uri?) {
+        if (image != null) _errorImage.value = false
+        _image.value = image
+    }
 
+    fun deselectImage() {
+        _image.value = null
+    }
+
+    private fun getLocations() {
+        viewModelScope.launch {
+            val countryResult = locationRepository.getCountries()
+
+            if (countryResult is Resource.Success) {
+                _allCountries.value = countryResult.data ?: emptyList()
+                _countries.value = UIState(data = countryResult.data)
+            } else {
+                _countries.value = UIState(message = countryResult.message ?: "Ocurrió un error")
+            }
+
+
+            val departmentResult = locationRepository.getDepartments()
+            if (departmentResult is Resource.Success) {
+                _allDepartments.value = departmentResult.data ?: emptyList()
+            }
+            val districtResult = locationRepository.getDistricts()
+            if (districtResult is Resource.Success) {
+                _allDistricts.value = districtResult.data ?: emptyList()
+            }
+
+             productToEdit.value?.let{product->
+                 _departments.value =  UIState(data = _allDepartments.value.filter { it.countryId == product.location.countryId })
+                 _districts.value = UIState(data = _allDistricts.value.filter { it.departmentId == product.location.departmentId })
+             }
+        }
+
+    }
+
+    private fun getCategories() {
+        viewModelScope.launch {
+            val result = productCategoryRepository.getProductCategories()
+            if (result is Resource.Success) {
+                _categories.value = UIState(data = result.data)
+            } else {
+                _categories.value = UIState(message = result.message ?: "Ocurrió un error")
+            }
+        }
+    }
+
+
+
+    fun validateDataToUploadImage(context: Context) {
+        _productState.value = UIState(isLoading = true)
+
+        viewModelScope.launch {
+            if (isEmptyData()) return@launch
+
+            productToEdit.value?.let { product ->
+
+                if (_image.value.toString() == product.image) {
+                    editProduct(product.id, product.image)
+                    return@launch
+                }
+            }
+
+            productToEdit.value?.let {
+                deleteProductFromFirebase(context)
+            } ?: uploadImageToFirebase(context)
+
+        }
+
+    }
+
+    private suspend fun uploadImageToFirebase(context: Context){
+        uploadImageToFirebase(
+            context = context,
+            fileUri = _image.value!!,
+            onSuccess = { imageUrl ->
+                productToEdit.value?.let { editProduct(it.id, imageUrl) } ?: createProduct(
+                    imageUrl
+                )
+            },
+            onFailure = {
+            },
+            onUploadStateChange = { },
+            path = "products"
+        )
+    }
+
+    private suspend fun deleteProductFromFirebase(context: Context){
+        deleteImageFromFirebase(
+            imageUrl = productToEdit.value?.image.toString(),
+            onSuccess = {
+                uploadImageToFirebase(context)
+            },
+            onFailure = {
+                _productState.value = UIState(isLoading = false)
+                return@deleteImageFromFirebase
+            }
+        )
+    }
+
+    private  suspend fun createProduct(urlImage: String) {
+
+            val product = CreateProductDto(
+                available = true,
+                boost = _boost.value,
+                description = _description.value,
+                desiredObject = _objectChange.value,
+                districtId = _districtSelected.value!!.id,
+                image = urlImage,
+                name = _name.value,
+                price = _price.value.toInt(),
+                productCategoryId = _categorySelected.value!!.id,
+                userId = Constants.user!!.id
+            )
+            val result = productRepository.createProduct(product)
+            if (result is Resource.Success) {
+                _productState.value = UIState(isLoading = false)
+                _productState.value = UIState(data = result.data)
+
+            }
+
+    }
+
+    private  suspend fun editProduct(productId: Int,urlImage: String) {
+
+            val product = CreateProductDto(
+                available = true,
+                boost = _boost.value,
+                description = _description.value,
+                desiredObject = _objectChange.value,
+                districtId = _districtSelected.value!!.id,
+                image = urlImage,
+                name = _name.value,
+                price = _price.value.toInt(),
+                productCategoryId = _categorySelected.value!!.id,
+                userId = Constants.user!!.id
+            )
+            val result = productRepository.updateProduct(productId, product)
+            if (result is Resource.Success) {
+                _productState.value = UIState(isLoading = false)
+                _productState.value = UIState(data = result.data)
+
+            }
+    }
+
+
+    private fun isEmptyData(): Boolean{
         if (_name.value.isEmpty()) {
             _errorName.value = true
         }
@@ -188,90 +384,9 @@ class PublishViewModel @Inject constructor(
         }
         if (_image.value == null) {
             _errorImage.value = true
-            return
         }
 
-        uploadImageToFirebase(
-            context = context,
-            fileUri = _image.value!!,
-            onSuccess = { imageUrl ->
-                createProduct(imageUrl)
-            },
-            onFailure = {
-            },
-            onUploadStateChange = {  },
-            path = "products"
-        )
-
+        return _name.value.isEmpty() || _description.value.isEmpty() || _price.value.isEmpty() || _objectChange.value.isEmpty() || _categorySelected.value == null || _countrySelected.value == null || _departmentSelected.value == null || _districtSelected.value == null || _image.value == null
     }
-
-
-    fun selectImage(image: Uri?) {
-        if (image != null) _errorImage.value = false
-        _image.value = image
-    }
-
-    fun deselectImage() {
-        _image.value = null
-    }
-
-    fun getLocations() {
-        viewModelScope.launch {
-            val countryResult = locationRepository.getCountries()
-
-            if (countryResult is Resource.Success) {
-                _allCountries.value = countryResult.data ?: emptyList()
-                _countries.value = UIState(data = countryResult.data)
-            } else {
-                _countries.value = UIState(message = countryResult.message ?: "Ocurrió un error")
-            }
-
-
-            val departmentResult = locationRepository.getDepartments()
-            if (departmentResult is Resource.Success) {
-                _allDepartments.value = departmentResult.data ?: emptyList()
-            }
-            val districtResult = locationRepository.getDistricts()
-            if (districtResult is Resource.Success) {
-                _allDistricts.value = districtResult.data ?: emptyList()
-            }
-
-        }
-
-
-    }
-
-    fun getCategories() {
-        viewModelScope.launch {
-            val result = productCategoryRepository.getProductCategories()
-            if (result is Resource.Success) {
-                _categories.value = UIState(data = result.data)
-            } else {
-                _categories.value = UIState(message = result.message ?: "Ocurrió un error")
-            }
-        }
-    }
-
-    fun createProduct(urlImage: String) {
-        _productState.value = UIState(isLoading = true)
-        viewModelScope.launch {
-            val product = CreateProductDto(
-                available = true,
-                boost = _boost.value,
-                description = _description.value,
-                desiredObject = _objectChange.value,
-                districtId = _districtSelected.value!!.id,
-                image = urlImage,
-                name = _name.value,
-                price = _price.value.toInt(),
-                productCategoryId = _categorySelected.value!!.id,
-                userId = Constants.user!!.id
-            )
-            val result = productRepository.createProduct(product)
-            if (result is Resource.Success) {
-                _productState.value = UIState(data = result.data)
-            }
-        }
-    }
-
+    
 }

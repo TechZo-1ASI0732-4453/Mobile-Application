@@ -1,8 +1,10 @@
 package com.techzo.cambiazo.domain
 
+import android.os.Parcelable
 import com.techzo.cambiazo.data.remote.products.Location
-import com.techzo.cambiazo.data.remote.products.ProductCategory
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Product(
     val id: Int,
     val name: String,
@@ -15,4 +17,7 @@ data class Product(
     val productCategory: ProductCategory,
     val user: User,
     val location: Location
-)
+): Parcelable
+
+
+
