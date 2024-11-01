@@ -8,16 +8,22 @@ import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.common.UserPreferences
 import com.techzo.cambiazo.data.repository.AuthRepository
 import com.techzo.cambiazo.domain.User
 import com.techzo.cambiazo.domain.UserSignIn
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 
 @HiltViewModel
-class SignInViewModel @Inject constructor(private val authRepository: AuthRepository): ViewModel() {
+class SignInViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
+    private val userPreferences: UserPreferences
+): ViewModel() {
 
 
     private val _state = mutableStateOf(UIState<UserSignIn>())
@@ -40,6 +46,29 @@ class SignInViewModel @Inject constructor(private val authRepository: AuthReposi
         _errorPassword.value = UIState(message = "Contraseña requerida", data =_password.value.isEmpty() )
         return !_errorUsername.value.data!! && !_errorPassword.value.data!!
     }
+
+    init{
+        viewModelScope.launch {
+            _state.value = UIState(isLoading = true) // Indicar carga inicial
+            val token = userPreferences.getToken.first()
+            if (token != null) {
+                Constants.token = token
+                Constants.user = UserSignIn(
+                    id = userPreferences.getId.first() ?: 0,
+                    username = userPreferences.getUsername.first() ?: "",
+                    name = userPreferences.getName.first() ?: "",
+                    phoneNumber = userPreferences.getPhoneNumber.first() ?: "",
+                    profilePicture = userPreferences.getProfilePicture.first() ?: "",
+                    token = token
+                )
+                _state.value = UIState(data = Constants.user)
+            } else {
+                _state.value = UIState() // Usuario no autenticado
+            }
+        }
+    }
+
+
     fun signIn() {
         if (!validateUser()) return
         _state.value = UIState(isLoading = true)
@@ -48,6 +77,9 @@ class SignInViewModel @Inject constructor(private val authRepository: AuthReposi
             if (result is Resource.Success) {
                 _state.value = UIState(data = result.data)
                 result.data?.let{
+                    viewModelScope.launch {
+                        userPreferences.saveUserSession(it.id, it.username, it.name, it.phoneNumber, it.profilePicture, it.token)
+                    }
                     Constants.token = it.token
                     Constants.user = it
                 }
