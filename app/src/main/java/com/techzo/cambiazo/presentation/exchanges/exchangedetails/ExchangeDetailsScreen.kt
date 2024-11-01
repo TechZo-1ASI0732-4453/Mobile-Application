@@ -53,7 +53,7 @@ import com.techzo.cambiazo.presentation.exchanges.ExchangeViewModel
 import com.techzo.cambiazo.presentation.explorer.review.ReviewViewModel
 
 @Composable
-fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), reviewViewModel: ExchangeViewModel =hiltViewModel(), exchangeId:Int, page: Int) {
+fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), exchangeId:Int, page: Int) {
 
     LaunchedEffect(Unit) {
         viewModel.getExchangeById(exchangeId)
@@ -315,7 +315,7 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp)
-                .padding(bottom = 10.dp)
+                .padding(bottom = 20.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(textUnderImage, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color(0xFF6D6D6D))
@@ -324,23 +324,64 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     GlideImage(
                         imageModel = { image },
                         modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .height(130.dp)
+                            .fillMaxWidth(0.45f)
+                            .height(140.dp)
                             .border(0.2.dp, Color(0xFFDCDCDC), RoundedCornerShape(10.dp))
                             .clip(RoundedCornerShape(10.dp))
                     )
                     Spacer(modifier = Modifier.width(5.dp))
-                    Column(modifier = Modifier.fillMaxWidth(1f).padding(horizontal = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(productName, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                        Text("S/${price} valor aprox.", textAlign = TextAlign.Center, fontSize = 16.sp, color = Color(0xFFFFD146), fontWeight = FontWeight.Bold)
+                    Column(
+                        modifier = Modifier.padding(5.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            productName,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                        Text(
+                            "S/${price} valor aprox.",
+                            textAlign = TextAlign.Center,
+                            fontSize = 16.sp,
+                            color = Color(0xFFFFD146),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Button(onClick = {
+                            viewModel.deleteExchange(exchangeId)
+                            goBack()
+                        },
+                            modifier = Modifier.fillMaxWidth()
+                                .height(40.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Red,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(10.dp))
+                        {
+                            Text(text = "Cancelar oferta",
+                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.SansSerif)
+                            )
+                        }
                     }
                 }
             }
         }
+
+
+
+
+
+
+
     }
     if(page == 1){
         Box(
@@ -431,8 +472,6 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
         }
     }
     if(page == 2){
-        var review= ""
-        var rating= 0
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -501,9 +540,7 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                                 onClickButton1 = { showDialog3=false},
                                 onClickButton2 = {showDialog3=false},
                                 onSubmitReview = { newRating, newReview ->
-                                    rating = newRating
-                                    review = newReview
-                                    reviewViewModel.addReview(review,rating,"Enviado",userAuthor, userReceptor, exchangeId,)
+                                    reviewViewModel.addReview(newReview,newRating,"Enviado",userAuthor, userReceptor, exchangeId)
                                     showDialog3 = false
                                 }
                             )

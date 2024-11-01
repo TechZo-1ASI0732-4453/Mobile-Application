@@ -14,55 +14,58 @@ import kotlinx.coroutines.withContext
 
 class ExchangeRepository(private val exchangeService: ExchangeService
 ) {
-    suspend fun getExchangesByUserOwnId(userId: Int): Resource<List<Exchange>> = withContext(Dispatchers.IO) {
-        try {
-            val response = exchangeService.getExchangesByUserOwnId(userId)
-            if (response.isSuccessful) {
-                response.body()?.let { exchangesDto ->
-                    val pendingExchanges = exchangesDto.filter { it.status == "Pendiente" }
-                    val exchanges = pendingExchanges.map { it.toExchange() }
-                    return@withContext Resource.Success(data = exchanges)
+    suspend fun getExchangesByUserOwnId(userId: Int): Resource<List<Exchange>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = exchangeService.getExchangesByUserOwnId(userId)
+                if (response.isSuccessful) {
+                    response.body()?.let { exchangesDto ->
+                        val pendingExchanges = exchangesDto.filter { it.status == "Pendiente" }
+                        val exchanges = pendingExchanges.map { it.toExchange() }
+                        return@withContext Resource.Success(data = exchanges)
+                    }
+                    return@withContext Resource.Error("No exchanges found")
                 }
-                return@withContext Resource.Error("No exchanges found")
+                return@withContext Resource.Error(response.message())
+            } catch (e: Exception) {
+                return@withContext Resource.Error(e.message ?: "An error occurred")
             }
-            return@withContext Resource.Error(response.message())
-        } catch (e: Exception) {
-            return@withContext Resource.Error(e.message ?: "An error occurred")
         }
-    }
 
-    suspend fun getExchangesByUserChangeId(userId: Int): Resource<List<Exchange>> = withContext(Dispatchers.IO) {
-        try {
-            val response = exchangeService.getExchangesByUserChangeId(userId)
-            if (response.isSuccessful) {
-                response.body()?.let { exchangesDto ->
-                    val pendingExchanges = exchangesDto.filter { it.status == "Pendiente" }
-                    val exchanges = pendingExchanges.map { it.toExchange() }
-                    return@withContext Resource.Success(data = exchanges)
+    suspend fun getExchangesByUserChangeId(userId: Int): Resource<List<Exchange>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = exchangeService.getExchangesByUserChangeId(userId)
+                if (response.isSuccessful) {
+                    response.body()?.let { exchangesDto ->
+                        val pendingExchanges = exchangesDto.filter { it.status == "Pendiente" }
+                        val exchanges = pendingExchanges.map { it.toExchange() }
+                        return@withContext Resource.Success(data = exchanges)
+                    }
+                    return@withContext Resource.Error("No exchanges found")
                 }
-                return@withContext Resource.Error("No exchanges found")
+                return@withContext Resource.Error(response.message())
+            } catch (e: Exception) {
+                return@withContext Resource.Error(e.message ?: "An error occurred")
             }
-            return@withContext Resource.Error(response.message())
-        } catch (e: Exception) {
-            return@withContext Resource.Error(e.message ?: "An error occurred")
         }
-    }
 
-    suspend fun getFinishedExchanges(userId: Int): Resource<List<Exchange>> = withContext(Dispatchers.IO) {
-        try {
-            val response = exchangeService.getFinishedExchangesByUserId(userId)
-            if (response.isSuccessful) {
-                response.body()?.let { exchangesDto ->
-                    val exchanges = exchangesDto.map { it.toExchange() }
-                    return@withContext Resource.Success(data = exchanges)
+    suspend fun getFinishedExchanges(userId: Int): Resource<List<Exchange>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = exchangeService.getFinishedExchangesByUserId(userId)
+                if (response.isSuccessful) {
+                    response.body()?.let { exchangesDto ->
+                        val exchanges = exchangesDto.map { it.toExchange() }
+                        return@withContext Resource.Success(data = exchanges)
+                    }
+                    return@withContext Resource.Error("No exchanges found")
                 }
-                return@withContext Resource.Error("No exchanges found")
+                return@withContext Resource.Error(response.message())
+            } catch (e: Exception) {
+                return@withContext Resource.Error(e.message ?: "An error occurred")
             }
-            return@withContext Resource.Error(response.message())
-        } catch (e: Exception) {
-            return@withContext Resource.Error(e.message ?: "An error occurred")
         }
-    }
 
     suspend fun getExchangeById(exchangeId: Int): Resource<Exchange> = withContext(Dispatchers.IO) {
         try {
@@ -80,21 +83,25 @@ class ExchangeRepository(private val exchangeService: ExchangeService
         }
     }
 
-    suspend fun updateExchangeStatus(exchangeId: Int, status: String): Resource<Exchange> = withContext(Dispatchers.IO) {
-        try {
-            val response = exchangeService.updateExchangeStatus(exchangeId, ExchangeStatusRequestDto(status))
-            if (response.isSuccessful) {
-                response.body()?.let { exchangeDto ->
-                    val exchange = exchangeDto.toExchange()
-                    return@withContext Resource.Success(data = exchange)
+    suspend fun updateExchangeStatus(exchangeId: Int, status: String): Resource<Exchange> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = exchangeService.updateExchangeStatus(
+                    exchangeId,
+                    ExchangeStatusRequestDto(status)
+                )
+                if (response.isSuccessful) {
+                    response.body()?.let { exchangeDto ->
+                        val exchange = exchangeDto.toExchange()
+                        return@withContext Resource.Success(data = exchange)
+                    }
+                    return@withContext Resource.Error("Exchange not found")
                 }
-                return@withContext Resource.Error("Exchange not found")
+                return@withContext Resource.Error(response.message())
+            } catch (e: Exception) {
+                return@withContext Resource.Error(e.message ?: "An error occurred")
             }
-            return@withContext Resource.Error(response.message())
-        } catch (e: Exception) {
-            return@withContext Resource.Error(e.message ?: "An error occurred")
         }
-    }
 
     suspend fun createExchange(exchangeRequestDto: ExchangeRequestDto): Resource<Boolean> {
         return withContext(Dispatchers.IO) {
@@ -111,18 +118,26 @@ class ExchangeRepository(private val exchangeService: ExchangeService
         }
     }
 
-    suspend fun checkIfExchangeExists(userId: Int, productOwnId: Int, productChangeId: Int): Resource<Boolean> =
+    suspend fun checkIfExchangeExists(
+        userId: Int,
+        productOwnId: Int,
+        productChangeId: Int
+    ): Resource<Boolean> =
         withContext(Dispatchers.IO) {
             try {
                 coroutineScope {
-                    val responseOwnDeferred = async { exchangeService.getExchangesByUserOwnId(userId) }
-                    val responseChangeDeferred = async { exchangeService.getExchangesByUserChangeId(userId) }
+                    val responseOwnDeferred =
+                        async { exchangeService.getExchangesByUserOwnId(userId) }
+                    val responseChangeDeferred =
+                        async { exchangeService.getExchangesByUserChangeId(userId) }
 
                     val responseOwn = responseOwnDeferred.await()
                     val responseChange = responseChangeDeferred.await()
 
                     if (responseOwn.isSuccessful && responseChange.isSuccessful) {
-                        val exchangesDto = (responseOwn.body() ?: emptyList()) + (responseChange.body() ?: emptyList())
+                        val exchangesDto =
+                            (responseOwn.body() ?: emptyList()) + (responseChange.body()
+                                ?: emptyList())
                         val exists = exchangesDto.any { exchange ->
                             exchange.status == "Pendiente" &&
                                     ((exchange.productOwn.id == productOwnId && exchange.productChange.id == productChangeId) ||
@@ -138,4 +153,18 @@ class ExchangeRepository(private val exchangeService: ExchangeService
             }
         }
 
+    suspend fun deleteExchange(exchangeId: Int): Resource<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = exchangeService.deleteExchange(exchangeId)
+                if (response.isSuccessful) {
+                    Resource.Success(true)
+                } else {
+                    Resource.Error("Failed to delete exchange")
+                }
+            } catch (e: Exception) {
+                Resource.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
 }

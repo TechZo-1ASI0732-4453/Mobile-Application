@@ -129,4 +129,15 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
         }
     }
 
+    fun deleteExchange(exchangeId: Int){
+        viewModelScope.launch {
+            val result = exchangeRepository.deleteExchange(exchangeId)
+            if(result is Resource.Success){
+                Log.d("ExchangeViewModel", "deleteExchange: ${result.data}")
+            }else{
+                Log.d("ExchangeViewModel", "deleteExchange: ${result.message}")
+            }
+        }
+    }
+
 }
