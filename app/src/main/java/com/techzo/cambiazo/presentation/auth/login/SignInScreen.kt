@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -48,6 +50,7 @@ fun SignInScreen(openRegister: () -> Unit = {},
     val errorPassword = viewModel.errorPassword.value
     val username = viewModel.username.value
     val password = viewModel.password.value
+    val isChecked = viewModel.isChecked
 
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 40.dp , end = 40.dp,top = 50.dp),
@@ -101,7 +104,31 @@ fun SignInScreen(openRegister: () -> Unit = {},
         }
 
 
-        TextLink("","Olvidé mi contraseña", clickable = {openForgotPassword()},Arrangement.End)
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween)
+        {
+            Checkbox(
+                checked = isChecked.value,
+                onCheckedChange = { viewModel.onCheckedChange(it) },
+                modifier = Modifier.size(20.dp),
+                colors= CheckboxDefaults.colors(
+                    checkmarkColor = Color.White,
+                    checkedColor = Color(0xFFFFD146),
+                    uncheckedColor = Color(0xFFFFD146)
+                )
+            )
+            Text(
+                text = "Recordar sesión",
+                modifier = Modifier.padding(start = 5.dp),
+            )
+            TextLink(
+                "",
+                "Olvidé mi contraseña",
+                clickable = { openForgotPassword() },
+                Arrangement.End
+            )
+        }
 
 
         Spacer(modifier = Modifier.height(15.dp))
