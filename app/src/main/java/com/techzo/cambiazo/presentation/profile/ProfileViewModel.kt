@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.common.UserPreferences
 import com.techzo.cambiazo.data.repository.ReviewRepository
 import com.techzo.cambiazo.domain.Review
 import com.techzo.cambiazo.data.repository.UserRepository
@@ -18,7 +19,14 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class ProfileViewModel@Inject constructor(private val reviewRepository: ReviewRepository, private val userRepository: UserRepository) : ViewModel() {
+class ProfileViewModel@Inject constructor(
+    private val reviewRepository: ReviewRepository,
+    private val userRepository: UserRepository,
+    private val userPreferences: UserPreferences
+) : ViewModel() {
+
+    private val _isLoggedOut = mutableStateOf(false)
+    val isLoggedOut: State<Boolean> get() = _isLoggedOut
 
     private val _averageRating = mutableStateOf<Double?>(null)
     val averageRating: State<Double?> get() = _averageRating
@@ -52,6 +60,8 @@ class ProfileViewModel@Inject constructor(private val reviewRepository: ReviewRe
         viewModelScope.launch {
             Constants.user = null
             Constants.token = ""
+            userPreferences.clearSession()
+            _isLoggedOut.value = true
         }
     }
 }
