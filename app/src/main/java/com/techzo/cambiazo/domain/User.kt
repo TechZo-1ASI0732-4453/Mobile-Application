@@ -1,8 +1,18 @@
 package com.techzo.cambiazo.domain
 
-import com.google.gson.annotations.SerializedName
+import java.util.Date
 
 data class User(
+    val id: Int,
+    val username: String,
+    val name: String,
+    val phoneNumber: String,
+    val profilePicture: String,
+    val createdAt: Date,
+    val roles: List<String>
+)
+
+data class UserSignIn(
     val id: Int,
     val username: String,
     val name: String,
@@ -15,4 +25,11 @@ data class UserSignUp(
     val id: Int,
     val username: String,
     val roles: List<String>
+)
+
+data class UserEdit(
+    val username: String,
+    val name: String,
+    val phoneNumber: String,
+    val profilePicture: String
 )
