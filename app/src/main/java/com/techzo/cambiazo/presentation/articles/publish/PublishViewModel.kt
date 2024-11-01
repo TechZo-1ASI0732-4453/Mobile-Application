@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
@@ -240,8 +239,11 @@ class PublishViewModel @Inject constructor(
                 _allDistricts.value = districtResult.data ?: emptyList()
             }
 
+             productToEdit.value?.let{product->
+                 _departments.value =  UIState(data = _allDepartments.value.filter { it.countryId == product.location.countryId })
+                 _districts.value = UIState(data = _allDistricts.value.filter { it.departmentId == product.location.departmentId })
+             }
         }
-
 
     }
 

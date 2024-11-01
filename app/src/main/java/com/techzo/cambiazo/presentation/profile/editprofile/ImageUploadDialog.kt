@@ -34,9 +34,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
-import com.techzo.cambiazo.common.deleteImageFromFirebase
 import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileViewModel
-import com.techzo.cambiazo.common.uploadImageToFirebase
 
 @Composable
 fun ImageUploadDialog(
