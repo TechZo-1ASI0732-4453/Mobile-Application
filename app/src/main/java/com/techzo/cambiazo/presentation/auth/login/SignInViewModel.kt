@@ -41,6 +41,10 @@ class SignInViewModel @Inject constructor(
     private val _errorPassword =  mutableStateOf(UIState<Boolean>(data = false))
     val errorPassword: State<UIState<Boolean>> get() = _errorPassword
 
+    private val _isChecked = mutableStateOf(false)
+    val isChecked: State<Boolean> get() = _isChecked
+
+
     fun validateUser():Boolean{
         _errorUsername.value = UIState(message = "Usuario requerido", data =_username.value.isEmpty() )
         _errorPassword.value = UIState(message = "Contraseña requerida", data =_password.value.isEmpty() )
@@ -77,7 +81,7 @@ class SignInViewModel @Inject constructor(
             if (result is Resource.Success) {
                 _state.value = UIState(data = result.data)
                 result.data?.let{
-                    viewModelScope.launch {
+                    if(_isChecked.value){
                         userPreferences.saveUserSession(it.id, it.username, it.name, it.phoneNumber, it.profilePicture, it.token)
                     }
                     Constants.token = it.token
@@ -101,4 +105,7 @@ class SignInViewModel @Inject constructor(
         _password.value = password
     }
 
+    fun onCheckedChange(checked: Boolean) {
+        _isChecked.value = checked
+    }
 }
