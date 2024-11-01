@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.common.deleteImageFromFirebase
 import com.techzo.cambiazo.common.uploadImageToFirebase
 import com.techzo.cambiazo.data.remote.products.CreateProductDto
 import com.techzo.cambiazo.data.repository.LocationRepository
@@ -258,36 +259,57 @@ class PublishViewModel @Inject constructor(
 
 
     fun validateDataToUploadImage(context: Context) {
+        _productState.value = UIState(isLoading = true)
 
-        if(isEmptyData()) return
+        viewModelScope.launch {
+            if (isEmptyData()) return@launch
 
-        productToEdit.value?.let {product->
+            productToEdit.value?.let { product ->
 
-            if (_image.value.toString() == product.image) {
-                editProduct(product.id,product.image)
-                return
+                if (_image.value.toString() == product.image) {
+                    editProduct(product.id, product.image)
+                    return@launch
+                }
             }
+
+            productToEdit.value?.let {
+                deleteProductFromFirebase(context)
+            } ?: uploadImageToFirebase(context)
+
         }
 
+    }
+
+    private suspend fun uploadImageToFirebase(context: Context){
         uploadImageToFirebase(
             context = context,
             fileUri = _image.value!!,
             onSuccess = { imageUrl ->
-                productToEdit.value?.let { editProduct(it.id,imageUrl) } ?: createProduct(imageUrl)
+                productToEdit.value?.let { editProduct(it.id, imageUrl) } ?: createProduct(
+                    imageUrl
+                )
             },
             onFailure = {
             },
-            onUploadStateChange = {  },
+            onUploadStateChange = { },
             path = "products"
         )
-
     }
 
-    private  fun createProduct(urlImage: String) {
+    private suspend fun deleteProductFromFirebase(context: Context){
+        deleteImageFromFirebase(
+            imageUrl = productToEdit.value?.image.toString(),
+            onSuccess = {
+                uploadImageToFirebase(context)
+            },
+            onFailure = {
+                _productState.value = UIState(isLoading = false)
+                return@deleteImageFromFirebase
+            }
+        )
+    }
 
-        _productState.value = UIState(isLoading = true)
-
-        viewModelScope.launch {
+    private  suspend fun createProduct(urlImage: String) {
 
             val product = CreateProductDto(
                 available = true,
@@ -308,13 +330,9 @@ class PublishViewModel @Inject constructor(
 
             }
 
-        }
     }
 
-    private  fun editProduct(productId: Int,urlImage: String) {
-        _productState.value = UIState(isLoading = true)
-
-        viewModelScope.launch {
+    private  suspend fun editProduct(productId: Int,urlImage: String) {
 
             val product = CreateProductDto(
                 available = true,
@@ -334,7 +352,6 @@ class PublishViewModel @Inject constructor(
                 _productState.value = UIState(data = result.data)
 
             }
-        }
     }
 
 
@@ -363,7 +380,7 @@ class PublishViewModel @Inject constructor(
         if (_districtSelected.value == null) {
             _errorDistrict.value = true
         }
-        if (_image.value == null || _image.value.toString() == productToEdit.value?.image) {
+        if (_image.value == null) {
             _errorImage.value = true
         }
 

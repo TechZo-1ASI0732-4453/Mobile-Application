@@ -156,28 +156,7 @@ fun ImageUploadDialog(
                             text = "Aceptar",
                             onClick = {
                                 fileUri?.let { uri ->
-                                    val currentProfilePicture = viewModel.profilePicture.value
-                                    deleteImageFromFirebase(
-                                        imageUrl = currentProfilePicture,
-                                        onSuccess = {
-                                            uploadImageToFirebase(
-                                                context = context,
-                                                fileUri = uri,
-                                                onSuccess = { imageUrl ->
-                                                    onImageUploaded(imageUrl)
-                                                    viewModel.onProfilePictureChanged(imageUrl)
-                                                    onDismiss()
-                                                },
-                                                onFailure = {
-                                                    // Handle failure if needed
-                                                },
-                                                onUploadStateChange = { isUploading = it },
-                                                path = "profiles"
-                                            )                                            },
-                                        onFailure = {
-                                            // Handle failure if needed
-                                        }
-                                    )
+                                    viewModel.imageToUploadFromFirebase(uri,context,isUpload = {isUploading = it}, onDismiss = onDismiss)
                                 }
                             }
                         )

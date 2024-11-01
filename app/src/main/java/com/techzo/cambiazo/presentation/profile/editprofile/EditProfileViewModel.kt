@@ -1,5 +1,7 @@
 package com.techzo.cambiazo.presentation.profile.editprofile
 
+import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -7,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.common.deleteImageFromFirebase
+import com.techzo.cambiazo.common.uploadImageToFirebase
 import com.techzo.cambiazo.data.repository.UserRepository
 import com.techzo.cambiazo.domain.User
 import com.techzo.cambiazo.domain.UserEdit
@@ -66,6 +70,38 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
 
     fun onProfilePictureChanged(newUrl: String) {
         _profilePicture.value = newUrl
+    }
+
+    fun imageToUploadFromFirebase(uri: Uri,context: Context,isUpload:(Boolean)->Unit, onDismiss: () -> Unit) {
+
+        val currentProfilePicture = profilePicture.value
+        viewModelScope.launch {
+            deleteImageFromFirebase(
+                imageUrl = currentProfilePicture,
+                onSuccess = {
+                    uploadImageToFirebase(
+                        context = context,
+                        fileUri = uri,
+                        onSuccess = { imageUrl ->
+                            onProfilePicture(imageUrl)
+                            saveProfile()
+                            onProfilePictureChanged(imageUrl)
+                            onDismiss()
+                        },
+                        onFailure = {
+                            // Handle failure if needed
+                        },
+                        onUploadStateChange = { isUpload(it) },
+                        path = "profiles"
+                    )                                            },
+                onFailure = {
+                    // Handle failure if needed
+                }
+            )
+        }
+
+
+
     }
 
     private val _editState = mutableStateOf(UIState<UserSignIn>())
