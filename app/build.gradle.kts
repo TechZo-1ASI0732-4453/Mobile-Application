@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.datastore.preferences)
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation (libs.accompanist.swiperefresh)
     testImplementation(libs.junit)

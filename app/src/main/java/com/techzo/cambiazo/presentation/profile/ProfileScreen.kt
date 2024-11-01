@@ -54,6 +54,13 @@ fun ProfileScreen(
 
     val user = Constants.user
 
+    LaunchedEffect(viewModel.isLoggedOut.value) {
+        if (viewModel.isLoggedOut.value) {
+            logOut()
+        }
+    }
+
+
     MainScaffoldApp(
         bottomBar = bottomBar,
         paddingCard = PaddingValues(top = 15.dp),
@@ -147,7 +154,6 @@ fun ProfileScreen(
                         text = "Cerrar Sesión",
                         onClick = {
                             viewModel.onLogout()
-                            logOut()
                         }
                     )
                 }
