@@ -1,7 +1,5 @@
 package com.techzo.cambiazo.presentation.navigate
 
-import android.net.Uri
-import android.os.Parcelable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material.icons.filled.Person
@@ -16,12 +14,10 @@ import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.articles.publish.PublishScreen
@@ -140,7 +136,8 @@ fun NavScreen() {
             SignUpScreen(
                 back = { navController.popBackStack() },
                 openLogin = { navController.navigate(Routes.SignIn.route) },
-                navigateToTermsAndConditions = { navController.navigate(Routes.TermsAndConditions.route) }
+                navigateToTermsAndConditions = { navController.navigate(Routes.TermsAndConditions.route) },
+                openApp = { navController.navigate(Routes.Explorer.route) }
             )
         }
 

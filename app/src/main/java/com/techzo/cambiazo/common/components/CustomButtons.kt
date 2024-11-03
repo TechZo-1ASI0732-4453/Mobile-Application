@@ -34,11 +34,11 @@ import androidx.compose.ui.unit.sp
 import com.techzo.cambiazo.R
 
 @Composable
-fun LoginGoogleApp(){
+fun LoginGoogleApp(onClick: () -> Unit){
     Surface(
         modifier = Modifier
             .size(56.dp)
-            .clickable(onClick = {}),
+            .clickable(onClick = onClick),
         shape = CircleShape,
         shadowElevation = 5.dp
     ) {
