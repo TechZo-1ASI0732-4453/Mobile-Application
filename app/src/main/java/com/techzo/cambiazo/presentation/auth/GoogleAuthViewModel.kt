@@ -2,6 +2,7 @@ package com.techzo.cambiazo.presentation.auth
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,14 +16,18 @@ import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.repository.AuthRepository
+import com.techzo.cambiazo.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class GoogleAuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
@@ -56,31 +61,30 @@ class GoogleAuthViewModel @Inject constructor(
 
     suspend fun signInWithGoogleCredential(
         credential: AuthCredential,
-        onResult: (Boolean) -> Unit
+        onResult: (Boolean, Boolean) -> Unit
     ) {
         try {
-            val result = auth.signInWithCredential(credential).await()
-            val isNewUser = result.additionalUserInfo?.isNewUser == true
-            if (isNewUser) {
-                onResult(true) // Usuario nuevo, solicitar número de teléfono
-            } else {
-                val firebaseUser = auth.currentUser ?: return onResult(false)
-                val email = firebaseUser.email ?: ""
-                val firebaseUid = firebaseUser.uid
+            auth.signInWithCredential(credential).await()
+            val email = auth.currentUser?.email?.trim()?.lowercase() ?: ""
+            val userExists = userRepository.checkIfUserExistsByEmail(email)
 
-                val signInResult = authRepository.signIn(email, firebaseUid)
+            if (userExists) {
+                val signInResult = authRepository.signIn(email, auth.currentUser!!.uid)
                 if (signInResult is Resource.Success) {
                     Constants.token = signInResult.data?.token
                     Constants.user = signInResult.data
-                    onResult(false)
+                    onResult(true, false)
                 } else {
-                    onResult(false)
+                    onResult(false, false)
                 }
+            } else {
+                onResult(false, true)
             }
         } catch (e: Exception) {
-            onResult(false)
+            onResult(false, false)
         }
     }
+
 
     fun completeRegistration(phone: String, onComplete: () -> Unit) {
         viewModelScope.launch {
@@ -109,7 +113,7 @@ class GoogleAuthViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                // Manejar la excepción si es necesario
+                Log.e("GoogleAuthViewModel", "Error during registration completion", e)
             }
         }
     }

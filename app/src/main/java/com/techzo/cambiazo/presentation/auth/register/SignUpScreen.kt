@@ -1,8 +1,8 @@
 package com.techzo.cambiazo.presentation.auth.register
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,18 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,12 +31,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,7 +45,6 @@ import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.LoginGoogleApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextLink
-import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import com.techzo.cambiazo.presentation.auth.GoogleAuthViewModel
 import com.techzo.cambiazo.presentation.auth.PhoneInputScreen
 import kotlinx.coroutines.launch
@@ -87,16 +79,22 @@ fun SignUpScreen(
         googleAuthViewModel.handleGoogleSignInResult(result.data) { credential, isValid ->
             if (isValid && credential != null) {
                 coroutineScope.launch {
-                    googleAuthViewModel.signInWithGoogleCredential(credential) { isNewUser ->
-                        if (isNewUser) {
-                            showPhoneInput = true
-                        } else {
-                            openApp()
+                    googleAuthViewModel.handleGoogleSignInResult(result.data) { credential, isValid ->
+                        if (isValid && credential != null) {
+                            coroutineScope.launch {
+                                googleAuthViewModel.signInWithGoogleCredential(credential) { success, needPhone ->
+                                    when {
+                                        success -> openApp()
+                                        needPhone -> showPhoneInput = true
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+
     }
 
     if (showPhoneInput) {

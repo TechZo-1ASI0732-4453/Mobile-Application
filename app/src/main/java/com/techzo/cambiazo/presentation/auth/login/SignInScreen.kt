@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.presentation.auth.login
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -68,21 +69,24 @@ fun SignInScreen(
     var showPhoneInput by remember { mutableStateOf(false) }
     val phoneNumber = googleAuthViewModel.phoneNumber.value
 
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         googleAuthViewModel.handleGoogleSignInResult(result.data) { credential, isValid ->
             if (isValid && credential != null) {
                 coroutineScope.launch {
-                    googleAuthViewModel.signInWithGoogleCredential(credential) { isNewUser ->
-                        if (isNewUser) {
-                            showPhoneInput = true
-                        } else openApp()
+                    googleAuthViewModel.signInWithGoogleCredential(credential) { success, needPhone ->
+                        when {
+                            success -> openApp()
+                            needPhone -> showPhoneInput = true
+                        }
                     }
                 }
             }
         }
     }
+
 
     if (showPhoneInput) {
         PhoneInputScreen(
@@ -155,8 +159,7 @@ fun SignInScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
-            )
-            {
+            ) {
                 Checkbox(
                     checked = isChecked.value,
                     onCheckedChange = { viewModel.onCheckedChange(it) },

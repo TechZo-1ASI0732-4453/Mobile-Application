@@ -25,6 +25,11 @@ interface UserService {
 
     @Headers("Content-Type: application/json",
         "Accept: application/json")
+    @GET("users/username/{username}")
+    suspend fun getUserByUsername(@Path("username") username: String): Response<Unit>
+
+    @Headers("Content-Type: application/json",
+        "Accept: application/json")
     @PUT("users/edit/profile/{id}")
     suspend fun updateUserById(@Path("id") id: Int, @Body user: UserEdit): Response<UserSignIn>
 

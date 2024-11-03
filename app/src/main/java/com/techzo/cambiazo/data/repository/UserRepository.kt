@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.data.repository
 
 
+import android.util.Log
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.remote.auth.UserService
 import com.techzo.cambiazo.data.remote.auth.toUser
@@ -74,5 +75,12 @@ class UserRepository(private val userService: UserService) {
         }
     }
 
+    suspend fun checkIfUserExistsByEmail(username: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            userService.getUserByUsername(username).isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
 
 }
