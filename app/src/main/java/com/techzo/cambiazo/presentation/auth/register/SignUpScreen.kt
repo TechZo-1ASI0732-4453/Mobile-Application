@@ -62,7 +62,7 @@ fun SignUpScreen(
     val name = viewModel.name.value
     val password = viewModel.password.value
     val email = viewModel.username.value
-    val phoneNumber = viewModel.phoneNumber.value
+    val phoneNumber = googleAuthViewModel.phoneNumber.value
     val showPassword = viewModel.showPassword.value
     val showPasswordRepeat = viewModel.showPasswordRepeat.value
     val repitePassword = viewModel.repitePassword.value
