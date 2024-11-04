@@ -41,6 +41,9 @@ import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.auth.register.SignUpScreen
 import com.techzo.cambiazo.presentation.auth.register.TyC.TermsAndConditionsScreen
 import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
+import com.techzo.cambiazo.presentation.profile.subscription.MySubscriptionScreen
+import com.techzo.cambiazo.presentation.profile.subscription.PaymentScreen
+import com.techzo.cambiazo.presentation.profile.subscription.PlansScreen
 
 sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, val title: String,val route: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -115,10 +118,18 @@ sealed class Routes(val route: String) {
             "ConfirmationOfferScreen/$desiredProductId/$offeredProductId"
     }
 
+    object Payment : Routes("PaymentScreen/{planId}") {
+        fun createSubscriptionPaymentRoute(planId: String ) = "PaymentScreen/$planId"
+    }
+
     object EditProfile : Routes("EditProfileScreen")
     object MyReviews : Routes("MyReviewsScreen")
     object Publish : Routes("PublishScreen")
     object Favorites : Routes("FavoritesScreen")
+    object MySubscription : Routes("MySubscriptionScreen")
+    object Plans : Routes("PlansScreen")
+
+
 }
 
 @Composable
@@ -228,6 +239,7 @@ fun NavScreen() {
                 openMyReviews = { navController.navigate(Routes.MyReviews.route) },
                 openEditProfile = { navController.navigate(Routes.EditProfile.route) },
                 openFavorites = { navController.navigate(Routes.Favorites.route) },
+                openSubscription = { navController.navigate(Routes.MySubscription.route) },
                 bottomBar = { BottomBarNavigation(items,currentRoute) }
             )
         }
@@ -245,7 +257,7 @@ fun NavScreen() {
         composable(route = Routes.MyReviews.route) {
             MyReviewsScreen(
                 back = { navController.popBackStack() },
-                OnUserClick = { userId ->
+                onUserClick = { userId ->
                     navController.navigate(Routes.Reviews.createRoute(userId.toString()))
                 }
             )
@@ -305,6 +317,27 @@ fun NavScreen() {
             ConfirmationOfferScreen(
                 navController = navController
             )
+        }
+
+        composable(route = Routes.MySubscription.route) {
+            MySubscriptionScreen(back = {navController.popBackStack()}, openPlans = {navController.navigate(Routes.Plans.route)})
+        }
+
+        composable(route = Routes.Plans.route) {
+            PlansScreen(
+                back = {navController.popBackStack()},
+                onPlanClick = { planId ->
+                    navController.navigate(
+                        Routes.Payment.createSubscriptionPaymentRoute(
+                            planId
+                        )
+                    )
+                }
+            )
+        }
+
+        composable(route = Routes.Payment.route) {
+            PaymentScreen(back = {navController.popBackStack()},)
         }
     }
 }
