@@ -60,6 +60,7 @@ class ProfileViewModel@Inject constructor(
         viewModelScope.launch {
             Constants.user = null
             Constants.token = ""
+            Constants.userSubscription = null
             userPreferences.clearSession()
             _isLoggedOut.value = true
         }
