@@ -46,6 +46,7 @@ fun ProfileScreen(
     openMyReviews: () -> Unit = {},
     openEditProfile: () -> Unit = {},
     openFavorites: () -> Unit = {},
+    openSubscription: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()) {
 
@@ -147,7 +148,11 @@ fun ProfileScreen(
                         onClick = { openMyReviews()}
                     )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
-                    ProfileOption(icon = Icons.Outlined.Diamond, text = "Mi Suscripción")
+                    ProfileOption(
+                        icon = Icons.Outlined.Diamond,
+                        text = "Mi Suscripción",
+                        onClick = { openSubscription() }
+                    )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
                     ProfileOption(
                         icon = Icons.Outlined.Logout,
