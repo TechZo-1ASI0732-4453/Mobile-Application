@@ -60,7 +60,7 @@ fun SignUpScreen(
     val phoneNumber = viewModel.phoneNumber.value
     val showPassword = viewModel.showPassword.value
     val showPasswordRepeat = viewModel.showPasswordRepeat.value
-    val repitePassword = viewModel.repitePassword.value
+    val repeatPassword = viewModel.repitePassword.value
     val isChecked = viewModel.isChecked
      val state = viewModel.state.value
     val successDialog = viewModel.successDialog.value
@@ -125,7 +125,7 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.size(10.dp))
 
-        CustomInput(value = password, type = "Password", placeHolder = "Confirmar contraseña", onValueChange = { viewModel.onRepitePasswordChange(it) })
+        CustomInput(value = repeatPassword, type = "Password", placeHolder = "Confirmar contraseña", onValueChange = { viewModel.onRepitePasswordChange(it) })
 
 
         Spacer(modifier = Modifier.size(10.dp))
