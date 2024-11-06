@@ -14,13 +14,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ArticlesOwn
-import com.techzo.cambiazo.common.components.FloatingButtonApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import com.techzo.cambiazo.domain.Product
@@ -29,7 +27,7 @@ import com.techzo.cambiazo.domain.Product
 fun ArticlesScreen(
     viewModel: ArticlesViewModel = hiltViewModel(),
     bottomBar: @Composable () -> Unit = {},
-    onPublish: (Product?) -> Unit = {},
+    editProduct: (Product?) -> Unit = {},
     onProductClick: (Int, Int) -> Unit,
 ) {
     val productsState = viewModel.products.collectAsState()
@@ -48,7 +46,7 @@ fun ArticlesScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(products.chunked(2) ?: emptyList()) { rowItems ->
+                items(products.chunked(2)) { rowItems ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -63,7 +61,7 @@ fun ArticlesScreen(
                                 deleteProduct = { productId ->
                                     viewModel.deleteProduct( productId, product.image)
                                 },
-                                editProduct = {onPublish(it)},
+                                editProduct = {editProduct(it)},
                                 onClick = onProductClick
                             )
                         }
@@ -78,11 +76,6 @@ fun ArticlesScreen(
                 }
                 item { Spacer(modifier = Modifier.height(70.dp)) }
             }
-
-            FloatingButtonApp(
-                text = "+ Publicar",
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) { onPublish(null) }
         }
     }
 }

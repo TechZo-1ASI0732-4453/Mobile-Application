@@ -61,6 +61,7 @@ import com.techzo.cambiazo.domain.Product
 @Composable
 fun PublishScreen(
     viewModel: PublishViewModel = hiltViewModel(),
+    bottomBar: @Composable () -> Unit = {},
     back : () -> Unit = {},
     product: Product? = null,
     openMyArticles: () -> Unit = {}
@@ -97,7 +98,6 @@ fun PublishScreen(
     val errorImage = viewModel.errorImage.value
 
     val image = viewModel.image.value
-    val buttonEdit = viewModel.buttonEdit.value
 
     val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.selectImage(uri)
@@ -116,6 +116,7 @@ fun PublishScreen(
 
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
+        bottomBar = productToEdit?.let{{}}?:bottomBar,
         contentsHeader = {
             Column(
                 Modifier
@@ -123,8 +124,9 @@ fun PublishScreen(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ){
-
-                ButtonIconHeaderApp(Icons.Filled.Close, onClick = {back()})
+                productToEdit?.let {
+                    ButtonIconHeaderApp(Icons.Filled.Close, onClick = {back()})
+                }?: Spacer(modifier = Modifier.height(30.dp))
                 TextTitleHeaderApp(action)
             }
         },
@@ -257,7 +259,7 @@ fun PublishScreen(
                 SubTitleText(subTittle = "Ubicación")
                 DropdownList(
                     selectedOption = countrySelected,
-                    label ="Seeleccione un País",
+                    label ="Seleccione un País",
                     itemList = countries.data ?: emptyList(),
                     onItemClick ={viewModel.selectCountry(it)},
                     isError = errorCountry,
@@ -267,7 +269,7 @@ fun PublishScreen(
 
                 DropdownList(
                     selectedOption = departmentSelected,
-                    label ="Seeleccione un Departamento",
+                    label ="Seleccione un Departamento",
                     itemList = departments.data ?: emptyList(),
                     onItemClick ={ viewModel.selectDepartment(it) },
                     isError = errorDepartment,
@@ -277,7 +279,7 @@ fun PublishScreen(
 
                 DropdownList(
                     selectedOption = districtSelected,
-                    label ="Seeleccione un Distrito",
+                    label ="Seleccione un Distrito",
                     itemList = districts.data ?: emptyList(),
                     onItemClick ={ viewModel.selectDistrict(it)},
                     isError = errorDistrict,
@@ -363,17 +365,12 @@ fun PublishScreen(
                     }
                 }else{
                     if (productState.data != null) {
-                         DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { openMyArticles() },)
+                         DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { product?.let {openMyArticles()}?:viewModel.clearData() })
                     }else{
-                        if (product == null) {
-                            ButtonApp(text = action) {
-                                viewModel.validateDataToUploadImage(context)
-                            }
-                            }else{
-                                ButtonApp(text = action, enable = buttonEdit) {
-                                    viewModel.validateDataToUploadImage(context)
-                                }
-                            }
+                        ButtonApp(text = action) {
+                            viewModel.validateDataToUploadImage(context)
+                        }
+
                     }
                 }
                 Spacer(modifier =   Modifier.height(30.dp))

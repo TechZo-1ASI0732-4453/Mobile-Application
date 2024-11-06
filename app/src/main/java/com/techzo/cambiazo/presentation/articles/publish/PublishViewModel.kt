@@ -388,5 +388,19 @@ class PublishViewModel @Inject constructor(
 
         return _name.value.isEmpty() || _description.value.isEmpty() || _price.value.isEmpty() || _objectChange.value.isEmpty() || _categorySelected.value == null || _countrySelected.value == null || _departmentSelected.value == null || _districtSelected.value == null || _image.value == null
     }
+
+    fun clearData(){
+        _name.value = ""
+        _description.value = ""
+        _price.value = ""
+        _objectChange.value = ""
+        _categorySelected.value = null
+        _countrySelected.value = null
+        _departmentSelected.value = null
+        _districtSelected.value = null
+        _image.value = null
+        _boost.value = false
+        _productState.value = UIState()
+    }
     
 }

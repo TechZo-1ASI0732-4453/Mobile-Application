@@ -1,11 +1,14 @@
 package com.techzo.cambiazo.presentation.navigate
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
@@ -56,6 +59,14 @@ sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, v
         route = Routes.Exchange.route
     )
 
+    data class Publish(val onNavigate: () -> Unit = {}) : ItemsScreens(
+        iconSelected = Icons.Filled.AddCircle,
+        icon = Icons.Outlined.AddCircleOutline,
+        title = "Publicar",
+        navigate = onNavigate,
+        route = Routes.Publish.route
+    )
+
     data class Articles(val onNavigate: () -> Unit = {}) : ItemsScreens(
         iconSelected = Icons.Filled.Sell,
         icon = Icons.Outlined.Sell,
@@ -64,13 +75,6 @@ sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, v
         route = Routes.Article.route
     )
 
-    data class Donation(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        iconSelected = Icons.Filled.Handshake,
-        icon = Icons.Outlined.Handshake,
-        title = "Donaciones",
-        navigate = onNavigate,
-        route = Routes.Donation.route
-    )
 
     data class Profile(val onNavigate: () -> Unit = {}) : ItemsScreens(
         iconSelected = Icons.Filled.Person,
@@ -126,8 +130,11 @@ fun NavScreen() {
     val items = listOf(
         ItemsScreens.Explorer(onNavigate = { navController.navigate(Routes.Explorer.route) }),
         ItemsScreens.Exchange(onNavigate = { navController.navigate(Routes.Exchange.route) }),
+        ItemsScreens.Publish(onNavigate = {
+            navController.currentBackStackEntry?.savedStateHandle?.set("product", null)
+            navController.navigate(Routes.Publish.route) }
+        ),
         ItemsScreens.Articles(onNavigate = { navController.navigate(Routes.Article.route) }),
-        ItemsScreens.Donation(onNavigate = { navController.navigate(Routes.Donation.route) }),
         ItemsScreens.Profile(onNavigate = { navController.navigate(Routes.Profile.route) })
     )
 
@@ -187,7 +194,7 @@ fun NavScreen() {
         composable(route = Routes.Article.route) {
             ArticlesScreen(
                 bottomBar = { BottomBarNavigation(items,currentRoute) },
-                onPublish = {
+                editProduct = {
                     navController.currentBackStackEntry?.savedStateHandle?.set("product", it)
                     navController.navigate(Routes.Publish.route)
                             },
@@ -286,6 +293,7 @@ fun NavScreen() {
             route = Routes.Publish.route,
         ){
             PublishScreen(
+                bottomBar = { BottomBarNavigation(items,currentRoute) },
                 back = {navController.popBackStack()},
                 openMyArticles = {navController.navigate(Routes.Article.route)},
                 product = navController.previousBackStackEntry?.savedStateHandle?.get<Product>("product")
