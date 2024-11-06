@@ -2,14 +2,11 @@ package com.techzo.cambiazo.presentation.navigate
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.outlined.AddCircleOutline
-import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Sell
@@ -25,7 +22,6 @@ import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.articles.publish.PublishScreen
 import com.techzo.cambiazo.presentation.explorer.productdetails.ProductDetailsScreen
-import com.techzo.cambiazo.presentation.donations.DonationsScreen
 import com.techzo.cambiazo.presentation.exchanges.exchangedetails.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
@@ -91,7 +87,6 @@ sealed class Routes(val route: String) {
     object Filter : Routes("FilterScreen")
     object Explorer : Routes("ExplorerScreen")
     object Article : Routes("ArticleScreen")
-    object Donation : Routes("DonationScreen")
     object Profile : Routes("ProfileScreen")
     object Exchange : Routes("ExchangeScreen")
     object TermsAndConditions : Routes("TermsAndConditionsScreen")
@@ -232,12 +227,6 @@ fun NavScreen() {
                 openMyReviews = { navController.navigate(Routes.MyReviews.route) },
                 openEditProfile = { navController.navigate(Routes.EditProfile.route) },
                 openFavorites = { navController.navigate(Routes.Favorites.route) },
-                bottomBar = { BottomBarNavigation(items,currentRoute) }
-            )
-        }
-
-        composable(route = Routes.Donation.route) {
-            DonationsScreen(
                 bottomBar = { BottomBarNavigation(items,currentRoute) }
             )
         }
