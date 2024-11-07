@@ -47,6 +47,7 @@ fun ProfileScreen(
     openEditProfile: () -> Unit = {},
     openFavorites: () -> Unit = {},
     bottomBar: Pair<@Composable () -> Unit, () -> Unit>,
+    openSubscription: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()) {
 
     val averageRating = viewModel.averageRating.value
@@ -147,7 +148,11 @@ fun ProfileScreen(
                         onClick = { openMyReviews()}
                     )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
-                    ProfileOption(icon = Icons.Outlined.Diamond, text = "Mi Suscripción")
+                    ProfileOption(
+                        icon = Icons.Outlined.Diamond,
+                        text = "Mi Suscripción",
+                        onClick = { openSubscription() }
+                    )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
                     ProfileOption(
                         icon = Icons.Outlined.Logout,

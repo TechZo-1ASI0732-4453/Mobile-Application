@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
+import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.CustomInput
@@ -320,45 +321,49 @@ fun PublishScreen(
                 Spacer(modifier = Modifier.height(spaceHeight))
 
             }
-            //-------------------BOOST------------------------//
-            item {
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    Box(
-                        modifier = Modifier.weight(1f)
+            //-------------------BOOST------------------------//
+            val userPlanId = Constants.userSubscription?.plan?.id
+            if ( userPlanId != 1){
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
                     ) {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            SubTitleText(subTittle = "Boost de Visibilidad")
-                            Text(modifier = Modifier.fillMaxWidth(),
-                                text = "¡Activa tu boost y destaca tu producto un día en la página principal para más ofertas!",
-                                color = Color.Gray)
+                        Box(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                SubTitleText(subTittle = "Boost de Visibilidad")
+                                Text(modifier = Modifier.fillMaxWidth(),
+                                    text = "¡Activa tu boost y destaca tu producto un día en la página principal para más ofertas!",
+                                    color = Color.Gray)
+                            }
+                        }
+
+                        Box{
+                            Switch(
+                                checked = boost,
+                                onCheckedChange = { viewModel.onChangeBoost(it)},
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,//circle color when switch is on
+                                    checkedTrackColor = Color(0xFFFFD146),//background color when switch is on
+                                    checkedBorderColor = Color(0xFFFFD146), //border color when switch is on
+                                    checkedIconColor = Color(0xFFFFD146),//icon color when switch is on
+
+                                    uncheckedThumbColor = Color.White,//circle color when switch is off
+                                    uncheckedTrackColor = Color(0xFFD9D9D9),//background color when switch is off
+                                    uncheckedBorderColor = Color(0xFFD9D9D9),//border color when switch is off
+                                    uncheckedIconColor = Color.Gray//icon color when switch is off
+                                )
+                            )
                         }
                     }
 
-                    Box{
-                        Switch(
-                            checked = boost,
-                            onCheckedChange = { viewModel.onChangeBoost(it)},
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,//circle color when switch is on
-                                checkedTrackColor = Color(0xFFFFD146),//background color when switch is on
-                                checkedBorderColor = Color(0xFFFFD146), //border color when switch is on
-                                checkedIconColor = Color(0xFFFFD146),//icon color when switch is on
-
-                                uncheckedThumbColor = Color.White,//circle color when switch is off
-                                uncheckedTrackColor = Color(0xFFD9D9D9),//background color when switch is off
-                                uncheckedBorderColor = Color(0xFFD9D9D9),//border color when switch is off
-                                uncheckedIconColor = Color.Gray//icon color when switch is off
-                            )
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
+
 
             item {
                 if(productState.isLoading){

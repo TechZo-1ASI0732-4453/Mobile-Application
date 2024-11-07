@@ -138,7 +138,7 @@ fun EditProfileScreen(
                             GlideImage(
                                 imageModel = { profilePicture ?: user.profilePicture },
                                 modifier = Modifier
-                                    .size(140.dp)
+                                    .size(150.dp)
                                     .clip(CircleShape)
                             )
                             Box(
@@ -173,7 +173,7 @@ fun EditProfileScreen(
                             messageError = errorName.message,
                             onValueChange = { viewModel.onNameChange(it) }
                         )
-                        Spacer(modifier =Modifier.height(20.dp))
+                        Spacer(modifier =Modifier.height(5.dp))
 
                         SubTitleText(subTittle = "Correo electrónico")
                         CustomInput(
@@ -184,7 +184,7 @@ fun EditProfileScreen(
                             messageError = errorUsername.message,
                             onValueChange = { viewModel.onUsernameChange(it) }
                         )
-                        Spacer(modifier =Modifier.height(20.dp))
+                        Spacer(modifier =Modifier.height(5.dp))
 
                         SubTitleText(subTittle = "Número de  teléfono")
                         CustomInput(
@@ -195,7 +195,7 @@ fun EditProfileScreen(
                             messageError = errorPhoneNumber.message,
                             onValueChange = { viewModel.onPhoneNumberChange(it) }
                         )
-                        Spacer(modifier =Modifier.height(20.dp))
+                        Spacer(modifier =Modifier.height(5.dp))
                     }
 
 

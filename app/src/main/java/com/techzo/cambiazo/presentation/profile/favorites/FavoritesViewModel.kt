@@ -39,25 +39,14 @@ class FavoritesViewModel @Inject constructor(
         viewModelScope.launch {
             val result = productDetailsRepository.getFavoriteProductByUserId(Constants.user!!.id)
             if (result is Resource.Success) {
-                val favoriteIds = result.data?.map { it.productId }?.toSet() ?: emptySet()
-                _favoriteProductsIds.value = favoriteIds
-                fetchFavoriteProducts(favoriteIds)
+                val favoriteProducts = result.data ?: emptyList()
+                _favoriteProducts.value = UIState(data = favoriteProducts.map { it.product })
             } else {
                 _favoriteProducts.value = UIState(message = "Error al cargar favoritos.")
             }
         }
     }
 
-    private fun fetchFavoriteProducts(favoriteIds: Set<Int>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val products = productRepository.getProductsByIds(favoriteIds).data ?: emptyList()
-                _favoriteProducts.value = UIState(data = products)
-            } catch (e: Exception) {
-                _favoriteProducts.value = UIState(message = "Error al cargar los productos favoritos.")
-            }
-        }
-    }
 
     fun removeProductFromFavorites(productId: Int) {
         viewModelScope.launch {
