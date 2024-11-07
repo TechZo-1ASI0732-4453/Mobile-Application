@@ -125,7 +125,10 @@ fun NavScreen() {
     val items = listOf(
         ItemsScreens.Explorer(onNavigate = { navController.navigate(Routes.Explorer.route) }),
         ItemsScreens.Exchange(onNavigate = { navController.navigate(Routes.Exchange.route) }),
-        ItemsScreens.Publish(onNavigate = { navController.navigate(Routes.Publish.route) }),
+        ItemsScreens.Publish(onNavigate = {
+            navController.currentBackStackEntry?.savedStateHandle?.set("product", null)
+            navController.navigate(Routes.Publish.route)
+        }),
         ItemsScreens.Articles(onNavigate = { navController.navigate(Routes.Article.route) }),
         ItemsScreens.Profile(onNavigate = { navController.navigate(Routes.Profile.route) })
     )

@@ -238,7 +238,7 @@ fun ExplorerScreen(
                     items(availableProducts.reversed()) { product ->
                         Products(product, onProductClick)
                     }
-                    item { Spacer(modifier = Modifier.height(15.dp)) }
+                    item { Spacer(modifier = Modifier.height(80.dp)) }
                 }
             }
         }
