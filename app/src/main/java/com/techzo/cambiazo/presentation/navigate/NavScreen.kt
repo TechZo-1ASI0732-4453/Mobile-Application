@@ -44,6 +44,7 @@ import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
 import com.techzo.cambiazo.presentation.profile.subscription.MySubscriptionScreen
 import com.techzo.cambiazo.presentation.profile.subscription.PaymentScreen
 import com.techzo.cambiazo.presentation.profile.subscription.PlansScreen
+import okhttp3.Route
 
 sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, val title: String,val route: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -320,7 +321,7 @@ fun NavScreen() {
         }
 
         composable(route = Routes.MySubscription.route) {
-            MySubscriptionScreen(back = {navController.popBackStack()}, openPlans = {navController.navigate(Routes.Plans.route)})
+            MySubscriptionScreen(back = {navController.navigate(Routes.Profile.route)}, openPlans = {navController.navigate(Routes.Plans.route)})
         }
 
         composable(route = Routes.Plans.route) {
@@ -337,7 +338,11 @@ fun NavScreen() {
         }
 
         composable(route = Routes.Payment.route) {
-            PaymentScreen(back = {navController.popBackStack()},)
+            PaymentScreen(
+                back = {navController.popBackStack()},
+                goToMySubscription = {navController.navigate(Routes.MySubscription.route){
+                    popUpTo(0) { inclusive = true }
+                } })
         }
     }
 }

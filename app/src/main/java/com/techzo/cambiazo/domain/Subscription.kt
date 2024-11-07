@@ -12,7 +12,14 @@ data class Subscription (
     val plan: Plan
 )
 
-
+data class SubscriptionResponse (
+    val id: Int,
+    val startDate: String,
+    val endDate: String,
+    val state: String,
+    val userId: Int,
+    val planId: Int
+)
 
 data class Plan(
     val id: Int,

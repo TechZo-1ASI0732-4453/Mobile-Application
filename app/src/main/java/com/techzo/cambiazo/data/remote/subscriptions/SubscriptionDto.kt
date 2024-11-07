@@ -3,6 +3,7 @@ package com.techzo.cambiazo.data.remote.subscriptions
 import com.techzo.cambiazo.domain.Benefit
 import com.techzo.cambiazo.domain.Plan
 import com.techzo.cambiazo.domain.Subscription
+import com.techzo.cambiazo.domain.SubscriptionResponse
 
 data class SubscriptionDto(
     val id: Int,
@@ -38,6 +39,17 @@ data class SubscriptionResponseDto(
     val startDate: String,
     val endDate: String,
 )
+
+fun SubscriptionResponseDto.toSubscription(): SubscriptionResponse {
+    return SubscriptionResponse(
+        id = id,
+        state = state,
+        planId = planId,
+        userId = userId,
+        startDate = startDate,
+        endDate = endDate
+    )
+}
 
 data class PlansDto(
     val id: Int,

@@ -2,6 +2,7 @@ package com.techzo.cambiazo.presentation.profile
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
@@ -36,6 +37,7 @@ class ProfileViewModel@Inject constructor(
 
     private val _state = mutableStateOf(UIState<Pair<ReviewAverageUser, List<Review>>>())
     val state: State<UIState<Pair<ReviewAverageUser, List<Review>>>> get() = _state
+
 
     init {
         getReviewData()

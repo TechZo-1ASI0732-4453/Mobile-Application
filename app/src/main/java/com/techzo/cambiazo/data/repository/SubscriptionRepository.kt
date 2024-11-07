@@ -12,6 +12,7 @@ import com.techzo.cambiazo.data.remote.subscriptions.toSubscription
 import com.techzo.cambiazo.domain.Plan
 import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.domain.Subscription
+import com.techzo.cambiazo.domain.SubscriptionResponse
 import com.techzo.cambiazo.domain.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,11 +35,14 @@ class SubscriptionRepository(private val subscriptionService: SubscriptionServic
     }
 
 
-    suspend fun createSubscription(subscription: SubscriptionRequestDto): Resource<Unit> = withContext(Dispatchers.IO) {
+    suspend fun createSubscription(subscription: SubscriptionRequestDto): Resource<SubscriptionResponse> = withContext(Dispatchers.IO) {
         try {
             val response = subscriptionService.createSubscription(subscription)
             if (response.isSuccessful) {
-                return@withContext Resource.Success(data = Unit)
+                response.body()?.let { subscriptionResponseDto ->
+                    return@withContext Resource.Success(data = subscriptionResponseDto.toSubscription())
+                }
+                return@withContext Resource.Error("Response body is null")
             }
             return@withContext Resource.Error(response.message())
         } catch (e: Exception) {
