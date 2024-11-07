@@ -61,7 +61,6 @@ import com.techzo.cambiazo.domain.Product
 @Composable
 fun PublishScreen(
     viewModel: PublishViewModel = hiltViewModel(),
-    bottomBar: @Composable () -> Unit = {},
     back : () -> Unit = {},
     product: Product? = null,
     openMyArticles: () -> Unit = {}
@@ -111,12 +110,8 @@ fun PublishScreen(
         viewModel.productDataToEdit(product)
     }
 
-
-
-
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
-        bottomBar = productToEdit?.let{{}}?:bottomBar,
         contentsHeader = {
             Column(
                 Modifier
@@ -124,9 +119,7 @@ fun PublishScreen(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ){
-                productToEdit?.let {
-                    ButtonIconHeaderApp(Icons.Filled.Close, onClick = {back()})
-                }?: Spacer(modifier = Modifier.height(30.dp))
+                ButtonIconHeaderApp(Icons.Filled.Close, onClick = {back()})
                 TextTitleHeaderApp(action)
             }
         },

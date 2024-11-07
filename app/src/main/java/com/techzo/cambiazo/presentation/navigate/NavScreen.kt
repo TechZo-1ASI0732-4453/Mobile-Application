@@ -125,10 +125,7 @@ fun NavScreen() {
     val items = listOf(
         ItemsScreens.Explorer(onNavigate = { navController.navigate(Routes.Explorer.route) }),
         ItemsScreens.Exchange(onNavigate = { navController.navigate(Routes.Exchange.route) }),
-        ItemsScreens.Publish(onNavigate = {
-            navController.currentBackStackEntry?.savedStateHandle?.set("product", null)
-            navController.navigate(Routes.Publish.route) }
-        ),
+        ItemsScreens.Publish(onNavigate = { navController.navigate(Routes.Publish.route) }),
         ItemsScreens.Articles(onNavigate = { navController.navigate(Routes.Article.route) }),
         ItemsScreens.Profile(onNavigate = { navController.navigate(Routes.Profile.route) })
     )
@@ -152,7 +149,7 @@ fun NavScreen() {
 
         composable(route = Routes.Explorer.route) {
             ExplorerScreen(
-                bottomBar = { BottomBarNavigation(items,currentRoute) },
+                bottomBar =  BottomBarNavigation(items,currentRoute) ,
                 onFilter = { navController.navigate(Routes.Filter.route) },
                 onProductClick = { productId, userId ->
                     navController.navigate(
@@ -174,7 +171,7 @@ fun NavScreen() {
 
         composable(route = Routes.Exchange.route) {
             ExchangeScreen(
-                bottomBar = { BottomBarNavigation(items,currentRoute) },
+                bottomBar = BottomBarNavigation(items,currentRoute) ,
                 goToDetailsScreen = { exchangeId, page ->
                     navController.navigate(
                         Routes.ExchangeDetails.createExchangeDetailsRoute(
@@ -188,7 +185,7 @@ fun NavScreen() {
 
         composable(route = Routes.Article.route) {
             ArticlesScreen(
-                bottomBar = { BottomBarNavigation(items,currentRoute) },
+                bottomBar = BottomBarNavigation(items,currentRoute) ,
                 editProduct = {
                     navController.currentBackStackEntry?.savedStateHandle?.set("product", it)
                     navController.navigate(Routes.Publish.route)
@@ -227,7 +224,7 @@ fun NavScreen() {
                 openMyReviews = { navController.navigate(Routes.MyReviews.route) },
                 openEditProfile = { navController.navigate(Routes.EditProfile.route) },
                 openFavorites = { navController.navigate(Routes.Favorites.route) },
-                bottomBar = { BottomBarNavigation(items,currentRoute) }
+                bottomBar = BottomBarNavigation(items,currentRoute)
             )
         }
 
@@ -282,7 +279,6 @@ fun NavScreen() {
             route = Routes.Publish.route,
         ){
             PublishScreen(
-                bottomBar = { BottomBarNavigation(items,currentRoute) },
                 back = {navController.popBackStack()},
                 openMyArticles = {navController.navigate(Routes.Article.route)},
                 product = navController.previousBackStackEntry?.savedStateHandle?.get<Product>("product")
