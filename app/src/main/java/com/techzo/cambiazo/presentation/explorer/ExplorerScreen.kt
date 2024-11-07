@@ -49,7 +49,7 @@ import com.techzo.cambiazo.domain.Product
 @Composable
 fun ExplorerScreen(
     viewModel: ExplorerListViewModel = hiltViewModel(),
-    bottomBar: @Composable () -> Unit = {},
+    bottomBar: Pair<@Composable () -> Unit, () -> Unit>,
     onFilter: () -> Unit = {},
     onProductClick: (String, String) -> Unit
 ) {
@@ -238,7 +238,7 @@ fun ExplorerScreen(
                     items(availableProducts.reversed()) { product ->
                         Products(product, onProductClick)
                     }
-                    item { Spacer(modifier = Modifier.height(15.dp)) }
+                    item { Spacer(modifier = Modifier.height(80.dp)) }
                 }
             }
         }

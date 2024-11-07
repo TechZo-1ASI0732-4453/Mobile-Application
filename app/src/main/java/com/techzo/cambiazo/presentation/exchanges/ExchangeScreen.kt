@@ -54,7 +54,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ExchangeScreen(
-    bottomBar: @Composable () -> Unit = {}, viewModel: ExchangeViewModel = hiltViewModel(),
+    bottomBar: Pair<@Composable () -> Unit, () -> Unit>, viewModel: ExchangeViewModel = hiltViewModel(),
     goToDetailsScreen: (String, String) -> Unit,
 ) {
 

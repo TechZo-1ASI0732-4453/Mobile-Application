@@ -26,7 +26,7 @@ import com.techzo.cambiazo.domain.Product
 @Composable
 fun ArticlesScreen(
     viewModel: ArticlesViewModel = hiltViewModel(),
-    bottomBar: @Composable () -> Unit = {},
+    bottomBar: Pair<@Composable () -> Unit, () -> Unit>,
     editProduct: (Product?) -> Unit = {},
     onProductClick: (Int, Int) -> Unit,
 ) {

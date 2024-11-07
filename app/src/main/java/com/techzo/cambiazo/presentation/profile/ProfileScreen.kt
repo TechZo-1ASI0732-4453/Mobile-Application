@@ -46,8 +46,8 @@ fun ProfileScreen(
     openMyReviews: () -> Unit = {},
     openEditProfile: () -> Unit = {},
     openFavorites: () -> Unit = {},
+    bottomBar: Pair<@Composable () -> Unit, () -> Unit>,
     openSubscription: () -> Unit = {},
-    bottomBar: @Composable () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()) {
 
     val averageRating = viewModel.averageRating.value
