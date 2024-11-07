@@ -68,3 +68,14 @@ fun SubTitleText(subTittle: String){
             modifier = Modifier.padding(bottom = 2.dp))
     }
 }
+
+
+@Composable
+fun PaymentText(subTittle: String){
+    Box( modifier = Modifier) {
+        Text(text = subTittle,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 2.dp))
+    }
+}

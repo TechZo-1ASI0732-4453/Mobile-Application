@@ -22,6 +22,7 @@
         private val productCategoryRepository: ProductCategoryRepository) : ViewModel() {
 
         private val _allProducts = mutableStateOf<List<Product>>(emptyList())
+
         private val _state = mutableStateOf(UIState<List<Product>>())
         val state: State<UIState<List<Product>>> = _state
 

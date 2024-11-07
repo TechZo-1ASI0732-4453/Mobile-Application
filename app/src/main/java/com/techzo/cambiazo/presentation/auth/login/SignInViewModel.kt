@@ -10,6 +10,8 @@ import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.UserPreferences
 import com.techzo.cambiazo.data.repository.AuthRepository
+import com.techzo.cambiazo.data.repository.SubscriptionRepository
+import com.techzo.cambiazo.domain.Subscription
 import com.techzo.cambiazo.domain.User
 import com.techzo.cambiazo.domain.UserSignIn
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val subscriptionRepository: SubscriptionRepository
 ): ViewModel() {
 
 
@@ -45,6 +48,11 @@ class SignInViewModel @Inject constructor(
     val isChecked: State<Boolean> get() = _isChecked
 
 
+    private val _subscription = mutableStateOf(UIState<Subscription>())
+    val subscription: State<UIState<Subscription>> get() = _subscription
+
+
+
     fun validateUser():Boolean{
         _errorUsername.value = UIState(message = "Usuario requerido", data =_username.value.isEmpty() )
         _errorPassword.value = UIState(message = "Contraseña requerida", data =_password.value.isEmpty() )
@@ -65,6 +73,7 @@ class SignInViewModel @Inject constructor(
                     profilePicture = userPreferences.getProfilePicture.first() ?: "",
                     token = token
                 )
+                Constants.userSubscription = getUserSubscription(userPreferences.getId.first() ?: 0)
                 _state.value = UIState(data = Constants.user)
             } else {
                 _state.value = UIState() // Usuario no autenticado
@@ -78,6 +87,7 @@ class SignInViewModel @Inject constructor(
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
             val result = authRepository.signIn(_username.value, _password.value)
+
             if (result is Resource.Success) {
                 _state.value = UIState(data = result.data)
                 result.data?.let{
@@ -86,10 +96,23 @@ class SignInViewModel @Inject constructor(
                     }
                     Constants.token = it.token
                     Constants.user = it
+                    Constants.userSubscription = getUserSubscription(it.id)
                 }
             } else {
                 _state.value = UIState(message = "Datos de usuario incorrectos")
             }
+        }
+    }
+
+    private suspend fun getUserSubscription(userId: Int): Subscription? {
+        _subscription.value = UIState(isLoading = true)
+        val result = subscriptionRepository.getSubscriptionByUserId(userId)
+        return if (result is Resource.Success) {
+            _subscription.value = UIState(data = result.data)
+            result.data
+        } else {
+            _subscription.value = UIState(message = "Datos del usuario incorrectos")
+            null
         }
     }
 
@@ -108,4 +131,5 @@ class SignInViewModel @Inject constructor(
     fun onCheckedChange(checked: Boolean) {
         _isChecked.value = checked
     }
+
 }
