@@ -65,7 +65,7 @@ fun SignUpScreen(
     val phoneNumber = googleAuthViewModel.phoneNumber.value
     val showPassword = viewModel.showPassword.value
     val showPasswordRepeat = viewModel.showPasswordRepeat.value
-    val repitePassword = viewModel.repitePassword.value
+    val repeatPassword = viewModel.repitePassword.value
     val isChecked = viewModel.isChecked
     var showPhoneInput by remember { mutableStateOf(false) }
     val state = viewModel.state.value
@@ -173,7 +173,7 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.size(10.dp))
 
             CustomInput(
-                value = password,
+                value = repeatPassword,
                 type = "Password",
                 placeHolder = "Confirmar contraseña",
                 onValueChange = { viewModel.onRepitePasswordChange(it) })
