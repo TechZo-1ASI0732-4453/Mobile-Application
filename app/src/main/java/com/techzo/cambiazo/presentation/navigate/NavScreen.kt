@@ -327,7 +327,11 @@ fun NavScreen() {
                             planId
                         )
                     )
-                }
+                },
+                goToMySubscription = {navController.navigate(Routes.MySubscription.route){
+                    popUpTo(0) { inclusive = true }
+                } }
+
             )
         }
 
