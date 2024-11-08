@@ -90,7 +90,7 @@ fun SubscriptionPlanCard(
     }
     val iconColor = if (plan.id == 3) Color.Black else Color.White
 
-    val inputDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
+    val inputDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
     val outputDateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
     val parsedDate = inputDateFormat.parse(subscription.endDate)
     val formattedEndDate = parsedDate?.let { outputDateFormat.format(it) } ?: subscription.endDate

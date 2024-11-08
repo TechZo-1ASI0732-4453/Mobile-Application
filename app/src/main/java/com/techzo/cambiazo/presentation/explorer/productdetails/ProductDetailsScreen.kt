@@ -36,6 +36,7 @@ import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.StarRating
 import com.techzo.cambiazo.domain.*
+import com.techzo.cambiazo.presentation.articles.ArticlesViewModel
 import com.techzo.cambiazo.presentation.explorer.offer.MakeOfferViewModel
 import com.techzo.cambiazo.presentation.navigate.Routes
 
@@ -162,9 +163,13 @@ fun ProductDetails(
     onMakeOffer: (desiredProduct: Product) -> Unit,
     desiredProductState: Product?,
     navController: NavController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    articlesViewModel: ArticlesViewModel = hiltViewModel()
 ) {
     var showDialog by remember { mutableStateOf(false) }
+
+    val articlesState by articlesViewModel.products.collectAsState()
+    val userProducts = articlesState.data?.filter { it.available } ?: emptyList()
 
     Column(
         modifier = modifier
@@ -287,7 +292,7 @@ fun ProductDetails(
         ButtonApp(
             text = "Intercambiar",
             onClick = {
-                if (desiredProductState == null) {
+                if ( userProducts.isEmpty() ) {
                     showDialog = true
                 } else {
                     onMakeOffer(product)
