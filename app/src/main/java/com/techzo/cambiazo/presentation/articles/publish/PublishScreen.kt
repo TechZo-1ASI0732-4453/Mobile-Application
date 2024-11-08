@@ -105,6 +105,7 @@ fun PublishScreen(
     val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.selectImage(uri)
     }
+    val buttonEnable = viewModel.buttonEdit.value
 
     val productState = viewModel.productState.value
     val context = LocalContext.current
@@ -374,6 +375,11 @@ fun PublishScreen(
                     if (productState.data != null) {
                          DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { product?.let {openMyArticles()}?:viewModel.clearData() })
                     }else{
+                        productToEdit?.let {
+                            ButtonApp(text = action, enable = buttonEnable) {
+                                viewModel.validateDataToUploadImage(context)
+                            }
+                        }?:
                         ButtonApp(text = action) {
                             viewModel.validateDataToUploadImage(context)
                         }
