@@ -117,6 +117,7 @@ fun ExchangeScreen(
                             HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
                         }
                     }
+                    item { Spacer(modifier = Modifier.height(60.dp))}
                 }
             }
         }
