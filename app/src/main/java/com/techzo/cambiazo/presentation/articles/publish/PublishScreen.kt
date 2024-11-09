@@ -99,7 +99,8 @@ fun PublishScreen(
     val errorDistrict = viewModel.errorDistrict.value
     val errorObjectChange = viewModel.errorObjectChange.value
     val errorImage = viewModel.errorImage.value
-
+    val messageError = viewModel.messageError.value
+    val descriptionError = viewModel.descriptionError.value
     val image = viewModel.image.value
 
     val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
@@ -372,8 +373,11 @@ fun PublishScreen(
                         CircularProgressIndicator(color = Color(0xFFFFD146))
                     }
                 }else{
-                    if (productState.data != null) {
-                         DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { product?.let {openMyArticles()}?:viewModel.clearData() })
+                    messageError?.let {
+                        DialogApp(it,descriptionError,"So quieres publicar mas publicaciones cambiate de plan","Entendido",onClickButton1 = {viewModel.clearError()})
+
+                    }?:if (productState.data != null) {
+                        DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { product?.let {openMyArticles()}?:viewModel.clearData() })
                     }else{
                         productToEdit?.let {
                             ButtonApp(text = action, enable = buttonEnable) {
@@ -385,6 +389,7 @@ fun PublishScreen(
                         }
 
                     }
+
                 }
                 Spacer(modifier =   Modifier.height(30.dp))
 
