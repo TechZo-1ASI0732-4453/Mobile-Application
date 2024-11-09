@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -53,6 +54,7 @@ fun ExplorerScreen(
     onFilter: () -> Unit = {},
     onProductClick: (String, String) -> Unit
 ) {
+
     val searcher = viewModel.name.value
     val categories = viewModel.productCategories.value
     val state = viewModel.state.value
@@ -61,7 +63,10 @@ fun ExplorerScreen(
     val availableProducts = state.data?.filter { it.available && !it.boost } ?: emptyList()
 
     val isRefreshing = remember { mutableStateOf(false) }
-    val listState = rememberLazyListState()
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = viewModel.scrollPosition.intValue,
+        initialFirstVisibleItemScrollOffset = viewModel.scrollOffset.intValue
+    )
     val rowState = rememberLazyListState()
 
     fun refreshData() {
@@ -79,8 +84,13 @@ fun ExplorerScreen(
 
 
     LaunchedEffect(viewModel.categoryId.value) {
-        listState.scrollToItem(0)
         rowState.scrollToItem(0)
+        listState.scrollToItem(0)
+    }
+
+    LaunchedEffect(listState) {
+        viewModel.scrollPosition = mutableIntStateOf( listState.firstVisibleItemIndex)
+        viewModel.scrollOffset = mutableIntStateOf( listState.firstVisibleItemScrollOffset)
     }
 
     MainScaffoldApp(
