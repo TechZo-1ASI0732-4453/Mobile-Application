@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordViewModel
@@ -35,6 +38,9 @@ fun OtpCodeVerificationScreen(
     changePasswordViewModel: ChangePasswordViewModel= hiltViewModel()
 ) {
     var firstDigit by remember { mutableStateOf("") }
+    var secondDigit by remember { mutableStateOf("") }
+    var thirdDigit by remember { mutableStateOf("") }
+    var fourthDigit by remember { mutableStateOf("") }
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 10.dp),
@@ -94,12 +100,39 @@ fun OtpCodeVerificationScreen(
                     .padding(vertical = 20.dp)
             )
 
-            CustomInput(
-                value = firstDigit,
-                onValueChange = { firstDigit = it },
-                type = "Number",
-                placeHolder = "0",
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                for (i in 1..4) {
+                    CustomInput(
+                        value = when (i) {
+                            1 -> firstDigit
+                            2 -> secondDigit
+                            3 -> thirdDigit
+                            4 -> fourthDigit
+                            else -> ""
+                        },
+                        placeHolder = "-",
+                        type = "Number",
+                        onValueChange = { newValue ->
+                            when (i) {
+                                1 -> firstDigit = newValue
+                                2 -> secondDigit = newValue
+                                3 -> thirdDigit = newValue
+                                4 -> fourthDigit = newValue
+                                else -> {}
+                            }
+                        },
+                        modifier = Modifier
+                            .width(50.dp) // Ajusta el ancho de cada input
+                            .padding(horizontal = 4.dp)
+                            .height(56.dp) // Ajusta la altura si es necesario
+                    )
+                }
+            }
 
             Text(
                 text = "Ingrese el código de 4 dígitos",
@@ -109,6 +142,12 @@ fun OtpCodeVerificationScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 20.dp)
+            )
+            
+            ButtonApp(
+                text = "Verificar",
+                onClick = {
+                }
             )
         }
     }
