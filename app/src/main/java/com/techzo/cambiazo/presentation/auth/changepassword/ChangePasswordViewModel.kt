@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.data.remote.auth.NewPassword
 import com.techzo.cambiazo.data.repository.UserRepository
 import com.techzo.cambiazo.domain.UserUsername
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,21 +53,13 @@ class ChangePasswordViewModel @Inject constructor(
     fun sendEmail(email: String) {
         viewModelScope.launch {
             try {
-                // Llamamos al repositorio para obtener los datos del usuario usando el correo
                 val response = userRepository.getUserByEmail(email)
 
                 if (response is Resource.Success) {
-                    // Si el correo es válido, asignamos el estado y generamos el código
                     emailExists.value = true
                     _code.value = generateCode().toString()
                     _name.value = response.data!!.name
 
-                    // Log de éxito
-                    Log.d("EMAIL_VERIFICATION", "Código generado: ${_code.value}")
-                    Log.d("EMAIL_VERIFICATION", "Correo: ${email}")
-                    Log.d("EMAIL_VERIFICATION", "Datos del usuario: ${response.data}")
-
-                    // Llamamos a la función sendEmail para enviar el correo
                     sendEmail(_name.value, email, _code.value)
                     _isEmailSent.value = true
                 } else {
@@ -75,10 +68,31 @@ class ChangePasswordViewModel @Inject constructor(
                     Log.e("EMAIL_VERIFICATION", "El correo no está registrado: ${email}")
                 }
             } catch (e: Exception) {
-                // Manejo de excepciones, en caso de que algo falle
                 emailExists.value = false
                 _isEmailSent.value = false
                 Log.e("EMAIL_VERIFICATION", "Error al obtener los datos del usuario o al enviar el correo: ${e.message}")
+            }
+        }
+    }
+
+    fun validateCode(inputCode: String, codeGenerated : String): Boolean {
+        return inputCode == codeGenerated
+    }
+
+    fun changePassword(username: String, password: String) {
+        viewModelScope.launch {
+            try {
+                val newPassword = NewPassword(password)
+
+                val response = userRepository.updateUserPassword(username, newPassword)
+
+                if (response is Resource.Success) {
+                    Log.d("PASSWORD_CHANGE", "Contraseña cambiada con éxito")
+                } else {
+                    Log.e("PASSWORD_CHANGE", "Error al cambiar la contraseña: ${response.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("PASSWORD_CHANGE", "Error al cambiar la contraseña: ${e.message}")
             }
         }
     }

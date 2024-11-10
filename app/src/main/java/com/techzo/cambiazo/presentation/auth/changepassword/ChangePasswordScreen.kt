@@ -32,11 +32,12 @@ import com.techzo.cambiazo.common.components.MainScaffoldApp
 @Composable
 fun ChangePasswordScreen(
     goBack: () -> Unit,
-    goOtpCodeVerificationScreen: (String) -> Unit,
+    goOtpCodeVerificationScreen: (String, Any?) -> Unit,
     changePasswordViewModel: ChangePasswordViewModel = hiltViewModel()
 ) {
     val email = changePasswordViewModel.email.collectAsState().value
     val isEmailSent = changePasswordViewModel.isEmailSent.value
+    val codeGenerated = changePasswordViewModel.code.value
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 10.dp),
@@ -113,14 +114,13 @@ fun ChangePasswordScreen(
                 onClick = {
                     if (email.isNotBlank()) {
                         changePasswordViewModel.sendEmail(email)
-                        goOtpCodeVerificationScreen(email)
                     } else {
                         Log.e("EMAIL_VERIFICATION", "El correo está vacío")
                     }
                 }
             )
 
-            // Mostrar el diálogo solo si `isEmailSent` es verdadero y resetearlo al presionar "Entendido"
+
             if (isEmailSent) {
                 DialogApp(
                     isEmailIcon = true,
@@ -129,6 +129,7 @@ fun ChangePasswordScreen(
                     labelButton1 = "Entendido",
                     onClickButton1 = {
                         changePasswordViewModel.resetEmailState()
+                        goOtpCodeVerificationScreen(email,codeGenerated)
                     }
                 )
             }

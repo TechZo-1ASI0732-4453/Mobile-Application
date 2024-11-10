@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.presentation.auth.changepassword.otpcodeverificationscreen
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,7 +38,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
-import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextLink
 import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordViewModel
@@ -45,11 +45,12 @@ import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordViewMo
 @Composable
 fun OtpCodeVerificationScreen(
     goBack: () -> Unit,
-    goNewPassword: () -> Unit,
+    goNewPassword: (String) -> Unit,
     email: String,
+    codeGenerated: String,
     changePasswordViewModel: ChangePasswordViewModel = hiltViewModel()
 ) {
-    val isEmailSent = changePasswordViewModel.isEmailSent.value
+    var isEmailResent by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         changePasswordViewModel.resetEmailState()
@@ -188,30 +189,36 @@ fun OtpCodeVerificationScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            TextLink(
-                clickable = { changePasswordViewModel.sendEmail(email) }, // Usar el correo recibido
-                text1 = "¿No recibiste el código? ",
-                text2 = "Reenviar código"
-            )
+            if (isEmailResent) {
+
+                TextLink(
+                    clickable = {},
+                    text1 = "¿No recibiste el código? ",
+                    text2 = "Correo Enviado"
+                )
+            } else {
+                TextLink(
+                    clickable = {
+                        changePasswordViewModel.sendEmail(email)
+                        isEmailResent = true
+                    },
+                    text1 = "¿No recibiste el código? ",
+                    text2 = "Reenviar código"
+                )
+            }
 
             ButtonApp(
                 text = "Verificar",
                 onClick = {
-                    // Acción de verificación
+                    val inputCode = firstDigit + secondDigit + thirdDigit + fourthDigit
+                    if (changePasswordViewModel.validateCode(inputCode,codeGenerated)) {
+                        goNewPassword(email)
+                    } else {
+                        Log.e("CODE_VERIFICATION", "CODIGO INCORRECTO")
+                    }
                 }
             )
         }
-    }
-    if (isEmailSent) {
-        DialogApp(
-            isEmailIcon = true,
-            message = "Revisa tu correo",
-            description = "Hemos enviado las instrucciones de recuperación a su correo electrónico.",
-            labelButton1 = "Entendido",
-            onClickButton1 = {
-                changePasswordViewModel.resetEmailState()
-            }
-        )
     }
 }
 

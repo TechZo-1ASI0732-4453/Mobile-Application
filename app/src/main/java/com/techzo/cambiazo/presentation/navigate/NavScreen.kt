@@ -1,7 +1,6 @@
 package com.techzo.cambiazo.presentation.navigate
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Person
@@ -131,13 +130,19 @@ sealed class Routes(val route: String) {
     object MySubscription : Routes("MySubscriptionScreen")
     object Plans : Routes("PlansScreen")
     object ChangePassword : Routes("ChangePasswordScreen")
-    object OtpCodeVerification : Routes("OtpCodeVerificationScreen/{email}") {
-        fun createRoute(email: String): String {
+    object OtpCodeVerification : Routes("OtpCodeVerificationScreen/{email}/{codeGenerated}") {
+        fun createRoute(email: String, codeGenerated: String): String {
             val encodedEmail = Uri.encode(email)
-            return "OtpCodeVerificationScreen/$encodedEmail"
+            val encodedCode = Uri.encode(codeGenerated)
+            return "OtpCodeVerificationScreen/$encodedEmail/$encodedCode"
         }
     }
-    object NewPassword:Routes("NewPasswordScreen")
+    object NewPassword:Routes("NewPasswordScreen/{email}"){
+        fun createRoute(email: String): String {
+            val encodedEmail = Uri.encode(email)
+            return "NewPasswordScreen/$encodedEmail"
+        }
+    }
 }
 
 @Composable
@@ -178,8 +183,10 @@ fun NavScreen() {
         composable(route = Routes.ChangePassword.route) {
             ChangePasswordScreen(
                 goBack = { navController.popBackStack() },
-                goOtpCodeVerificationScreen = { email ->
-                    navController.navigate(Routes.OtpCodeVerification.createRoute(email))
+                goOtpCodeVerificationScreen = { email, codeGenerated ->
+                    navController.navigate(Routes.OtpCodeVerification.createRoute(email,
+                        codeGenerated.toString()
+                    ))
                 }
             )
         }
@@ -187,25 +194,38 @@ fun NavScreen() {
 
         composable(
             route = Routes.OtpCodeVerification.route,
-            arguments = listOf(navArgument("email") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("email") { type = NavType.StringType },
+                navArgument("codeGenerated") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email") ?: ""
+            val codeGenerated = backStackEntry.arguments?.getString("codeGenerated") ?: ""
             OtpCodeVerificationScreen(
                 email = email,
+                codeGenerated = codeGenerated,
                 goBack = {
                     navController.popBackStack()
                 },
-                goNewPassword = {
-                    navController.navigate(Routes.NewPassword.route)
+                goNewPassword = { userEmail  ->
+                    navController.navigate(Routes.NewPassword.createRoute(userEmail))
                 }
             )
         }
 
 
-        composable(route=Routes.NewPassword.route){
+        composable(route=Routes.NewPassword.route,
+            arguments = listOf(
+                navArgument("email") { type = NavType.StringType },
+            )){ backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
             NewPasswordScreen(
+                email = email,
                 goBack = { navController.popBackStack() },
-                goSignIn = { navController.navigate(Routes.SignIn.route) }
+                goSignIn = { navController.navigate(Routes.SignIn.route){
+                    popUpTo(0) { inclusive = true }
+                } }
+
             )
         }
 
