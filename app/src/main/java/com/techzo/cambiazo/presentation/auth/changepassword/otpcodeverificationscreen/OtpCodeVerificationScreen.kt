@@ -1,14 +1,17 @@
 package com.techzo.cambiazo.presentation.auth.changepassword.otpcodeverificationscreen
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -21,26 +24,42 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
-import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.common.components.TextLink
 import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordViewModel
 
 @Composable
 fun OtpCodeVerificationScreen(
     goBack: () -> Unit,
     goNewPassword: () -> Unit,
-    changePasswordViewModel: ChangePasswordViewModel= hiltViewModel()
+    changePasswordViewModel: ChangePasswordViewModel = hiltViewModel()
 ) {
+
+    val email = changePasswordViewModel.email.collectAsState().value
+
     var firstDigit by remember { mutableStateOf("") }
     var secondDigit by remember { mutableStateOf("") }
     var thirdDigit by remember { mutableStateOf("") }
     var fourthDigit by remember { mutableStateOf("") }
+
+    // FocusRequester para cada campo
+    val focusRequester1 = remember { FocusRequester() }
+    val focusRequester2 = remember { FocusRequester() }
+    val focusRequester3 = remember { FocusRequester() }
+    val focusRequester4 = remember { FocusRequester() }
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 10.dp),
@@ -52,7 +71,7 @@ fun OtpCodeVerificationScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 0.dp),
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -67,7 +86,7 @@ fun OtpCodeVerificationScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 0.dp),
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
@@ -86,7 +105,7 @@ fun OtpCodeVerificationScreen(
         }
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 30.dp, horizontal = 40.dp),
+            modifier = Modifier.padding(vertical = 50.dp, horizontal = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -97,58 +116,129 @@ fun OtpCodeVerificationScreen(
                 letterSpacing = 1.2.sp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 20.dp)
             )
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 5.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                for (i in 1..4) {
-                    CustomInput(
-                        value = when (i) {
-                            1 -> firstDigit
-                            2 -> secondDigit
-                            3 -> thirdDigit
-                            4 -> fourthDigit
-                            else -> ""
-                        },
-                        placeHolder = "-",
-                        type = "Number",
-                        onValueChange = { newValue ->
-                            when (i) {
-                                1 -> firstDigit = newValue
-                                2 -> secondDigit = newValue
-                                3 -> thirdDigit = newValue
-                                4 -> fourthDigit = newValue
-                                else -> {}
-                            }
-                        },
-                        modifier = Modifier
-                            .width(50.dp) // Ajusta el ancho de cada input
-                            .padding(horizontal = 4.dp)
-                            .height(56.dp) // Ajusta la altura si es necesario
-                    )
-                }
+                OtpInputField(
+                    value = firstDigit,
+                    onValueChange = { newValue, isDeleting ->
+                        firstDigit = newValue
+                        if (!isDeleting && newValue.isNotEmpty()) {
+                            focusRequester2.requestFocus()
+                        }
+                    },
+                    focusRequester = focusRequester1
+                )
+                OtpInputField(
+                    value = secondDigit,
+                    onValueChange = { newValue, isDeleting ->
+                        secondDigit = newValue
+                        if (!isDeleting && newValue.isNotEmpty()) {
+                            focusRequester3.requestFocus()
+                        } else if (isDeleting && newValue.isEmpty()) {
+                            focusRequester1.requestFocus()
+                        }
+                    },
+                    focusRequester = focusRequester2
+                )
+                OtpInputField(
+                    value = thirdDigit,
+                    onValueChange = { newValue, isDeleting ->
+                        thirdDigit = newValue
+                        if (!isDeleting && newValue.isNotEmpty()) {
+                            focusRequester4.requestFocus()
+                        } else if (isDeleting && newValue.isEmpty()) {
+                            focusRequester2.requestFocus()
+                        }
+                    },
+                    focusRequester = focusRequester3
+                )
+                OtpInputField(
+                    value = fourthDigit,
+                    onValueChange = { newValue, isDeleting ->
+                        fourthDigit = newValue
+                        if (isDeleting && newValue.isEmpty()) {
+                            focusRequester3.requestFocus()
+                        }
+                    },
+                    focusRequester = focusRequester4
+                )
             }
 
             Text(
                 text = "Ingrese el código de 4 dígitos",
-                textAlign = TextAlign.Center,
                 fontSize = 16.sp,
-                letterSpacing = 1.2.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp)
+                color = Color(0xFF8C8C8C),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
-            
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            TextLink(clickable = { changePasswordViewModel.sendEmail(email)  }, text1 = "¿No recibiste el código? ", text2 = "Reenviar código")
+
             ButtonApp(
                 text = "Verificar",
                 onClick = {
+                    // Acción de verificación
                 }
             )
         }
     }
 }
+
+@Composable
+fun OtpInputField(
+    value: String,
+    onValueChange: (String, Boolean) -> Unit,
+    focusRequester: FocusRequester
+) {
+    BasicTextField(
+        value = value,
+        onValueChange = { newValue ->
+            val isDeleting = newValue.length < value.length
+            if (newValue.length <= 1) {
+                onValueChange(newValue, isDeleting)
+            }
+        },
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+        singleLine = true,
+        textStyle = androidx.compose.ui.text.TextStyle(
+            fontSize = 24.sp,
+            textAlign = TextAlign.Center
+        ),
+        modifier = Modifier
+            .width(65.dp)
+            .height(50.dp)
+            .border(
+                width = 1.dp,
+                color = Color(0xFFC2C2C2),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(horizontal = 10.dp, vertical = 12.dp)
+            .focusRequester(focusRequester),
+        decorationBox = { innerTextField ->
+            if (value.isEmpty()) {
+                Text(
+                    text = "-",
+                    fontSize = 24.sp,
+                    color = Color(0xFFC2C2C2),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            innerTextField()
+        }
+    )
+}
+
+
+
+

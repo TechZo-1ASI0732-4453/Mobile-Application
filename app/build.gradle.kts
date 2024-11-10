@@ -104,6 +104,10 @@ dependencies {
     // Hilt Navigation Compose
     implementation(libs.androidx.hilt.navigation.compose)
 
+    // EmailJS
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("org.json:json:20211205")
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -64,7 +64,8 @@ fun DialogApp(
     ) {
 
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(20.dp)
                 .background(Color.White, shape = RoundedCornerShape(25.dp))
                 .padding(30.dp),
@@ -76,9 +77,9 @@ fun DialogApp(
                 // Icon
                 Box(
                     modifier = Modifier
-                        .size(56.dp)
+                        .size(60.dp)
                         .background(
-                            color = Color(0xFFFFB74D),
+                            color = Color(0xFFFFD146),
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
@@ -90,6 +91,7 @@ fun DialogApp(
                         modifier = Modifier.size(32.dp)
                     )
                 }
+                Spacer(modifier = Modifier.padding(10.dp))
             }
 
             Text(text =message,
@@ -160,7 +162,7 @@ fun DialogApp(
                     textAlign = TextAlign.Center,
                     color = Color.Gray,
                     style = TextStyle(
-                        fontSize = 20.sp
+                        fontSize = 18.sp
                     ),
                     fontWeight = FontWeight.Normal
                 )
