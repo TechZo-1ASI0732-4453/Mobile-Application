@@ -3,6 +3,7 @@ package com.techzo.cambiazo.data.repository
 
 import android.util.Log
 import com.techzo.cambiazo.common.Resource
+import com.techzo.cambiazo.data.remote.auth.SendEmailResponseDto
 import com.techzo.cambiazo.data.remote.auth.UserService
 import com.techzo.cambiazo.data.remote.auth.toUser
 import com.techzo.cambiazo.domain.User
@@ -80,6 +81,20 @@ class UserRepository(private val userService: UserService) {
             userService.getUserByUsername(username).isSuccessful
         } catch (e: Exception) {
             false
+        }
+    }
+
+    suspend fun getUserByEmail(email: String): Resource<SendEmailResponseDto> = withContext(Dispatchers.IO) {
+        try {
+            val response = userService.getUserByEmail(email)
+            if (response.isSuccessful) {
+                response.body()?.let { userEmail ->
+                    return@withContext Resource.Success(data = userEmail)
+                }
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "Ocurrió un error")
         }
     }
 
