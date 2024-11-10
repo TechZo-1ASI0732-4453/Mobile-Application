@@ -63,6 +63,7 @@ fun SignUpScreen(
     val password = viewModel.password.value
     val email = viewModel.username.value
     val phoneNumber = googleAuthViewModel.phoneNumber.value
+    val phone = viewModel.phoneNumber.value
     val showPassword = viewModel.showPassword.value
     val showPasswordRepeat = viewModel.showPasswordRepeat.value
     val repeatPassword = viewModel.repitePassword.value
@@ -147,7 +148,7 @@ fun SignUpScreen(
             )
             Spacer(modifier = Modifier.size(10.dp))
             CustomInput(
-                value = phoneNumber,
+                value = phone,
                 type = "Number",
                 placeHolder = "Numero de Telefono",
                 onValueChange = { viewModel.onPhoneNumberChange(it) }

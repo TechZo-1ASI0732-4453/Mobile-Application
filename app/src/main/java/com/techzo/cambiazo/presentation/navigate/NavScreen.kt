@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.presentation.navigate
 
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Person
@@ -14,13 +15,18 @@ import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.articles.publish.PublishScreen
+import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordScreen
+import com.techzo.cambiazo.presentation.auth.changepassword.newpasswordscreen.NewPasswordScreen
+import com.techzo.cambiazo.presentation.auth.changepassword.otpcodeverificationscreen.OtpCodeVerificationScreen
 import com.techzo.cambiazo.presentation.explorer.productdetails.ProductDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.exchangedetails.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
@@ -39,7 +45,6 @@ import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
 import com.techzo.cambiazo.presentation.profile.subscription.MySubscriptionScreen
 import com.techzo.cambiazo.presentation.profile.subscription.PaymentScreen
 import com.techzo.cambiazo.presentation.profile.subscription.PlansScreen
-import okhttp3.Route
 
 sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, val title: String,val route: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -124,8 +129,20 @@ sealed class Routes(val route: String) {
     object Favorites : Routes("FavoritesScreen")
     object MySubscription : Routes("MySubscriptionScreen")
     object Plans : Routes("PlansScreen")
-
-
+    object ChangePassword : Routes("ChangePasswordScreen")
+    object OtpCodeVerification : Routes("OtpCodeVerificationScreen/{email}/{codeGenerated}") {
+        fun createRoute(email: String, codeGenerated: String): String {
+            val encodedEmail = Uri.encode(email)
+            val encodedCode = Uri.encode(codeGenerated)
+            return "OtpCodeVerificationScreen/$encodedEmail/$encodedCode"
+        }
+    }
+    object NewPassword:Routes("NewPasswordScreen/{email}"){
+        fun createRoute(email: String): String {
+            val encodedEmail = Uri.encode(email)
+            return "NewPasswordScreen/$encodedEmail"
+        }
+    }
 }
 
 @Composable
@@ -158,7 +175,57 @@ fun NavScreen() {
         composable(route = Routes.SignIn.route) {
             SignInScreen(
                 openRegister = { navController.navigate(Routes.SignUp.route) },
-                openApp = { navController.navigate(Routes.Explorer.route) }
+                openApp = { navController.navigate(Routes.Explorer.route) },
+                openForgotPassword = { navController.navigate(Routes.ChangePassword.route) }
+            )
+        }
+
+        composable(route = Routes.ChangePassword.route) {
+            ChangePasswordScreen(
+                goBack = { navController.popBackStack() },
+                goOtpCodeVerificationScreen = { email, codeGenerated ->
+                    navController.navigate(Routes.OtpCodeVerification.createRoute(email,
+                        codeGenerated.toString()
+                    ))
+                }
+            )
+        }
+
+
+        composable(
+            route = Routes.OtpCodeVerification.route,
+            arguments = listOf(
+                navArgument("email") { type = NavType.StringType },
+                navArgument("codeGenerated") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            val codeGenerated = backStackEntry.arguments?.getString("codeGenerated") ?: ""
+            OtpCodeVerificationScreen(
+                email = email,
+                codeGenerated = codeGenerated,
+                goBack = {
+                    navController.popBackStack()
+                },
+                goNewPassword = { userEmail  ->
+                    navController.navigate(Routes.NewPassword.createRoute(userEmail))
+                }
+            )
+        }
+
+
+        composable(route=Routes.NewPassword.route,
+            arguments = listOf(
+                navArgument("email") { type = NavType.StringType },
+            )){ backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            NewPasswordScreen(
+                email = email,
+                goBack = { navController.popBackStack() },
+                goSignIn = { navController.navigate(Routes.SignIn.route){
+                    popUpTo(0) { inclusive = true }
+                } }
+
             )
         }
 
