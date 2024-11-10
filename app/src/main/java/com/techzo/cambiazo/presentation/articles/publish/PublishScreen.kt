@@ -61,13 +61,16 @@ import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import com.techzo.cambiazo.domain.Product
+import com.techzo.cambiazo.presentation.articles.ArticlesViewModel
 
 @Composable
 fun PublishScreen(
     viewModel: PublishViewModel = hiltViewModel(),
+    articlesViewModel: ArticlesViewModel = hiltViewModel(),
     back : () -> Unit = {},
     product: Product? = null,
-    openMyArticles: () -> Unit = {}
+    openMyArticles: () -> Unit = {},
+    openSubscription: () -> Unit = {}
 ) {
 
     val productToEdit = remember { product }
@@ -112,7 +115,22 @@ fun PublishScreen(
     val context = LocalContext.current
     val spaceHeight = 20.dp
 
+    val limitReached = viewModel.limitReached.value
+
+    if(limitReached){
+        DialogApp(
+            "¡Límite de publicaciones alcanzado!",
+            "Actualiza tu plan para seguir publicando",
+            "Regresar",
+            "Comprar suscripción",
+            onClickButton1 = {back()},
+            onClickButton2 = {openSubscription()})
+
+    }
+
+
     LaunchedEffect(Unit) {
+        viewModel.validateReachingLimit(articlesViewModel.products.value.data?: emptyList())
         viewModel.productDataToEdit(product)
     }
 

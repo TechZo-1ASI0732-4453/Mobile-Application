@@ -23,6 +23,8 @@ import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.domain.ProductCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 
 
@@ -34,7 +36,7 @@ class PublishViewModel @Inject constructor(
 ):ViewModel() {
 
     private val productToEdit = mutableStateOf<Product?>(null)
-    private val limitReached = mutableStateOf(false)
+     val limitReached = mutableStateOf(false)
 
 
     private val _allCountries = mutableStateOf<List<Country>>(emptyList())
@@ -132,13 +134,41 @@ class PublishViewModel @Inject constructor(
     val descriptionError: State<String?> get() = _descriptionError
 
 
+    fun validateReachingLimit(list: List<Product>) {
+        val limit = when (Constants.userSubscription!!.id) {
+            1 -> 3
+            2 -> 15
+            else -> 35
+        }
+        val inputDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+
+        val startDate = inputDateFormat.parse(Constants.userSubscription!!.startDate)
+        val endDate = inputDateFormat.parse(Constants.userSubscription!!.endDate)
+
+        val productsAllowed = list.count {
+            (it.createdAt.after(startDate) && it.createdAt.before(endDate)) ||
+                    it.createdAt == startDate ||
+                    it.createdAt == endDate
+        }
+
+        if (productsAllowed < limit) {
+            limitReached.value = true
+            _messageError.value = "Límite de publicaciones alcanzado"
+            _descriptionError.value = "Si quieres publicar más artículos, cambia tu suscripción."
+        }else{
+            isEmptyData()
+        }
+
+    }
+
+
+
     fun clearError(){
         _messageError.value = null
         _descriptionError.value = null
     }
 
     fun productDataToEdit(product: Product?){
-
         product?.let {
             productToEdit.value = product
             _name.value = product.name
