@@ -38,4 +38,9 @@ interface UserService {
     @DELETE("users/delete/{userId}")
     suspend fun deleteUser(@Path("userId") userId: Int): Response<Unit>
 
+    @Headers("Content-Type: application/json",
+        "Accept: application/json")
+    @GET("users/email/{email}")
+    suspend fun getUserByEmail(@Path("email") email: String): Response<SendEmailResponseDto>
+
 }
