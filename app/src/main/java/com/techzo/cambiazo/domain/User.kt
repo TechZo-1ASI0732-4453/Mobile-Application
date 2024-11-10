@@ -37,3 +37,7 @@ data class UserEdit(
     val phoneNumber: String,
     val profilePicture: String
 )
+
+data class UserUsername(
+    val name: String
+)
