@@ -31,12 +31,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
+import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextLink
 import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordViewModel
@@ -45,10 +46,15 @@ import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordViewMo
 fun OtpCodeVerificationScreen(
     goBack: () -> Unit,
     goNewPassword: () -> Unit,
+    email: String,
     changePasswordViewModel: ChangePasswordViewModel = hiltViewModel()
 ) {
+    val isEmailSent = changePasswordViewModel.isEmailSent.value
 
-    val email = changePasswordViewModel.email.collectAsState().value
+    LaunchedEffect(Unit) {
+        changePasswordViewModel.resetEmailState()
+    }
+    changePasswordViewModel.onEmailChange(email)
 
     var firstDigit by remember { mutableStateOf("") }
     var secondDigit by remember { mutableStateOf("") }
@@ -182,7 +188,11 @@ fun OtpCodeVerificationScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            TextLink(clickable = { changePasswordViewModel.sendEmail(email)  }, text1 = "¿No recibiste el código? ", text2 = "Reenviar código")
+            TextLink(
+                clickable = { changePasswordViewModel.sendEmail(email) }, // Usar el correo recibido
+                text1 = "¿No recibiste el código? ",
+                text2 = "Reenviar código"
+            )
 
             ButtonApp(
                 text = "Verificar",
@@ -191,6 +201,17 @@ fun OtpCodeVerificationScreen(
                 }
             )
         }
+    }
+    if (isEmailSent) {
+        DialogApp(
+            isEmailIcon = true,
+            message = "Revisa tu correo",
+            description = "Hemos enviado las instrucciones de recuperación a su correo electrónico.",
+            labelButton1 = "Entendido",
+            onClickButton1 = {
+                changePasswordViewModel.resetEmailState()
+            }
+        )
     }
 }
 

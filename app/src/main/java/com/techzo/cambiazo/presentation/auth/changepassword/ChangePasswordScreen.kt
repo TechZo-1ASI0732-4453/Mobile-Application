@@ -1,7 +1,6 @@
 package com.techzo.cambiazo.presentation.auth.changepassword
 
-
-
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,12 +32,11 @@ import com.techzo.cambiazo.common.components.MainScaffoldApp
 @Composable
 fun ChangePasswordScreen(
     goBack: () -> Unit,
-    goOtpCodeVerificationScreen: () -> Unit,
+    goOtpCodeVerificationScreen: (String) -> Unit,
     changePasswordViewModel: ChangePasswordViewModel = hiltViewModel()
 ) {
     val email = changePasswordViewModel.email.collectAsState().value
     val isEmailSent = changePasswordViewModel.isEmailSent.value
-
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 10.dp),
@@ -104,7 +102,7 @@ fun ChangePasswordScreen(
                 placeHolder = "Correo Electrónico",
                 type = "Email",
                 pressEnter = {},
-            ){
+            ) {
                 changePasswordViewModel.onEmailChange(it)
             }
 
@@ -113,10 +111,17 @@ fun ChangePasswordScreen(
             ButtonApp(
                 text = "Enviar",
                 onClick = {
-                    changePasswordViewModel.sendEmail(email)
-                },
+                    if (email.isNotBlank()) {
+                        changePasswordViewModel.sendEmail(email)
+                        goOtpCodeVerificationScreen(email)
+                    } else {
+                        Log.e("EMAIL_VERIFICATION", "El correo está vacío")
+                    }
+                }
             )
-            if(isEmailSent){
+
+            // Mostrar el diálogo solo si `isEmailSent` es verdadero y resetearlo al presionar "Entendido"
+            if (isEmailSent) {
                 DialogApp(
                     isEmailIcon = true,
                     message = "Revisa tu correo",
@@ -124,7 +129,6 @@ fun ChangePasswordScreen(
                     labelButton1 = "Entendido",
                     onClickButton1 = {
                         changePasswordViewModel.resetEmailState()
-                        goOtpCodeVerificationScreen()
                     }
                 )
             }
