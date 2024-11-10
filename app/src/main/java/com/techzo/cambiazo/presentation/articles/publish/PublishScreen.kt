@@ -33,6 +33,8 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -115,12 +117,13 @@ fun PublishScreen(
     val context = LocalContext.current
     val spaceHeight = 20.dp
 
-    val limitReached = viewModel.limitReached.value
+    val limitReached  = viewModel.limitReached.value
+
 
     if(limitReached){
         DialogApp(
-            "¡Límite de publicaciones alcanzado!",
-            "Actualiza tu plan para seguir publicando",
+            message = messageError?: "¡Has alcanzado el límite de publicaciones!",
+            descriptionError,
             "Regresar",
             "Comprar suscripción",
             onClickButton1 = {back()},
@@ -128,10 +131,11 @@ fun PublishScreen(
 
     }
 
+    val articlesState by articlesViewModel.products.collectAsState()
+    val articles = articlesState.data?: emptyList()
 
     LaunchedEffect(Unit) {
-        viewModel.validateReachingLimit(articlesViewModel.products.value.data?: emptyList())
-        viewModel.productDataToEdit(product)
+        viewModel.productDataToEdit(product,articles)
     }
 
     MainScaffoldApp(
@@ -392,8 +396,7 @@ fun PublishScreen(
                     }
                 }else{
                     messageError?.let {
-                        DialogApp(it,descriptionError,"So quieres publicar mas publicaciones cambiate de plan","Entendido",onClickButton1 = {viewModel.clearError()})
-
+                        DialogApp(it,descriptionError,"Entendido",onClickButton1 = {back()})
                     }?:if (productState.data != null) {
                         DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { product?.let {openMyArticles()}?:viewModel.clearData() })
                     }else{
