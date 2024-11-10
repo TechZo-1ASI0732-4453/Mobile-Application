@@ -56,6 +56,9 @@ class ChangePasswordViewModel @Inject constructor(
                 val response = userRepository.getUserByEmail(email)
 
                 if (response is Resource.Success) {
+                    // Si el correo es válido, asignamos el estado y generamos el código
+                    emailExists.value = true
+                    _code.value = generateCode().toString()
                     _name.value = response.data!!.name
 
                     // Log de éxito
