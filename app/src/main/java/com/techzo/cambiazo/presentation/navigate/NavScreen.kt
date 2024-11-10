@@ -21,6 +21,9 @@ import androidx.navigation.compose.rememberNavController
 import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.articles.publish.PublishScreen
+import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordScreen
+import com.techzo.cambiazo.presentation.auth.changepassword.newpasswordscreen.NewPasswordScreen
+import com.techzo.cambiazo.presentation.auth.changepassword.otpcodeverificationscreen.OtpCodeVerificationScreen
 import com.techzo.cambiazo.presentation.explorer.productdetails.ProductDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.exchangedetails.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
@@ -39,7 +42,6 @@ import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
 import com.techzo.cambiazo.presentation.profile.subscription.MySubscriptionScreen
 import com.techzo.cambiazo.presentation.profile.subscription.PaymentScreen
 import com.techzo.cambiazo.presentation.profile.subscription.PlansScreen
-import okhttp3.Route
 
 sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, val title: String,val route: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -124,8 +126,9 @@ sealed class Routes(val route: String) {
     object Favorites : Routes("FavoritesScreen")
     object MySubscription : Routes("MySubscriptionScreen")
     object Plans : Routes("PlansScreen")
-
-
+    object ChangePassword : Routes("ChangePasswordScreen")
+    object OtpCodeVerification : Routes("OtpCodeVerificationScreen")
+    object NewPassword:Routes("NewPasswordScreen")
 }
 
 @Composable
@@ -158,7 +161,29 @@ fun NavScreen() {
         composable(route = Routes.SignIn.route) {
             SignInScreen(
                 openRegister = { navController.navigate(Routes.SignUp.route) },
-                openApp = { navController.navigate(Routes.Explorer.route) }
+                openApp = { navController.navigate(Routes.Explorer.route) },
+                openForgotPassword = { navController.navigate(Routes.ChangePassword.route) }
+            )
+        }
+
+        composable(route = Routes.ChangePassword.route) {
+            ChangePasswordScreen(
+                goBack = { navController.popBackStack() },
+                goOtpCodeVerificationScreen = { navController.navigate(Routes.OtpCodeVerification.route) }
+            )
+        }
+
+        composable(route = Routes.OtpCodeVerification.route) {
+            OtpCodeVerificationScreen(
+                goBack = { navController.popBackStack() },
+                goNewPassword = { navController.navigate(Routes.NewPassword.route) }
+            )
+        }
+
+        composable(route=Routes.NewPassword.route){
+            NewPasswordScreen(
+                goBack = { navController.popBackStack() },
+                goSignIn = { navController.navigate(Routes.SignIn.route) }
             )
         }
 
