@@ -1,5 +1,7 @@
 package com.techzo.cambiazo.presentation.exchanges
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,12 +31,11 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,9 +52,11 @@ import com.techzo.cambiazo.domain.Exchange
 import kotlinx.coroutines.launch
 
 
+
+
 @Composable
 fun ExchangeScreen(
-    bottomBar: @Composable () -> Unit = {}, viewModel: ExchangeViewModel = hiltViewModel(),
+    bottomBar: Pair<@Composable () -> Unit, () -> Unit>, viewModel: ExchangeViewModel = hiltViewModel(),
     goToDetailsScreen: (String, String) -> Unit,
 ) {
 
@@ -75,7 +77,7 @@ fun ExchangeScreen(
 
         val coroutineScope = rememberCoroutineScope()
 
-        val itemTabs= listOf("Enviados", "Recibidos", "Finalizados")
+        val itemTabs= listOf("Enviados", "Recibidos", "Completados")
         CustomTabs(
             selectedTabIndex = pagerState.currentPage,
             itemTabs = itemTabs,
@@ -117,6 +119,7 @@ fun ExchangeScreen(
                             HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
                         }
                     }
+                    item { Spacer(modifier = Modifier.height(85.dp))}
                 }
             }
         }
@@ -195,6 +198,12 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
         else -> if(boolean) exchange.productChange.name else exchange.productOwn.name
     }
 
+    val phoneNumber= when (page) {
+        0 -> exchange.userChange.phoneNumber
+        1 -> exchange.userOwn.phoneNumber
+        else -> if(boolean) exchange.userChange.phoneNumber else exchange.userOwn.phoneNumber
+    }
+
 
 
     Column(Modifier.clickable { goToDetailsScreen(exchange.id.toString(), page.toString()) }) {
@@ -222,6 +231,7 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                     fontWeight = FontWeight.Bold
                 )
             }
+            val context = LocalContext.current
 
             Text(
                 text = statusText(),
@@ -229,7 +239,19 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
                     .background(statusBackgroundColor())
-                    .padding(horizontal = 20.dp, vertical = 3.dp),
+                    .padding(horizontal = 20.dp, vertical = 3.dp)
+                    .clickable {
+                        if (page == 2) {
+                            val formattedNumber = phoneNumber
+                                .replace("+", "")
+                                .replace(" ", "")
+                            val url = "https://wa.me/$formattedNumber"
+                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                data = Uri.parse(url)
+                            }
+                            context.startActivity(intent)
+                        }
+                    },
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp
             )
@@ -270,7 +292,9 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
         Text(
             text = tag,
             color = Color(0xFF6D6D6D),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 5.dp),
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
@@ -281,7 +305,7 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
                 .height(120.dp)
                 .shadow(
                     elevation = 4.dp,
-                    shape = RoundedCornerShape(10,10),
+                    shape = RoundedCornerShape(10, 10),
                     clip = true
                 )
                 .clip(RoundedCornerShape(10, 10, 0, 0))
@@ -300,7 +324,8 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
             Text(
                 text = productName,
                 modifier = Modifier
-                    .fillMaxWidth().padding(horizontal = 5.dp),
+                    .fillMaxWidth()
+                    .padding(horizontal = 5.dp),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 fontSize = 16.sp,

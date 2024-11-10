@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "806366156677",
+    "firebase_url": "https://appcambiazo-default-rtdb.firebaseio.com",
     "project_id": "appcambiazo",
     "storage_bucket": "appcambiazo.appspot.com"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.techzo.cambiazo"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "806366156677-uogoklp690en1sae2p8evmd01ivi8ghr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.techzo.cambiazo",
+            "certificate_hash": "75def013788506be564fb189d265b2eb3a0d41de"
+          }
+        },
+        {
+          "client_id": "806366156677-v8fht21b619d0sftsqkcbvbu5602br7e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAI7z44voASuj2Nu-L3c8c-g1es2QorEgs"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "806366156677-v8fht21b619d0sftsqkcbvbu5602br7e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -1,13 +1,13 @@
     package com.techzo.cambiazo.presentation.explorer
 
     import androidx.compose.runtime.State
+    import androidx.compose.runtime.mutableIntStateOf
     import androidx.compose.runtime.mutableStateOf
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
     import com.techzo.cambiazo.common.Constants
     import com.techzo.cambiazo.common.Resource
     import com.techzo.cambiazo.common.UIState
-    import com.techzo.cambiazo.data.repository.LocationRepository
     import com.techzo.cambiazo.data.repository.ProductCategoryRepository
     import com.techzo.cambiazo.data.repository.ProductRepository
     import com.techzo.cambiazo.domain.Product
@@ -23,6 +23,7 @@
         private val productCategoryRepository: ProductCategoryRepository) : ViewModel() {
 
         private val _allProducts = mutableStateOf<List<Product>>(emptyList())
+
         private val _state = mutableStateOf(UIState<List<Product>>())
         val state: State<UIState<List<Product>>> = _state
 
@@ -35,10 +36,17 @@
         private val _productCategories = mutableStateOf(UIState<List<ProductCategory>>())
         val productCategories: State<UIState<List<ProductCategory>>> = _productCategories
 
+        var scrollPosition = mutableIntStateOf(0)
+        var scrollOffset = mutableIntStateOf(0)
+
         init {
             getProducts()
             getProductCategories()
             applyFilter()
+        }
+
+        fun loadProducts() {
+            getProducts()
         }
 
         private fun getProducts() {
@@ -112,9 +120,5 @@
                     _productCategories.value = UIState(message = result.message?:"Ocurrió un error")
                 }
             }
-        }
-
-        fun getProductById(productId: Int): Product? {
-            return _allProducts.value.find { it.id == productId }
         }
     }

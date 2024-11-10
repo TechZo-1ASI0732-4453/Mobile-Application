@@ -1,7 +1,10 @@
 package com.techzo.cambiazo.domain
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 
+@Parcelize
 data class User(
     val id: Int,
     val username: String,
@@ -10,7 +13,8 @@ data class User(
     val profilePicture: String,
     val createdAt: Date,
     val roles: List<String>
-)
+): Parcelable
+
 
 data class UserSignIn(
     val id: Int,
@@ -32,4 +36,8 @@ data class UserEdit(
     val name: String,
     val phoneNumber: String,
     val profilePicture: String
+)
+
+data class UserUsername(
+    val name: String
 )

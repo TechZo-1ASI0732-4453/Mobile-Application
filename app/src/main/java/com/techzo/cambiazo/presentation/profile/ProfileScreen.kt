@@ -46,17 +46,21 @@ fun ProfileScreen(
     openMyReviews: () -> Unit = {},
     openEditProfile: () -> Unit = {},
     openFavorites: () -> Unit = {},
-    bottomBar: @Composable () -> Unit = {},
+    bottomBar: Pair<@Composable () -> Unit, () -> Unit>,
+    openSubscription: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()) {
 
     val averageRating = viewModel.averageRating.value
     val countReviews = viewModel.countReviews.value
 
-    val user = viewModel.user.value
+    val user = Constants.user
 
-    LaunchedEffect(Unit) {
-        viewModel.refreshUserData()
+    LaunchedEffect(viewModel.isLoggedOut.value) {
+        if (viewModel.isLoggedOut.value) {
+            logOut()
+        }
     }
+
 
     MainScaffoldApp(
         bottomBar = bottomBar,
@@ -144,16 +148,20 @@ fun ProfileScreen(
                         onClick = { openMyReviews()}
                     )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
-                    ProfileOption(icon = Icons.Outlined.Diamond, text = "Mi Suscripción")
+                    ProfileOption(
+                        icon = Icons.Outlined.Diamond,
+                        text = "Mi Suscripción",
+                        onClick = { openSubscription() }
+                    )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
                     ProfileOption(
                         icon = Icons.Outlined.Logout,
                         text = "Cerrar Sesión",
                         onClick = {
                             viewModel.onLogout()
-                            logOut()
                         }
                     )
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
         }

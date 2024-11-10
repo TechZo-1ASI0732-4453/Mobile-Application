@@ -34,5 +34,10 @@ interface ExchangeService {
     @PUT("exchanges/status/{exchangeId}")
     suspend fun updateExchangeStatus(@Path("exchangeId") exchangeId: Int, @Body status: ExchangeStatusRequestDto):Response<ExchangeDto>
 
+    @Headers("Content-Type: application/json",
+        "Accept: application/json")
+    @DELETE("exchanges/delete/{exchangeId}")
+    suspend fun deleteExchange(@Path("exchangeId") exchangeId: Int): Response<Void>
+
 
 }

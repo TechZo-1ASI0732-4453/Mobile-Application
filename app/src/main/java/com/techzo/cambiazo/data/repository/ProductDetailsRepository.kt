@@ -5,9 +5,11 @@ import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.local.FavoriteProductDao
 import com.techzo.cambiazo.data.local.FavoriteProductEntity
 import com.techzo.cambiazo.data.remote.products.FavoriteProductDto
+import com.techzo.cambiazo.data.remote.products.FavoriteProductRequestDto
 import com.techzo.cambiazo.data.remote.products.FavoriteProductService
 import com.techzo.cambiazo.data.remote.products.toFavoriteProduct
 import com.techzo.cambiazo.domain.FavoriteProduct
+import com.techzo.cambiazo.domain.FavoriteProductRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -43,10 +45,10 @@ class ProductDetailsRepository(
             }
         }
 
-    suspend fun addFavoriteProduct(productId: Int): Resource<FavoriteProduct> =
+    suspend fun addFavoriteProduct(productId: Int): Resource<FavoriteProductRequest> =
         withContext(Dispatchers.IO) {
             try {
-                val favoriteProductDto = FavoriteProductDto(
+                val favoriteProductDto = FavoriteProductRequestDto(
                     id = 0,
                     productId = productId,
                     userId = Constants.user!!.id

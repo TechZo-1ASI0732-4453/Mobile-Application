@@ -1,7 +1,9 @@
 package com.techzo.cambiazo.data.remote.products
 
 import com.techzo.cambiazo.domain.Product
+import com.techzo.cambiazo.domain.ProductCategory
 import com.techzo.cambiazo.domain.User
+import java.util.Date
 
 data class ProductDto(
     val id: Int,
@@ -14,7 +16,8 @@ data class ProductDto(
     val location: Location,
     val name: String,
     val price: Int,
-    val productCategory: ProductCategory
+    val productCategory: ProductCategory,
+    val createdAt: Date
 )
 
 fun ProductDto.toProduct(): Product {
@@ -29,6 +32,7 @@ fun ProductDto.toProduct(): Product {
         available = available,
         productCategory = productCategory,
         user = user,
-        location = location
+        location = location,
+        createdAt = createdAt
     )
 }

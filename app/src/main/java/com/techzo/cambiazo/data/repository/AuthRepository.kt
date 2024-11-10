@@ -7,7 +7,6 @@ import com.techzo.cambiazo.data.remote.signup.SignUpRequestDto
 import com.techzo.cambiazo.data.remote.auth.UserSignInRequestDto
 import com.techzo.cambiazo.data.remote.auth.toUserSignIn
 import com.techzo.cambiazo.data.remote.signup.toUserSignUp
-import com.techzo.cambiazo.domain.User
 import com.techzo.cambiazo.domain.UserSignIn
 import com.techzo.cambiazo.domain.UserSignUp
 import kotlinx.coroutines.Dispatchers

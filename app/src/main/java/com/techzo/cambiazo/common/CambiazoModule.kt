@@ -14,6 +14,7 @@ import com.techzo.cambiazo.data.remote.location.CountryService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.remote.reviews.ReviewService
+import com.techzo.cambiazo.data.remote.subscriptions.SubscriptionService
 import com.techzo.cambiazo.data.repository.AuthRepository
 import com.techzo.cambiazo.data.repository.ProductDetailsRepository
 import com.techzo.cambiazo.data.repository.ExchangeRepository
@@ -21,6 +22,7 @@ import com.techzo.cambiazo.data.repository.LocationRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
 import com.techzo.cambiazo.data.repository.ReviewRepository
+import com.techzo.cambiazo.data.repository.SubscriptionRepository
 import com.techzo.cambiazo.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -85,6 +87,12 @@ object CambiazoModule {
         return retrofit.create(AuthService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideUserPreferences(@ApplicationContext context: Context): UserPreferences {
+        return UserPreferences(context)
+    }
+
 
     @Provides
     @Singleton
@@ -140,6 +148,11 @@ object CambiazoModule {
         return retrofit.create(FavoriteProductService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideSubscriptionService(retrofit: Retrofit): SubscriptionService {
+        return retrofit.create(SubscriptionService::class.java)
+    }
 
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS REPOSITORIOS
 
@@ -192,6 +205,12 @@ object CambiazoModule {
                                  departmentService: DepartmentService,
                                  districtService: DistrictService): LocationRepository {
         return LocationRepository(countryService,departmentService,districtService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSubscriptionRepository(service: SubscriptionService): SubscriptionRepository {
+        return SubscriptionRepository(service)
     }
 
 }

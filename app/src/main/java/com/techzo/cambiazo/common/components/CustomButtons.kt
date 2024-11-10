@@ -34,11 +34,11 @@ import androidx.compose.ui.unit.sp
 import com.techzo.cambiazo.R
 
 @Composable
-fun LoginGoogleApp(){
+fun LoginGoogleApp(onClick: () -> Unit){
     Surface(
         modifier = Modifier
             .size(56.dp)
-            .clickable(onClick = {}),
+            .clickable(onClick = onClick),
         shape = CircleShape,
         shadowElevation = 5.dp
     ) {
@@ -59,17 +59,19 @@ fun ButtonApp(text:String,
               bgColor: Color = Color(0xFFFFD146),
               fColor: Color = Color.Black,
               bColor: Color = Color(0xFFFFD146),
+              enable: Boolean = true,
               onClick: ()-> Unit){
     Button(
         onClick = { onClick() },
         modifier = Modifier
             .fillMaxWidth().height(65.dp)
             .padding(bottom = 10.dp, top = 10.dp)
-            .border(1.5.dp,color = bColor,RoundedCornerShape(10.dp)),
+            .border(1.5.dp,color = if (enable)bColor else Color.Transparent,RoundedCornerShape(10.dp)),
         colors = ButtonDefaults.buttonColors(
             containerColor = bgColor,
-            contentColor = fColor
+            contentColor = fColor,
         ),
+        enabled = enable,
         shape = RoundedCornerShape(10.dp),
     ) {
         Text(

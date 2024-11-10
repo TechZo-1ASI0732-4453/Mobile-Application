@@ -35,7 +35,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileViewModel
-import com.techzo.cambiazo.common.uploadImageToFirebase
 
 @Composable
 fun ImageUploadDialog(
@@ -85,7 +84,7 @@ fun ImageUploadDialog(
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop
                         )
-                        if(!isUploading){
+                        if (!isUploading) {
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
@@ -145,29 +144,17 @@ fun ImageUploadDialog(
                 Spacer(modifier = Modifier.padding(15.dp))
 
                 Column {
-                    if(isUploading) {
+                    if (isUploading) {
                         LinearProgressIndicator(
                             color = Color(0xFFFFD146),
                             modifier = Modifier.fillMaxWidth()
                         )
-                    }else {
+                    } else {
                         ButtonApp(
                             text = "Aceptar",
                             onClick = {
                                 fileUri?.let { uri ->
-                                    uploadImageToFirebase(
-                                        context = context,
-                                        fileUri = uri,
-                                        onSuccess = { imageUrl ->
-                                            onImageUploaded(imageUrl)
-                                            viewModel.onProfilePictureChanged(imageUrl)
-                                            onDismiss()
-                                        },
-                                        onFailure = {
-                                        },
-                                        onUploadStateChange = { isUploading = it },
-                                        path = "profiles"
-                                    )
+                                    viewModel.imageToUploadFromFirebase(uri,context,isUpload = {isUploading = it}, onDismiss = onDismiss)
                                 }
                             }
                         )
@@ -180,9 +167,7 @@ fun ImageUploadDialog(
                             fColor = Color(0xFFFFD146),
                             onClick = onDismiss
                         )
-
                     }
-
                 }
             }
         }
