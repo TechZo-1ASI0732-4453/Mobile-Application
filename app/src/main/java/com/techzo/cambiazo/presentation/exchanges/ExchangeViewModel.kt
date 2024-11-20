@@ -63,11 +63,15 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
         viewModelScope.launch {
             val result = exchangeRepository.getExchangesByUserOwnId(Constants.user!!.id)
             Log.d("id", Constants.user?.id.toString())
-            if(result is Resource.Success){
-                _exchangesSend.value = UIState(data = result.data)
-                _state.value = UIState(data = result.data)
-            }else{
-                _state.value = UIState(message = result.message?:"Ocurrió un error")
+            if (result is Resource.Success) {
+                val filteredData = result.data?.filter { exchange ->
+                    exchange.productOwn.available && exchange.productChange.available &&
+                            exchange.userOwn.name != "Usuario de cambio" && exchange.userChange.name != "Usuario de cambio"
+                }
+                _exchangesSend.value = UIState(data = filteredData)
+                _state.value = UIState(data = filteredData)
+            } else {
+                _state.value = UIState(message = result.message ?: "Ocurrió un error")
             }
             Log.d("ExchangeViewModel", "getExchangesByUserOwnId: ${result.data}")
         }
@@ -76,12 +80,16 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
     fun getExchangesByUserChangeId() {
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
-            val result =  exchangeRepository.getExchangesByUserChangeId(Constants.user!!.id)
-            if(result is Resource.Success){
-                _exchangesReceived.value = UIState(data = result.data)
-                _state.value = UIState(data = result.data)
-            }else{
-                _state.value = UIState(message = result.message?:"Ocurrió un error")
+            val result = exchangeRepository.getExchangesByUserChangeId(Constants.user!!.id)
+            if (result is Resource.Success) {
+                val filteredData = result.data?.filter { exchange ->
+                    exchange.productOwn.available && exchange.productChange.available &&
+                            exchange.userOwn.name != "Usuario de cambio" && exchange.userChange.name != "Usuario de cambio"
+                }
+                _exchangesReceived.value = UIState(data = filteredData)
+                _state.value = UIState(data = filteredData)
+            } else {
+                _state.value = UIState(message = result.message ?: "Ocurrió un error")
             }
         }
     }
@@ -125,6 +133,17 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
                 Log.d("ExchangeViewModel", "updateExchangeStatus: ${result.data}")
             }else{
                 Log.d("ExchangeViewModel", "updateExchangeStatus: ${result.message}")
+            }
+        }
+    }
+
+    fun deleteExchange(exchangeId: Int){
+        viewModelScope.launch {
+            val result = exchangeRepository.deleteExchange(exchangeId)
+            if(result is Resource.Success){
+                Log.d("ExchangeViewModel", "deleteExchange: ${result.data}")
+            }else{
+                Log.d("ExchangeViewModel", "deleteExchange: ${result.message}")
             }
         }
     }

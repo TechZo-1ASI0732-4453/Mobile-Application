@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,7 +35,7 @@ fun MyReviewsScreen(
     back: () -> Unit = {},
     profileViewModel: ProfileViewModel = hiltViewModel(),
     myReviewsViewModel: MyReviewsViewModel = hiltViewModel(),
-    OnUserClick: (Int) -> Unit
+    onUserClick: (Int) -> Unit
 ) {
 
     val averageRating = profileViewModel.averageRating.value
@@ -86,9 +87,10 @@ fun MyReviewsScreen(
 
                 Spacer(modifier = Modifier.height(30.dp))
 
+
                 LazyColumn {
                     items(reviewsState.data ?: emptyList()) { review ->
-                        ReviewItem(review, OnUserClick)
+                        ReviewItem(review, onUserClick)
                     }
                 }
 

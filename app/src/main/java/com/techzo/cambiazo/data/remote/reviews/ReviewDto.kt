@@ -28,6 +28,17 @@ fun ReviewDto.toReview(): Review {
     )
 }
 
+data class ReviewRequestDto(
+    val message: String,
+    val rating: Int,
+    val state: String,
+    val exchangeId: Int,
+    val userAuthorId: Int,
+    val userReceptorId: Int,
+)
+
+
+
 data class ReviewAverageUserDto(
     val averageRating: Double,
     val countReviews: Int,

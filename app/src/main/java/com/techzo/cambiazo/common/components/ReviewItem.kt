@@ -27,10 +27,10 @@ import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.domain.Review
 
 @Composable
-fun ReviewItem(review: Review, OnUserClick: (Int) -> Unit) {
+fun ReviewItem(review: Review, OnUserClick: (Int) -> Unit, dividerUp: Boolean = true) {
     val interactionSource = remember { MutableInteractionSource() }
 
-    HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
+    if (dividerUp) HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
 
     Spacer(modifier = Modifier.height(20.dp))
 
@@ -76,4 +76,6 @@ fun ReviewItem(review: Review, OnUserClick: (Int) -> Unit) {
         )
         Spacer(modifier = Modifier.height(20.dp))
     }
+
+
 }
