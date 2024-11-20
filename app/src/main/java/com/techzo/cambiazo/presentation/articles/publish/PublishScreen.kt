@@ -33,6 +33,8 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,13 +63,16 @@ import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import com.techzo.cambiazo.domain.Product
+import com.techzo.cambiazo.presentation.articles.ArticlesViewModel
 
 @Composable
 fun PublishScreen(
     viewModel: PublishViewModel = hiltViewModel(),
+    articlesViewModel: ArticlesViewModel = hiltViewModel(),
     back : () -> Unit = {},
     product: Product? = null,
-    openMyArticles: () -> Unit = {}
+    openMyArticles: () -> Unit = {},
+    openSubscription: () -> Unit = {}
 ) {
 
     val productToEdit = remember { product }
@@ -99,19 +104,38 @@ fun PublishScreen(
     val errorDistrict = viewModel.errorDistrict.value
     val errorObjectChange = viewModel.errorObjectChange.value
     val errorImage = viewModel.errorImage.value
-
+    val messageError = viewModel.messageError.value
+    val descriptionError = viewModel.descriptionError.value
     val image = viewModel.image.value
 
     val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.selectImage(uri)
     }
+    val buttonEnable = viewModel.buttonEdit.value
 
     val productState = viewModel.productState.value
     val context = LocalContext.current
     val spaceHeight = 20.dp
 
+    val limitReached  = viewModel.limitReached.value
+
+
+    if(limitReached){
+        DialogApp(
+            message = messageError?: "¡Has alcanzado el límite de publicaciones!",
+            descriptionError,
+            "Regresar",
+            "Comprar suscripción",
+            onClickButton1 = {back()},
+            onClickButton2 = {openSubscription()})
+
+    }
+
+    val articlesState by articlesViewModel.products.collectAsState()
+    val articles = articlesState.data?: emptyList()
+
     LaunchedEffect(Unit) {
-        viewModel.productDataToEdit(product)
+        viewModel.productDataToEdit(product,articles)
     }
 
     MainScaffoldApp(
@@ -371,14 +395,22 @@ fun PublishScreen(
                         CircularProgressIndicator(color = Color(0xFFFFD146))
                     }
                 }else{
-                    if (productState.data != null) {
-                         DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { product?.let {openMyArticles()}?:viewModel.clearData() })
+                    messageError?.let {
+                        DialogApp(it,descriptionError,"Entendido",onClickButton1 = {back()})
+                    }?:if (productState.data != null) {
+                        DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { product?.let {openMyArticles()}?:viewModel.clearData() })
                     }else{
+                        productToEdit?.let {
+                            ButtonApp(text = action, enable = buttonEnable) {
+                                viewModel.validateDataToUploadImage(context)
+                            }
+                        }?:
                         ButtonApp(text = action) {
                             viewModel.validateDataToUploadImage(context)
                         }
 
                     }
+
                 }
                 Spacer(modifier =   Modifier.height(30.dp))
 

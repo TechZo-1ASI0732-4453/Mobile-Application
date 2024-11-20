@@ -23,6 +23,8 @@ import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.domain.ProductCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 
 
@@ -34,6 +36,8 @@ class PublishViewModel @Inject constructor(
 ):ViewModel() {
 
     private val productToEdit = mutableStateOf<Product?>(null)
+     val limitReached = mutableStateOf(false)
+
 
     private val _allCountries = mutableStateOf<List<Country>>(emptyList())
     private val _allDepartments = mutableStateOf<List<Department>>(emptyList())
@@ -124,31 +128,68 @@ class PublishViewModel @Inject constructor(
                 )
     }
 
+    private val _messageError = mutableStateOf<String?>(null)
+    val messageError: State<String?> get() = _messageError
+    private val _descriptionError = mutableStateOf<String?>(null)
+    val descriptionError: State<String?> get() = _descriptionError
 
 
-    fun productDataToEdit(product: Product?){
+    fun validateReachingLimit(list: List<Product>) {
+        val limit = when (Constants.userSubscription!!.plan.id) {
+            1 -> 3
+            2 -> 15
+            else -> 35
+        }
+        val inputDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
 
-        productToEdit.value = product?:return
-        _name.value = product.name
-        _description.value = product.description
-        _price.value = product.price.toString()
-        _objectChange.value = product.desiredObject
-        _categorySelected.value = product.productCategory
-        _countrySelected.value = Country(
-            id = product.location.countryId,
-            name = product.location.countryName
-        )
-        _departmentSelected.value = Department(
-            id = product.location.departmentId,
-            name = product.location.departmentName,
-            countryId = product.location.countryId
-        )
-        _districtSelected.value = District(
-            id = product.location.districtId,
-            name = product.location.districtName,
-            departmentId = product.location.departmentId
-        )
+        val startDate = inputDateFormat.parse(Constants.userSubscription!!.startDate)
+        val endDate = inputDateFormat.parse(Constants.userSubscription!!.endDate)
+
+        val productsAllowed = list.count {
+            (it.createdAt.after(startDate) && it.createdAt.before(endDate)) ||
+                    it.createdAt == startDate ||
+                    it.createdAt == endDate
+        }
+
+        if (productsAllowed >= limit) {
+            limitReached.value = true
+            _messageError.value = "Límite de publicaciones alcanzado"
+            _descriptionError.value = "Si quieres publicar más artículos, cambia tu suscripción."
+        }
+
+    }
+
+
+
+    fun clearError(){
+        _messageError.value = null
+        _descriptionError.value = null
+    }
+
+    fun productDataToEdit(product: Product?,list: List<Product>){
+        product?.let {
+            productToEdit.value = product
+            _name.value = product.name
+            _description.value = product.description
+            _price.value = product.price.toString()
+            _objectChange.value = product.desiredObject
+            _categorySelected.value = product.productCategory
+            _countrySelected.value = Country(
+                id = product.location.countryId,
+                name = product.location.countryName
+            )
+            _departmentSelected.value = Department(
+                id = product.location.departmentId,
+                name = product.location.departmentName,
+                countryId = product.location.countryId
+            )
+            _districtSelected.value = District(
+                id = product.location.districtId,
+                name = product.location.districtName,
+                departmentId = product.location.departmentId
+            )
         _image.value = Uri.parse(product.image)
+        }?:validateReachingLimit(list)
     }
 
     init {
@@ -292,6 +333,8 @@ class PublishViewModel @Inject constructor(
                 )
             },
             onFailure = {
+                _messageError.value = "Ocurrió un error al subir la imagen"
+                _descriptionError.value = "Hubo un error al subir la imagen, porfavor intenta de nuevo"
             },
             onUploadStateChange = { },
             path = "products"
@@ -330,6 +373,16 @@ class PublishViewModel @Inject constructor(
                 _productState.value = UIState(isLoading = false)
                 _productState.value = UIState(data = result.data)
 
+            }else{
+                _productState.value = UIState(isLoading = false)
+                _productState.value = UIState(message = result.message?:"Ocurrió un error")
+                if(result.message == "Bad Request"){
+                    _messageError.value = "Límite de publicaciones alcanzado"
+                    _descriptionError.value = "Si quieres publicar más artículos, cambia tu suscripción."
+                }else{
+                    _messageError.value = "Error al publicar"
+                    _descriptionError.value = "Hubo una falla al publicar el producto, porfavor intenta de nuevo"
+                }
             }
 
     }

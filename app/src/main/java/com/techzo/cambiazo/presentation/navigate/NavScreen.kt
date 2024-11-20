@@ -280,7 +280,6 @@ fun NavScreen() {
                         )
                     )
                 }
-
             )
         }
 
@@ -364,6 +363,7 @@ fun NavScreen() {
             PublishScreen(
                 back = {navController.popBackStack()},
                 openMyArticles = {navController.navigate(Routes.Article.route)},
+                openSubscription = {navController.navigate(Routes.MySubscription.route)},
                 product = navController.previousBackStackEntry?.savedStateHandle?.get<Product>("product")
             )
         }

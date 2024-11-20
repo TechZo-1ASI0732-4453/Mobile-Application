@@ -47,13 +47,13 @@ fun CardApp(padding: PaddingValues, content: @Composable () -> Unit = {}) {
             modifier = Modifier
                 .background(Color.White, RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                 .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-
                 .fillMaxSize()
                 .padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             content()
             Spacer(modifier = Modifier.weight(1f))
+
         }
     }
 }
@@ -77,21 +77,24 @@ fun MainScaffoldApp(
                         .size(60.dp),
                     containerColor = Color(0xFFFFD146),
                     shape = CircleShape,
-                    onClick = {newPost() }) {
+                    onClick = { newPost() }
+                ) {
                     Icon(
                         modifier = Modifier.size(25.dp),
                         imageVector = Icons.Filled.Add,
-                        contentDescription =null,
+                        contentDescription = null,
                         tint = Color.White
                     )
                 }
             }
         },
         floatingActionButtonPosition = FabPosition.Center,
-
-    ){
-        paddingValues ->
-        Box(contentAlignment = Alignment.BottomCenter) {
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -99,25 +102,19 @@ fun MainScaffoldApp(
                     .background(Color(0xFFFFD146)),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
                 contentsHeader()
                 profileImage?.let { it() }
                 CardApp(paddingCard) {
                     content()
                 }
-                Box(Modifier.height(50.dp)) {
-
-                }
-
             }
 
-            bar?.let { it() }
-
-
-
+            bar?.let {
+                it()
+            }
         }
-
     }
+
 
 }
 
