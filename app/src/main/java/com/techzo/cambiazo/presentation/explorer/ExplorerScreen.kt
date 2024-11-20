@@ -21,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,11 +64,7 @@ fun ExplorerScreen(
     val availableProducts = state.data?.filter { it.available && !it.boost } ?: emptyList()
 
     val isRefreshing = remember { mutableStateOf(false) }
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = viewModel.scrollPosition.intValue,
-        initialFirstVisibleItemScrollOffset = viewModel.scrollOffset.intValue
-    )
-    val rowState = rememberLazyListState()
+
 
     fun refreshData() {
         isRefreshing.value = true
@@ -76,23 +73,10 @@ fun ExplorerScreen(
 
     LaunchedEffect(isRefreshing.value) {
         if (isRefreshing.value) {
-            listState.scrollToItem(0)
-            rowState.scrollToItem(0)
+            viewModel.resetListPosition()
             isRefreshing.value = false
         }
     }
-
-
-    LaunchedEffect(viewModel.categoryId.value) {
-        rowState.scrollToItem(0)
-        listState.scrollToItem(0)
-    }
-
-    LaunchedEffect(listState) {
-        viewModel.scrollPosition = mutableIntStateOf( listState.firstVisibleItemIndex)
-        viewModel.scrollOffset = mutableIntStateOf( listState.firstVisibleItemScrollOffset)
-    }
-
     MainScaffoldApp(
         bottomBar = bottomBar,
         paddingCard = PaddingValues(top = 5.dp),
@@ -212,7 +196,7 @@ fun ExplorerScreen(
                 )
             }
         ) {
-            LazyColumn(state = listState) {
+            LazyColumn(state = viewModel.listState) {
                 if (boostProducts.isNotEmpty()) {
                     item {
                         Text(
@@ -224,7 +208,7 @@ fun ExplorerScreen(
                                 .padding(horizontal = 20.dp)
                                 .padding(bottom = 10.dp)
                         )
-                        LazyRow(state = rowState) {
+                        LazyRow(state = viewModel.rowState) {
                             item { Spacer(modifier = Modifier.width(20.dp)) }
                             items(boostProducts.reversed()) { product ->
                                 ProductsRow(product, onProductClick)
