@@ -179,6 +179,16 @@ fun OtpCodeVerificationScreen(
                 )
             }
 
+            if(changePasswordViewModel.errorCode.value.data == true){
+                Text(
+                    text = changePasswordViewModel.errorCode.value.message,
+                    fontSize = 14.sp,
+                    color = Color.Red,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             Text(
                 text = "Ingrese el código de 4 dígitos",
                 fontSize = 16.sp,
@@ -211,7 +221,7 @@ fun OtpCodeVerificationScreen(
                 text = "Verificar",
                 onClick = {
                     val inputCode = firstDigit + secondDigit + thirdDigit + fourthDigit
-                    if (changePasswordViewModel.validateCode(inputCode,codeGenerated)) {
+                    if (changePasswordViewModel.validateCode(inputCode,changePasswordViewModel.code.value)) {
                         goNewPassword(email)
                     } else {
                         Log.e("CODE_VERIFICATION", "CODIGO INCORRECTO")
