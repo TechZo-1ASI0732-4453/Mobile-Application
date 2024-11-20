@@ -24,7 +24,11 @@ class ChangePasswordViewModel @Inject constructor(
     private val _state = mutableStateOf(UIState<UserUsername>())
     val state: State<UIState<UserUsername>> get() = _state
 
-    private val emailExists = mutableStateOf(false)
+    private val _emailNotExists = mutableStateOf(false)
+    val emailNotExists: State<Boolean> get() = _emailNotExists
+
+    private val _errorEmail = mutableStateOf(UIState<Boolean>(data = false, message = ""))
+    val errorEmail: State<UIState<Boolean>> get() = _errorEmail
 
     private val _isEmailSent = mutableStateOf(false)
     val isEmailSent: State<Boolean> = _isEmailSent
@@ -38,12 +42,23 @@ class ChangePasswordViewModel @Inject constructor(
     private val _code = mutableStateOf("")
     val code: State<String> get() = _code
 
+    private val _errorCode = mutableStateOf(UIState<Boolean>(data = false, message = ""))
+    val errorCode: State<UIState<Boolean>> get() = _errorCode
+
+
     fun onEmailChange(email: String) {
         _email.value = email
     }
 
     fun resetEmailState() {
         _isEmailSent.value = false
+    }
+    fun resetEmailError() {
+        _errorEmail.value = UIState(data = false, message = "")
+    }
+
+    fun emailIsEmpty() {
+        _errorEmail.value = UIState(data = true, message = "El campo de correo no puede estar vacío")
     }
 
     private fun generateCode():Int{
@@ -56,19 +71,28 @@ class ChangePasswordViewModel @Inject constructor(
                 val response = userRepository.getUserByEmail(email)
 
                 if (response is Resource.Success) {
-                    emailExists.value = true
+                    _emailNotExists.value = false
+                    if(response.data!!.isGoogleAccount){
+                        _errorEmail.value = UIState(data = true, message = "Correo inválido: es una cuenta de Google")
+                        _isEmailSent.value = false
+                        Log.e("EMAIL_VERIFICATION", "No se puede cambiar la contraseña de una cuenta de Google")
+                        return@launch
+                    }
+                    _errorEmail.value = UIState(data = false, message = "")
                     _code.value = generateCode().toString()
                     _name.value = response.data!!.name
 
                     sendEmail(_name.value, email, _code.value)
                     _isEmailSent.value = true
                 } else {
-                    emailExists.value = false
+                    _emailNotExists.value = true
+                    _errorEmail.value = UIState(data = true, message = "El correo no está registrado")
                     _isEmailSent.value = false
                     Log.e("EMAIL_VERIFICATION", "El correo no está registrado: ${email}")
                 }
             } catch (e: Exception) {
-                emailExists.value = false
+                _emailNotExists.value = true
+                _errorEmail.value = UIState(data = true, message = "Error al obtener los datos del usuario o al enviar el correo")
                 _isEmailSent.value = false
                 Log.e("EMAIL_VERIFICATION", "Error al obtener los datos del usuario o al enviar el correo: ${e.message}")
             }
@@ -76,7 +100,16 @@ class ChangePasswordViewModel @Inject constructor(
     }
 
     fun validateCode(inputCode: String, codeGenerated : String): Boolean {
-        return inputCode == codeGenerated
+        if(inputCode.isBlank()){
+            _errorCode.value = UIState(data = true, message = "El campo de código no puede estar vacío")
+            return false
+        }
+        if(inputCode!=codeGenerated){
+            _errorCode.value = UIState(data = true, message = "Código incorrecto")
+            return false
+        }
+        _errorCode.value = UIState(data = false, message = "")
+        return true
     }
 
     fun changePassword(username: String, password: String) {
