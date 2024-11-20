@@ -99,7 +99,8 @@ class GoogleAuthViewModel @Inject constructor(
                     name = name,
                     phoneNumber = phone,
                     profilePicture = profilePicture,
-                    roles = listOf("ROLE_USER")
+                    roles = listOf("ROLE_USER"),
+                    isGoogleAccount = true
                 )
 
                 if (signUpResult is Resource.Success) {
@@ -115,4 +116,5 @@ class GoogleAuthViewModel @Inject constructor(
             }
         }
     }
+
 }
