@@ -50,9 +50,9 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
     private val _estateButton = mutableStateOf<Boolean>(false)
     val estateButton: State<Boolean> get() = _estateButton
 
-
     private val _token = mutableStateOf(Constants.token?:"")
     val token: State<String> get() = _token
+
 
     private fun updateToken(newToken: String) {
         _token.value = newToken
@@ -65,6 +65,13 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
     private fun updateUser(updatedUser: UserSignIn) {
         _user.value = updatedUser
         Constants.user = updatedUser
+    }
+
+    private val _changesSaved = mutableStateOf(false)
+    val changesSaved: State<Boolean> get() = _changesSaved
+
+    fun closeChangesSaved() {
+        _changesSaved.value = false
     }
 
 
@@ -196,6 +203,7 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
                 result.data?.let {
                     updateUser(it)
                     updateToken(it.token)
+                    _changesSaved.value = true
                 }
 
             } else {
