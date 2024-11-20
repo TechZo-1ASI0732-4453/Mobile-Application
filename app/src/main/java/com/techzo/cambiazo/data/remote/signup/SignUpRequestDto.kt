@@ -17,5 +17,6 @@ data class SignUpRequestDto(
     val name: String,
     val phoneNumber: String,
     val profilePicture: String,
+    val isGoogleAccount: Boolean = false,
     val roles: List<String>
 )
