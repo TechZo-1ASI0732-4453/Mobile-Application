@@ -1,13 +1,13 @@
     package com.techzo.cambiazo.presentation.explorer
 
     import androidx.compose.runtime.State
+    import androidx.compose.runtime.mutableIntStateOf
     import androidx.compose.runtime.mutableStateOf
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
     import com.techzo.cambiazo.common.Constants
     import com.techzo.cambiazo.common.Resource
     import com.techzo.cambiazo.common.UIState
-    import com.techzo.cambiazo.data.repository.LocationRepository
     import com.techzo.cambiazo.data.repository.ProductCategoryRepository
     import com.techzo.cambiazo.data.repository.ProductRepository
     import com.techzo.cambiazo.domain.Product
@@ -23,18 +23,21 @@
         private val productCategoryRepository: ProductCategoryRepository) : ViewModel() {
 
         private val _allProducts = mutableStateOf<List<Product>>(emptyList())
+
         private val _state = mutableStateOf(UIState<List<Product>>())
         val state: State<UIState<List<Product>>> = _state
 
         private val _name = mutableStateOf("")
         val name: State<String> get() = _name
 
-        //category id
         private val _categoryId = mutableStateOf<Int?>(Constants.filterValues.categoryId)
         val categoryId: State<Int?> get() = _categoryId
 
         private val _productCategories = mutableStateOf(UIState<List<ProductCategory>>())
         val productCategories: State<UIState<List<ProductCategory>>> = _productCategories
+
+        var scrollPosition = mutableIntStateOf(0)
+        var scrollOffset = mutableIntStateOf(0)
 
         init {
             getProducts()
@@ -42,20 +45,23 @@
             applyFilter()
         }
 
-        fun getProducts() {
+        fun loadProducts() {
+            getProducts()
+        }
+
+        private fun getProducts() {
             _state.value = UIState(isLoading = true)
             viewModelScope.launch {
-
                 val result = productRepository.getProducts()
-                if(result is Resource.Success){
-                    val products = result.data?: emptyList()
-                    _allProducts.value = products
-                    _state.value = UIState(data = products, isLoading = false)
-                }else{
-                    _state.value = UIState(message = result.message?:"Ocurrió un error")
+                if (result is Resource.Success) {
+                    _allProducts.value = result.data ?: emptyList()
+                    _state.value = UIState(data = result.data ?: emptyList(), isLoading = false)
+                } else {
+                    _state.value = UIState(message = result.message ?: "Ocurrió un error")
                 }
                 applyFilter()
             }
+
         }
 
         fun onProductCategorySelected(id: Int) {

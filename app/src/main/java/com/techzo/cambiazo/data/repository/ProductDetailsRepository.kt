@@ -5,9 +5,11 @@ import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.local.FavoriteProductDao
 import com.techzo.cambiazo.data.local.FavoriteProductEntity
 import com.techzo.cambiazo.data.remote.products.FavoriteProductDto
+import com.techzo.cambiazo.data.remote.products.FavoriteProductRequestDto
 import com.techzo.cambiazo.data.remote.products.FavoriteProductService
 import com.techzo.cambiazo.data.remote.products.toFavoriteProduct
 import com.techzo.cambiazo.domain.FavoriteProduct
+import com.techzo.cambiazo.domain.FavoriteProductRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -26,10 +28,27 @@ class ProductDetailsRepository(
             }
         }
 
-    suspend fun addFavoriteProduct(productId: Int): Resource<FavoriteProduct> =
+    suspend fun getFavoriteProductByUserId(userId: Int): Resource<List<FavoriteProduct>> =
         withContext(Dispatchers.IO) {
             try {
-                val favoriteProductDto = FavoriteProductDto(
+                val response = favoriteProductService.getFavoriteProductsByUserId(userId)
+                if (response.isSuccessful) {
+                    response.body()?.let { favoriteProductsDto ->
+                        val favoriteProducts = favoriteProductsDto.map { it.toFavoriteProduct() }
+                        return@withContext Resource.Success(data = favoriteProducts)
+                    }
+                    return@withContext Resource.Error("No se encontraron productos favoritos")
+                }
+                return@withContext Resource.Error(response.message())
+            } catch (e: Exception) {
+                return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+            }
+        }
+
+    suspend fun addFavoriteProduct(productId: Int): Resource<FavoriteProductRequest> =
+        withContext(Dispatchers.IO) {
+            try {
+                val favoriteProductDto = FavoriteProductRequestDto(
                     id = 0,
                     productId = productId,
                     userId = Constants.user!!.id

@@ -45,23 +45,28 @@ fun ProfileScreen(
     logOut: () -> Unit = {},
     openMyReviews: () -> Unit = {},
     openEditProfile: () -> Unit = {},
-    bottomBar: @Composable () -> Unit = {},
+    openFavorites: () -> Unit = {},
+    bottomBar: Pair<@Composable () -> Unit, () -> Unit>,
+    openSubscription: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()) {
 
     val averageRating = viewModel.averageRating.value
     val countReviews = viewModel.countReviews.value
 
-    val user = viewModel.user.value
-    val state = viewModel.state.value
+    val user = Constants.user
 
-    LaunchedEffect(Unit) {
-        viewModel.refreshUserData()
+    LaunchedEffect(viewModel.isLoggedOut.value) {
+        if (viewModel.isLoggedOut.value) {
+            logOut()
+        }
     }
+
 
     MainScaffoldApp(
         bottomBar = bottomBar,
         paddingCard = PaddingValues(top = 15.dp),
         contentsHeader = {
+            Spacer(modifier = Modifier.height(35.dp))
         },
         profileImage = {
                 ProfileImage(
@@ -97,10 +102,8 @@ fun ProfileScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
-
-                        StarRating(rating = averageRating ?: 0.0, 24.dp)
-                        Spacer(modifier = Modifier.width(4.dp))
-
+                    StarRating(rating = averageRating ?: 0.0, 24.dp)
+                    Spacer(modifier = Modifier.width(4.dp))
 
                     Box(
                         modifier = Modifier
@@ -134,7 +137,10 @@ fun ProfileScreen(
                         onClick = { openEditProfile() }
                     )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
-                    ProfileOption(icon = Icons.Outlined.FavoriteBorder, text = "Favoritos")
+                    ProfileOption(
+                        icon = Icons.Outlined.FavoriteBorder,
+                        text = "Favoritos",
+                        onClick = { openFavorites() })
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
                     ProfileOption(
                         icon = Icons.Outlined.StarOutline,
@@ -142,16 +148,20 @@ fun ProfileScreen(
                         onClick = { openMyReviews()}
                     )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
-                    ProfileOption(icon = Icons.Outlined.Diamond, text = "Mi Suscripción")
+                    ProfileOption(
+                        icon = Icons.Outlined.Diamond,
+                        text = "Mi Suscripción",
+                        onClick = { openSubscription() }
+                    )
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
                     ProfileOption(
                         icon = Icons.Outlined.Logout,
                         text = "Cerrar Sesión",
                         onClick = {
                             viewModel.onLogout()
-                            logOut()
                         }
                     )
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
         }

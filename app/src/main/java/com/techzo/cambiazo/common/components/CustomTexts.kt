@@ -2,6 +2,7 @@ package com.techzo.cambiazo.common.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,8 +23,7 @@ fun TextLink(text1:String = "",
              horizontal: Arrangement.Horizontal = Arrangement.Center){
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp, bottom = 20.dp),
+            .fillMaxWidth(),
         horizontalArrangement = horizontal,
         ) {
         Text(
@@ -51,10 +51,31 @@ fun TextLink(text1:String = "",
 fun TextTitleHeaderApp(text: String){
     Text(
         text = text,
-        fontSize = 40.sp,
+        fontSize = 30.sp,
         style = MaterialTheme.typography.bodyLarge.copy(
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.SansSerif
         ),
     )
+}
+
+@Composable
+fun SubTitleText(subTittle: String){
+    Box( modifier = Modifier.fillMaxWidth()) {
+        Text(text = subTittle,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 2.dp))
+    }
+}
+
+
+@Composable
+fun PaymentText(subTittle: String){
+    Box( modifier = Modifier) {
+        Text(text = subTittle,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 2.dp))
+    }
 }
