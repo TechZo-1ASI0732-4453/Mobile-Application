@@ -68,6 +68,12 @@ class ChangePasswordViewModel @Inject constructor(
 
                 if (response is Resource.Success) {
                     _emailNotExists.value = false
+                    if(response.data!!.isGoogleAccount){
+                        _errorEmail.value = UIState(data = true, message = "Correo inválido: es una cuenta de Google")
+                        _isEmailSent.value = false
+                        Log.e("EMAIL_VERIFICATION", "No se puede cambiar la contraseña de una cuenta de Google")
+                        return@launch
+                    }
                     _errorEmail.value = UIState(data = false, message = "")
                     _code.value = generateCode().toString()
                     _name.value = response.data!!.name
