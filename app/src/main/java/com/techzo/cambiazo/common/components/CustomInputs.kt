@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -106,7 +107,7 @@ fun CustomInput(
             interactionSource = interactionSource,
             textStyle = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Normal,
-                fontSize = 15.sp,
+                fontSize = 16.sp,
                 color = Color.Black
             ),
             visualTransformation =  if(hidePassword.value) PasswordVisualTransformation() else VisualTransformation.None,
@@ -131,7 +132,7 @@ fun CustomInput(
                                 color = Color.Gray,
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     fontWeight = FontWeight.Normal,
-                                    fontSize = 15.sp
+                                    fontSize = 16.sp
                                 )
                             )
                         }
@@ -157,9 +158,12 @@ fun CustomInput(
                 Text(
                     text = " *$messageError",
                     color = Color.Red,
+                    modifier = Modifier.height(18.dp),
                     fontSize = 12.sp,
                 )
             }
+        }else{
+            Spacer(modifier = Modifier.height(18.dp))
         }
     }
 }
@@ -177,25 +181,25 @@ sealed class Constraints(
         type = "Money",
         validate = {it.matches(Regex("^\\d*(\\.\\d{0,2})?\$"))},
         keyboardType = KeyboardType.Number,
-        height = 45.dp,
+        height = 50.dp,
     )
     object Number : Constraints(
         type = "Number",
         validate = {it.matches(Regex("^\\d*\$"))},
         keyboardType = KeyboardType.Number,
-        height = 45.dp,
+        height = 50.dp,
     )
     object Text : Constraints(
         type = "Text",
         validate = {it.length <= 50},
         keyboardType = KeyboardType.Text,
-        height = 45.dp,
+        height = 50.dp,
     )
     object Password : Constraints(
         type = "Password",
         validate = {it.length <= 16},
         keyboardType = KeyboardType.Password,
-        height = 45.dp,
+        height = 50.dp,
     )
     object TextArea : Constraints(
         type = "TextArea",
@@ -208,12 +212,12 @@ sealed class Constraints(
         type = "Email",
         validate = {it.length <= 254},
         keyboardType = KeyboardType.Email,
-        height = 45.dp,
+        height = 50.dp,
     )
     object Phone : Constraints(
         type = "Phone",
         validate = {it.isDigitsOnly() && it.length <= 9},
         keyboardType = KeyboardType.Phone,
-        height = 45.dp,
+        height = 50.dp,
     )
 }

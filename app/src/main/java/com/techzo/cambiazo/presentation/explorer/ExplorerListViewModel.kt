@@ -1,6 +1,7 @@
     package com.techzo.cambiazo.presentation.explorer
 
     import androidx.compose.runtime.State
+    import androidx.compose.runtime.mutableIntStateOf
     import androidx.compose.runtime.mutableStateOf
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
@@ -22,6 +23,7 @@
         private val productCategoryRepository: ProductCategoryRepository) : ViewModel() {
 
         private val _allProducts = mutableStateOf<List<Product>>(emptyList())
+
         private val _state = mutableStateOf(UIState<List<Product>>())
         val state: State<UIState<List<Product>>> = _state
 
@@ -34,10 +36,17 @@
         private val _productCategories = mutableStateOf(UIState<List<ProductCategory>>())
         val productCategories: State<UIState<List<ProductCategory>>> = _productCategories
 
+        var scrollPosition = mutableIntStateOf(0)
+        var scrollOffset = mutableIntStateOf(0)
+
         init {
             getProducts()
             getProductCategories()
             applyFilter()
+        }
+
+        fun loadProducts() {
+            getProducts()
         }
 
         private fun getProducts() {

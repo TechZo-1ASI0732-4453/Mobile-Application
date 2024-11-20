@@ -26,6 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,87 +41,113 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.techzo.cambiazo.common.components.ArticlesOwn
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
+import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
+import com.techzo.cambiazo.presentation.articles.ArticlesViewModel
 import com.techzo.cambiazo.presentation.navigate.Routes
+import kotlinx.coroutines.launch
 
 @Composable
 fun MakeOfferScreen(
     navController: NavController,
-    viewModel: MakeOfferViewModel = hiltViewModel()
+    viewModel: MakeOfferViewModel = hiltViewModel(),
+    articlesViewModel: ArticlesViewModel = hiltViewModel()
 ) {
     val desiredProduct by viewModel.desiredProduct.collectAsState()
-    val userProducts by viewModel.userProducts.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val articlesState by articlesViewModel.products.collectAsState()
+    val userProducts = articlesState.data?.filter { it.available } ?: emptyList()
 
-    if (error != null) {
-        Text(text = error ?: "Unknown error")
-    } else if (desiredProduct != null) {
-        MainScaffoldApp(
-            paddingCard = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
-            contentsHeader = {
-                Box(
+    val coroutineScope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogMessage by remember { mutableStateOf("") }
+
+    MainScaffoldApp(
+        paddingCard = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
+        contentsHeader = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp)
+            ) {
+                ButtonIconHeaderApp(
+                    iconVector = Icons.Filled.ArrowBack,
+                    onClick = { navController.popBackStack() },
+                    iconSize = 35.dp,
+                )
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 20.dp)
+                        .align(Alignment.Center)
+                        .padding(top = 30.dp)
                 ) {
-                    ButtonIconHeaderApp(
-                        iconVector = Icons.Filled.ArrowBack,
-                        onClick = { navController.popBackStack() },
-                        iconSize = 35.dp,
+                    Text(
+                        text = "¿Qué ofreces a",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(top = 30.dp)
-                    ) {
-                        Text(
-                            text = "¿Qué ofreces a",
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Text(
-                            text = "cambio?",
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            },
-            content = {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    verticalArrangement = Arrangement.spacedBy(0.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(userProducts) { product ->
-                        ArticlesOwn(
-                            product = product,
-                            onClick = { selectedProductId, _ ->
-                                navController.navigate(
-                                    Routes.ConfirmationOffer.createConfirmationOfferRoute(
-                                        desiredProduct!!.id.toString(),
-                                        selectedProductId.toString()
-                                    )
-                                )
-                            }
-                        )
-                    }
-                    item {
-                        AddProductButton(onPublish = { navController.navigate(Routes.Publish.route) })
-                    }
+                    Text(
+                        text = "cambio?",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
-        )
-    } else {
-        // Loading state
-    }
+        },
+        content = {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                verticalArrangement = Arrangement.spacedBy(0.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(userProducts) { product ->
+                    ArticlesOwn(
+                        product = product,
+                        onClick = { selectedProductId: Int, _: Int ->
+                            coroutineScope.launch {
+                                val exists = viewModel.checkIfExchangeExists(selectedProductId) ?: false
+                                if (exists) {
+                                    dialogMessage = "Ya has realizado una oferta con este artículo. Por favor, selecciona otro producto."
+                                    showDialog = true
+                                } else {
+                                    desiredProduct?.let {
+                                        navController.navigate(
+                                            Routes.ConfirmationOffer.createConfirmationOfferRoute(
+                                                it.id.toString(),
+                                                selectedProductId.toString()
+                                            )
+                                        )
+                                    } ?: run {
+                                        dialogMessage = "Producto deseado no encontrado."
+                                        showDialog = true
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
+                item {
+                    AddProductButton(onPublish = { navController.navigate(Routes.Publish.route) })
+                }
+            }
+
+            if (showDialog) {
+                DialogApp(
+                    message = "Oferta ya realizada",
+                    description = dialogMessage,
+                    labelButton1 = "Aceptar",
+                    onClickButton1 = {
+                        showDialog = false
+                    }
+                )
+            }
+        }
+    )
 }
 
 @Composable
@@ -146,6 +176,3 @@ fun AddProductButton(onPublish: () -> Unit) {
         }
     }
 }
-
-
-

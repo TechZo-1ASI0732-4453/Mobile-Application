@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,12 +32,18 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -46,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
+import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.CustomInput
@@ -54,13 +62,23 @@ import com.techzo.cambiazo.common.components.DropdownList
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
+import com.techzo.cambiazo.domain.Product
+import com.techzo.cambiazo.presentation.articles.ArticlesViewModel
 
 @Composable
 fun PublishScreen(
     viewModel: PublishViewModel = hiltViewModel(),
+    articlesViewModel: ArticlesViewModel = hiltViewModel(),
     back : () -> Unit = {},
-    openMyArticles: () -> Unit = {}
+    product: Product? = null,
+    openMyArticles: () -> Unit = {},
+    openSubscription: () -> Unit = {}
 ) {
+
+    val productToEdit = remember { product }
+    val messages = remember { productToEdit?.let { "¡Cambios guardados con éxito!" } ?: "¡Publicación exitosa!" }
+    val descriptionMessage = remember { productToEdit?.let { "Tus modificaciones se han guardado correctamente." } ?: "Otros usuarios podrán hacerte ofertas y también podrás ofertar cuando quieras intercambiar algo." }
+    val action = remember { productToEdit?.let { "Editar" } ?: "Publicar" }
 
     val countries = viewModel.countries.value
     val departments = viewModel.departments.value
@@ -86,16 +104,40 @@ fun PublishScreen(
     val errorDistrict = viewModel.errorDistrict.value
     val errorObjectChange = viewModel.errorObjectChange.value
     val errorImage = viewModel.errorImage.value
-
+    val messageError = viewModel.messageError.value
+    val descriptionError = viewModel.descriptionError.value
     val image = viewModel.image.value
 
     val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.selectImage(uri)
     }
+    val buttonEnable = viewModel.buttonEdit.value
 
     val productState = viewModel.productState.value
     val context = LocalContext.current
     val spaceHeight = 20.dp
+
+    val limitReached  = viewModel.limitReached.value
+
+
+    if(limitReached){
+        DialogApp(
+            message = messageError?: "¡Has alcanzado el límite de publicaciones!",
+            descriptionError,
+            "Regresar",
+            "Comprar suscripción",
+            onClickButton1 = {back()},
+            onClickButton2 = {openSubscription()})
+
+    }
+
+    val articlesState by articlesViewModel.products.collectAsState()
+    val articles = articlesState.data?: emptyList()
+
+    LaunchedEffect(Unit) {
+        viewModel.productDataToEdit(product,articles)
+    }
+
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
         contentsHeader = {
@@ -105,9 +147,8 @@ fun PublishScreen(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ){
-
                 ButtonIconHeaderApp(Icons.Filled.Close, onClick = {back()})
-                TextTitleHeaderApp("Publicar")
+                TextTitleHeaderApp(action)
             }
         },
     ) {
@@ -117,7 +158,13 @@ fun PublishScreen(
 
                 SubTitleText(subTittle = "Imagen")
                 image?.let { uri ->
-                    Box {
+                    Box(modifier = Modifier
+                        .shadow(
+                            3.dp,
+                            RoundedCornerShape(10.dp),
+                            ambientColor = Color(0xFFFFD146),
+                            spotColor = Color.Black
+                        )) {
                         Image(
                             painter = rememberImagePainter(uri),
                             contentDescription = null,
@@ -239,7 +286,7 @@ fun PublishScreen(
                 SubTitleText(subTittle = "Ubicación")
                 DropdownList(
                     selectedOption = countrySelected,
-                    label ="Seeleccione un País",
+                    label ="Seleccione un País",
                     itemList = countries.data ?: emptyList(),
                     onItemClick ={viewModel.selectCountry(it)},
                     isError = errorCountry,
@@ -249,7 +296,7 @@ fun PublishScreen(
 
                 DropdownList(
                     selectedOption = departmentSelected,
-                    label ="Seeleccione un Departamento",
+                    label ="Seleccione un Departamento",
                     itemList = departments.data ?: emptyList(),
                     onItemClick ={ viewModel.selectDepartment(it) },
                     isError = errorDepartment,
@@ -259,7 +306,7 @@ fun PublishScreen(
 
                 DropdownList(
                     selectedOption = districtSelected,
-                    label ="Seeleccione un Distrito",
+                    label ="Seleccione un Distrito",
                     itemList = districts.data ?: emptyList(),
                     onItemClick ={ viewModel.selectDistrict(it)},
                     isError = errorDistrict,
@@ -298,44 +345,47 @@ fun PublishScreen(
                 Spacer(modifier = Modifier.height(spaceHeight))
 
             }
-            //-------------------BOOST------------------------//
-            item {
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    Box(
-                        modifier = Modifier.weight(1f)
+            //-------------------BOOST------------------------//
+            val userPlanId = Constants.userSubscription?.plan?.id
+            if ( userPlanId != 1){
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
                     ) {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            SubTitleText(subTittle = "Boost de Visibilidad")
-                            Text(modifier = Modifier.fillMaxWidth(),
-                                text = "¡Activa tu boost y destaca tu producto un día en la página principal para más ofertas!",
-                                color = Color.Gray)
+                        Box(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                SubTitleText(subTittle = "Boost de Visibilidad")
+                                Text(modifier = Modifier.fillMaxWidth(),
+                                    text = "¡Activa tu boost y destaca tu producto un día en la página principal para más ofertas!",
+                                    color = Color.Gray)
+                            }
+                        }
+
+                        Box{
+                            Switch(
+                                checked = boost,
+                                onCheckedChange = { viewModel.onChangeBoost(it)},
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,//circle color when switch is on
+                                    checkedTrackColor = Color(0xFFFFD146),//background color when switch is on
+                                    checkedBorderColor = Color(0xFFFFD146), //border color when switch is on
+                                    checkedIconColor = Color(0xFFFFD146),//icon color when switch is on
+
+                                    uncheckedThumbColor = Color.White,//circle color when switch is off
+                                    uncheckedTrackColor = Color(0xFFD9D9D9),//background color when switch is off
+                                    uncheckedBorderColor = Color(0xFFD9D9D9),//border color when switch is off
+                                    uncheckedIconColor = Color.Gray//icon color when switch is off
+                                )
+                            )
                         }
                     }
 
-                    Box{
-                        Switch(
-                            checked = boost,
-                            onCheckedChange = { viewModel.onChangeBoost(it)},
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,//circle color when switch is on
-                                checkedTrackColor = Color(0xFFFFD146),//background color when switch is on
-                                checkedBorderColor = Color(0xFFFFD146), //border color when switch is on
-                                checkedIconColor = Color(0xFFFFD146),//icon color when switch is on
-
-                                uncheckedThumbColor = Color.White,//circle color when switch is off
-                                uncheckedTrackColor = Color(0xFFD9D9D9),//background color when switch is off
-                                uncheckedBorderColor = Color(0xFFD9D9D9),//border color when switch is off
-                                uncheckedIconColor = Color.Gray//icon color when switch is off
-                            )
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
 
@@ -345,20 +395,22 @@ fun PublishScreen(
                         CircularProgressIndicator(color = Color(0xFFFFD146))
                     }
                 }else{
-                    if (productState.data != null) {
-
-                        DialogApp(
-                            message = "¡Publicación exitosa!",
-                            description = "Otros usuarios podran hacerte ofertas y tambien podras ofertar cuando quieras intercambiar algo.",
-                            labelButton1 = "Entendido",
-                            onClickButton1 = { openMyArticles() },
-                        )
+                    messageError?.let {
+                        DialogApp(it,descriptionError,"Entendido",onClickButton1 = {back()})
+                    }?:if (productState.data != null) {
+                        DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { product?.let {openMyArticles()}?:viewModel.clearData() })
                     }else{
-                        ButtonApp(text = "Publicar", onClick = {
-                            viewModel.validatePublish(context)
-                        })
+                        productToEdit?.let {
+                            ButtonApp(text = action, enable = buttonEnable) {
+                                viewModel.validateDataToUploadImage(context)
+                            }
+                        }?:
+                        ButtonApp(text = action) {
+                            viewModel.validateDataToUploadImage(context)
+                        }
 
                     }
+
                 }
                 Spacer(modifier =   Modifier.height(30.dp))
 

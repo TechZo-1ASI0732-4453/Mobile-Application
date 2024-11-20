@@ -14,7 +14,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,50 +33,51 @@ import coil.compose.rememberAsyncImagePainter
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.components.ButtonApp
+import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.StarRating
 import com.techzo.cambiazo.domain.*
+import com.techzo.cambiazo.presentation.articles.ArticlesViewModel
+import com.techzo.cambiazo.presentation.explorer.offer.MakeOfferViewModel
 import com.techzo.cambiazo.presentation.navigate.Routes
 
 @Composable
 fun ProductDetailsScreen(
     navController: NavController,
-    viewModel: ProductDetailsViewModel = hiltViewModel()
+    productDetailsViewModel: ProductDetailsViewModel = hiltViewModel(),
+    makeOfferViewModel: MakeOfferViewModel = hiltViewModel()
 ) {
-    val productState = viewModel.product.value
-    val averageRating = viewModel.averageRating.value
-    val countReviews = viewModel.countReviews.value
-    val isFavoriteState = viewModel.isFavorite.value
-    val userId = viewModel.userId.value
+    val productState = productDetailsViewModel.product
+    val desiredProductState = makeOfferViewModel.desiredProduct.collectAsState()
 
     Scaffold(
         content = { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
-                val product = productState.data
+                val product = productState.value.data
                 if (product != null) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         ProductHeader(product = product, onBack = { navController.popBackStack() })
                         ProductDetails(
                             product = product,
                             user = product.user,
-                            averageRating = averageRating ?: 0.0,
-                            countReviews = countReviews ?: 0,
-                            isFavoriteState = isFavoriteState,
+                            averageRating = productDetailsViewModel.averageRating.value ?: 0.0,
+                            countReviews = productDetailsViewModel.countReviews.value ?: 0,
+                            isFavoriteState = productDetailsViewModel.isFavorite.value,
                             onFavoriteToggle = { isCurrentlyFavorite ->
-                                viewModel.toggleFavoriteStatus(product.id, isCurrentlyFavorite)
+                                productDetailsViewModel.toggleFavoriteStatus(product.id, isCurrentlyFavorite)
                             },
                             onUserClick = {
+                                val userId = productDetailsViewModel.userId.value
                                 if (userId != null) {
                                     navController.navigate(Routes.Reviews.createRoute(userId.toString()))
                                 }
                             },
-                            onMakeOffer = { desiredProduct, offeredProduct ->
+                            onMakeOffer = { desiredProduct ->
                                 navController.navigate(
-                                    Routes.MakeOffer.createMakeOfferRoute(
-                                        desiredProductId = desiredProduct.id.toString(),
-                                        offeredProductIds = listOf(offeredProduct.id.toString())
-                                    )
+                                    Routes.MakeOffer.createMakeOfferRoute(desiredProduct.id.toString())
                                 )
                             },
+                            desiredProductState = desiredProductState.value,
+                            navController = navController,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 360.dp)
@@ -82,7 +87,7 @@ fun ProductDetailsScreen(
                     }
                 } else {
                     Text(
-                        text = productState.message ?: "Error al cargar detalles del producto",
+                        text = productState.value.message ?: "Error al cargar detalles del producto",
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -155,15 +160,23 @@ fun ProductDetails(
     isFavoriteState: UIState<Boolean>,
     onFavoriteToggle: (Boolean) -> Unit,
     onUserClick: () -> Unit,
-    onMakeOffer: (desiredProduct: Product, offeredProduct: Product) -> Unit,
-    modifier: Modifier = Modifier
+    onMakeOffer: (desiredProduct: Product) -> Unit,
+    desiredProductState: Product?,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    articlesViewModel: ArticlesViewModel = hiltViewModel()
 ) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    val articlesState by articlesViewModel.products.collectAsState()
+    val userProducts = articlesState.data?.filter { it.available } ?: emptyList()
+
     Column(
         modifier = modifier
             .padding(horizontal = 20.dp)
             .padding(top = 20.dp)
     ) {
-        user?.let {
+        user.let {
             if (it.name.isNotEmpty() && it.profilePicture.isNotEmpty()) {
                 Row(
                     modifier = Modifier
@@ -205,7 +218,7 @@ fun ProductDetails(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text ="$countReviews",
+                                    text = "$countReviews",
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp
@@ -220,9 +233,7 @@ fun ProductDetails(
                         },
                         modifier = Modifier
                             .background(
-                                color = if (isFavoriteState.data == true) Color(0xFFFFD146) else Color(
-                                    0xFFDFDFDF
-                                ),
+                                color = if (isFavoriteState.data == true) Color(0xFFFFD146) else Color(0xFFDFDFDF),
                                 shape = CircleShape
                             )
                             .padding(4.dp)
@@ -239,7 +250,7 @@ fun ProductDetails(
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        Text(text = product.name, lineHeight = 26.sp,fontWeight = FontWeight.Bold, fontSize = 26.sp)
+        Text(text = product.name, lineHeight = 26.sp, fontWeight = FontWeight.Bold, fontSize = 26.sp)
         Spacer(modifier = Modifier.height(5.dp))
 
         Text(text = product.description, fontSize = 16.sp, color = Color.Gray)
@@ -274,20 +285,36 @@ fun ProductDetails(
         Spacer(modifier = Modifier.weight(1f))
 
         Text(text = "Le interesa:", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        Text(text = product.desiredObject, fontSize = 16.sp , color = Color.Gray)
+        Text(text = product.desiredObject, fontSize = 16.sp, color = Color.Gray)
 
         Spacer(modifier = Modifier.weight(6f))
 
-        val currentUserId = Constants.user?.id
-
-        if(product.user.id != currentUserId ) {
-            ButtonApp(
-                text = "Intercambiar",
-                onClick = {
-                    onMakeOffer(product, product)
+        ButtonApp(
+            text = "Intercambiar",
+            onClick = {
+                if ( userProducts.isEmpty() ) {
+                    showDialog = true
+                } else {
+                    onMakeOffer(product)
                 }
+            }
+        )
+
+        if (showDialog) {
+            DialogApp(
+                message = "No tienes productos",
+                description = "No tienes productos disponibles para intercambiar. ¿Deseas publicar uno?",
+                labelButton1 = "Publicar Producto",
+                onClickButton1 = {
+                    navController.navigate(Routes.Publish.route)
+                    showDialog = false
+                },
+                labelButton2 = "Cerrar",
+                onClickButton2 = {
+                    showDialog = false
+                },
+                onDismissRequest = { showDialog = false }
             )
         }
-
     }
 }
