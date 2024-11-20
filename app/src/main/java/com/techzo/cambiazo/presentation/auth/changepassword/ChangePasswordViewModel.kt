@@ -24,7 +24,11 @@ class ChangePasswordViewModel @Inject constructor(
     private val _state = mutableStateOf(UIState<UserUsername>())
     val state: State<UIState<UserUsername>> get() = _state
 
-    private val emailExists = mutableStateOf(false)
+    private val _emailNotExists = mutableStateOf(false)
+    val emailNotExists: State<Boolean> get() = _emailNotExists
+
+    private val _errorEmail = mutableStateOf(UIState<Boolean>(data = false, message = ""))
+    val errorEmail: State<UIState<Boolean>> get() = _errorEmail
 
     private val _isEmailSent = mutableStateOf(false)
     val isEmailSent: State<Boolean> = _isEmailSent
@@ -45,6 +49,13 @@ class ChangePasswordViewModel @Inject constructor(
     fun resetEmailState() {
         _isEmailSent.value = false
     }
+    fun resetEmailError() {
+        _errorEmail.value = UIState(data = false, message = "")
+    }
+
+    fun emailIsEmpty() {
+        _errorEmail.value = UIState(data = true, message = "El campo de correo no puede estar vacío")
+    }
 
     private fun generateCode():Int{
         return (1000..9999).random()
@@ -56,19 +67,22 @@ class ChangePasswordViewModel @Inject constructor(
                 val response = userRepository.getUserByEmail(email)
 
                 if (response is Resource.Success) {
-                    emailExists.value = true
+                    _emailNotExists.value = false
+                    _errorEmail.value = UIState(data = false, message = "")
                     _code.value = generateCode().toString()
                     _name.value = response.data!!.name
 
                     sendEmail(_name.value, email, _code.value)
                     _isEmailSent.value = true
                 } else {
-                    emailExists.value = false
+                    _emailNotExists.value = true
+                    _errorEmail.value = UIState(data = true, message = "El correo no está registrado")
                     _isEmailSent.value = false
                     Log.e("EMAIL_VERIFICATION", "El correo no está registrado: ${email}")
                 }
             } catch (e: Exception) {
-                emailExists.value = false
+                _emailNotExists.value = true
+                _errorEmail.value = UIState(data = true, message = "Error al obtener los datos del usuario o al enviar el correo")
                 _isEmailSent.value = false
                 Log.e("EMAIL_VERIFICATION", "Error al obtener los datos del usuario o al enviar el correo: ${e.message}")
             }
