@@ -10,6 +10,7 @@ import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.ExchangeRepository
 import com.techzo.cambiazo.data.repository.LocationRepository
+import com.techzo.cambiazo.data.repository.ReviewRepository
 import com.techzo.cambiazo.domain.Department
 import com.techzo.cambiazo.domain.District
 import com.techzo.cambiazo.domain.Exchange
@@ -21,7 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExchangeViewModel @Inject constructor(private val exchangeRepository: ExchangeRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val reviewRepository: ReviewRepository
 ) : ViewModel() {
 
     private val _exchangesSend = mutableStateOf(UIState<List<Exchange>>())
@@ -44,6 +46,9 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
 
     private val _departments = mutableStateOf<List<Department>>(emptyList())
     //val departments: State<List<Department>> get() = _departments
+
+    private val _existReview= mutableStateOf(false)
+    val existReview: State<Boolean> get() = _existReview
 
 
     init{
@@ -113,6 +118,7 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
         viewModelScope.launch {
             val result = exchangeRepository.getExchangeById(exchangeId)
             if(result is Resource.Success){
+                _existReview.value= reviewRepository.getReviewsByUserAuthorIdAndExchangeId(Constants.user!!.id, exchangeId).data!!
                 _exchange.value = UIState(data = result.data)
             }else{
                 _exchange.value = UIState(message = result.message?:"Ocurrió un error")
