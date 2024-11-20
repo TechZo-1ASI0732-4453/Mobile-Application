@@ -72,36 +72,51 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
         _profilePicture.value = newUrl
     }
 
-    fun imageToUploadFromFirebase(uri: Uri,context: Context,isUpload:(Boolean)->Unit, onDismiss: () -> Unit) {
-
+    fun imageToUploadFromFirebase(uri: Uri, context: Context, isUpload: (Boolean) -> Unit, onDismiss: () -> Unit) {
         val currentProfilePicture = profilePicture.value
         viewModelScope.launch {
-            deleteImageFromFirebase(
-                imageUrl = currentProfilePicture,
-                onSuccess = {
-                    uploadImageToFirebase(
-                        context = context,
-                        fileUri = uri,
-                        onSuccess = { imageUrl ->
-                            onProfilePicture(imageUrl)
-                            saveProfile()
-                            onProfilePictureChanged(imageUrl)
-                            onDismiss()
-                        },
-                        onFailure = {
-                            // Handle failure if needed
-                        },
-                        onUploadStateChange = { isUpload(it) },
-                        path = "profiles"
-                    )                                            },
-                onFailure = {
-                    // Handle failure if needed
-                }
-            )
+            if (currentProfilePicture.startsWith("https://firebasestorage.googleapis.com")) {
+                deleteImageFromFirebase(
+                    imageUrl = currentProfilePicture,
+                    onSuccess = {
+                        uploadImageToFirebase(
+                            context = context,
+                            fileUri = uri,
+                            onSuccess = { imageUrl ->
+                                onProfilePicture(imageUrl)
+                                saveProfile()
+                                onProfilePictureChanged(imageUrl)
+                                onDismiss()
+                            },
+                            onFailure = {
+                                // Handle failure if needed
+                            },
+                            onUploadStateChange = { isUpload(it) },
+                            path = "profiles"
+                        )
+                    },
+                    onFailure = {
+                        // Handle failure if needed
+                    }
+                )
+            } else {
+                uploadImageToFirebase(
+                    context = context,
+                    fileUri = uri,
+                    onSuccess = { imageUrl ->
+                        onProfilePicture(imageUrl)
+                        saveProfile()
+                        onProfilePictureChanged(imageUrl)
+                        onDismiss()
+                    },
+                    onFailure = {
+                        // Handle failure if needed
+                    },
+                    onUploadStateChange = { isUpload(it) },
+                    path = "profiles"
+                )
+            }
         }
-
-
-
     }
 
     private val _editState = mutableStateOf(UIState<UserSignIn>())

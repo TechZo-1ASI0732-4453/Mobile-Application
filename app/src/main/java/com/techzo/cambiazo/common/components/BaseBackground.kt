@@ -92,13 +92,13 @@ fun MainScaffoldApp(
     ) { paddingValues ->
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+                .fillMaxSize(),
             contentAlignment = Alignment.BottomCenter
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(paddingValues)
                     .background(Color(0xFFFFD146)),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {

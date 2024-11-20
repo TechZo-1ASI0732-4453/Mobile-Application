@@ -380,6 +380,8 @@ fun SkeletonLoader() {
                                 .background(gradient)
                         )
                     }
+
+                    item { Spacer(modifier = Modifier.height(90.dp)) }
                 }
             }
         }

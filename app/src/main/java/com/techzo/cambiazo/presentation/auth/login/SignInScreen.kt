@@ -167,7 +167,7 @@ fun SignInScreen(
                     colors = CheckboxDefaults.colors(
                         checkmarkColor = Color.White,
                         checkedColor = Color(0xFFFFD146),
-                        uncheckedColor = Color(0xFFFFD146)
+                        uncheckedColor = Color.Gray
                     )
                 )
                 Text(

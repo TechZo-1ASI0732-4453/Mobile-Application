@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.glide)
     implementation (libs.accompanist.swiperefresh)
     annotationProcessor(libs.room.compiler)
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
 
     // Firebase and Google Auth
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
@@ -103,6 +104,10 @@ dependencies {
 
     // Hilt Navigation Compose
     implementation(libs.androidx.hilt.navigation.compose)
+
+    // EmailJS
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("org.json:json:20211205")
 
     // Testing
     testImplementation(libs.junit)

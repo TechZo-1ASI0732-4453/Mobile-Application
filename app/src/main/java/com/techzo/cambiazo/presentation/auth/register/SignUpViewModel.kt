@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class SignUpViewModel @Inject constructor (private val authRepository: AuthRepository): ViewModel() {
+class SignUpViewModel @Inject constructor(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _state = mutableStateOf(UIState<UserSignUp>())
     val state: State<UIState<UserSignUp>> get() = _state
@@ -47,59 +47,66 @@ class SignUpViewModel @Inject constructor (private val authRepository: AuthRepos
     private val _phoneNumber = mutableStateOf("")
     val phoneNumber: State<String> get() = _phoneNumber
 
-    private val profilePicture = Constants.DEFAULT_PROFILE_PICTURE
+    private val _isGoogleAccount = mutableStateOf(false) // Nuevo estado para isGoogleAccount
+    val isGoogleAccount: State<Boolean> get() = _isGoogleAccount
 
+    private val profilePicture = Constants.DEFAULT_PROFILE_PICTURE
     private val roles = listOf(Constants.DEFAULT_ROLE)
 
-
-    fun signUp() {
+    // Registro normal
+    fun signUp(isGoogle: Boolean = false) {
         _state.value = UIState(isLoading = true)
 
-        if(_username.value.isEmpty() ||
-            _password.value.isEmpty() ||
-            _name.value.isEmpty() ||
-            _phoneNumber.value.isEmpty()
-        ){
-            _state.value = UIState(message = "Por favor llene todos los campos")
-            return
-        }
-        if(_phoneNumber.value.length != 9){
-            _state.value = UIState(message = "Por favor ingrese un numero de telefono valido")
-            return
-        }
+        // Validaciones solo para registros normales
+        if (!isGoogle) {
+            if (_username.value.isEmpty() ||
+                _password.value.isEmpty() ||
+                _name.value.isEmpty() ||
+                _phoneNumber.value.isEmpty()
+            ) {
+                _state.value = UIState(message = "Por favor llene todos los campos")
+                return
+            }
+            if (_phoneNumber.value.length != 9) {
+                _state.value = UIState(message = "Por favor ingrese un numero de telefono valido")
+                return
+            }
 
-        if (!_username.value.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))){
+            if (!_username.value.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))) {
+                _state.value = UIState(message = "Por favor ingrese un correo valido")
+                return
+            }
+            if (_password.value != _repitePassword.value) {
+                _state.value = UIState(message = "Las contraseñas no coinciden")
+                return
+            }
 
-            _state.value = UIState(message = "Por favor ingrese un correo valido")
-            return
+            if (!isChecked.value) {
+                _state.value = UIState(message = "Por favor acepte los terminos y condiciones")
+                return
+            }
         }
-        if(_password.value != _repitePassword.value){
-            _state.value = UIState(message = "Las contraseñas no coinciden")
-            return
-        }
-
-        if (!isChecked.value){
-            _state.value = UIState(message = "Por favor acepte los terminos y condiciones")
-            return
-        }
-
-
-//        if(!_password.value.matches(Regex("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}\$"))){
-//            _state.value = UIState(message = "La contraseña debe tener al menos 8 caracteres, una letra y un numero")
-//            return
-//        }
 
         viewModelScope.launch {
-            val result = authRepository.signUp(_username.value, _password.value, _name.value, _phoneNumber.value, profilePicture, roles)
+            val result = authRepository.signUp(
+                username = _username.value,
+                password = _password.value,
+                name = _name.value,
+                phoneNumber = _phoneNumber.value,
+                profilePicture = profilePicture,
+                roles = roles,
+                isGoogleAccount = _isGoogleAccount.value
+            )
             if (result is Resource.Success) {
                 _state.value = UIState(data = result.data)
                 _successDialog.value = true
             } else {
-                _state.value = UIState(message =result.message?:"Error")
+                _state.value = UIState(message = result.message ?: "Error")
             }
         }
     }
 
+    // Actualizaciones de campos
     fun onUsernameChange(username: String) {
         _username.value = username
     }
@@ -116,7 +123,6 @@ class SignUpViewModel @Inject constructor (private val authRepository: AuthRepos
         _phoneNumber.value = phoneNumber
     }
 
-
     fun onRepitePasswordChange(repitePassword: String) {
         _repitePassword.value = repitePassword
     }
@@ -129,11 +135,11 @@ class SignUpViewModel @Inject constructor (private val authRepository: AuthRepos
         _showPasswordRepeat.value = showPasswordRepeat
     }
 
-    fun onCheckedChange(isChecked: Boolean){
+    fun onCheckedChange(isChecked: Boolean) {
         _isChecked.value = isChecked
     }
 
-    fun hideSuccessDialog(){
+    fun hideSuccessDialog() {
         _successDialog.value = false
     }
 }

@@ -52,6 +52,8 @@ import com.techzo.cambiazo.domain.Exchange
 import kotlinx.coroutines.launch
 
 
+
+
 @Composable
 fun ExchangeScreen(
     bottomBar: Pair<@Composable () -> Unit, () -> Unit>, viewModel: ExchangeViewModel = hiltViewModel(),
@@ -117,7 +119,7 @@ fun ExchangeScreen(
                             HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
                         }
                     }
-                    item { Spacer(modifier = Modifier.height(60.dp))}
+                    item { Spacer(modifier = Modifier.height(85.dp))}
                 }
             }
         }
@@ -239,8 +241,10 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                     .background(statusBackgroundColor())
                     .padding(horizontal = 20.dp, vertical = 3.dp)
                     .clickable {
-                        if(page==2){
-                            val formattedNumber = phoneNumber.replace("+", "").replace(" ", "")
+                        if (page == 2) {
+                            val formattedNumber = phoneNumber
+                                .replace("+", "")
+                                .replace(" ", "")
                             val url = "https://wa.me/$formattedNumber"
                             val intent = Intent(Intent.ACTION_VIEW).apply {
                                 data = Uri.parse(url)
@@ -288,7 +292,9 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
         Text(
             text = tag,
             color = Color(0xFF6D6D6D),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 5.dp),
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
@@ -299,7 +305,7 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
                 .height(120.dp)
                 .shadow(
                     elevation = 4.dp,
-                    shape = RoundedCornerShape(10,10),
+                    shape = RoundedCornerShape(10, 10),
                     clip = true
                 )
                 .clip(RoundedCornerShape(10, 10, 0, 0))
@@ -318,7 +324,8 @@ fun ExchangeProductCard(productImageUrl: String, productName: String, tag: Strin
             Text(
                 text = productName,
                 modifier = Modifier
-                    .fillMaxWidth().padding(horizontal = 5.dp),
+                    .fillMaxWidth()
+                    .padding(horizontal = 5.dp),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 fontSize = 16.sp,

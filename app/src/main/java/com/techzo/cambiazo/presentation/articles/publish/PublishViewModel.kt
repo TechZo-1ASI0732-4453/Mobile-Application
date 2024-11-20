@@ -135,7 +135,7 @@ class PublishViewModel @Inject constructor(
 
 
     fun validateReachingLimit(list: List<Product>) {
-        val limit = when (Constants.userSubscription!!.id) {
+        val limit = when (Constants.userSubscription!!.plan.id) {
             1 -> 3
             2 -> 15
             else -> 35
@@ -151,12 +151,10 @@ class PublishViewModel @Inject constructor(
                     it.createdAt == endDate
         }
 
-        if (productsAllowed < limit) {
+        if (productsAllowed >= limit) {
             limitReached.value = true
             _messageError.value = "Límite de publicaciones alcanzado"
             _descriptionError.value = "Si quieres publicar más artículos, cambia tu suscripción."
-        }else{
-            isEmptyData()
         }
 
     }
@@ -168,7 +166,7 @@ class PublishViewModel @Inject constructor(
         _descriptionError.value = null
     }
 
-    fun productDataToEdit(product: Product?){
+    fun productDataToEdit(product: Product?,list: List<Product>){
         product?.let {
             productToEdit.value = product
             _name.value = product.name
@@ -191,7 +189,7 @@ class PublishViewModel @Inject constructor(
                 departmentId = product.location.departmentId
             )
         _image.value = Uri.parse(product.image)
-        }
+        }?:validateReachingLimit(list)
     }
 
     init {
