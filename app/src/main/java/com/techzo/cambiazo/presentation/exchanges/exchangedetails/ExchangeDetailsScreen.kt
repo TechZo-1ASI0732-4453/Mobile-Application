@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,7 +54,13 @@ import com.techzo.cambiazo.presentation.exchanges.ExchangeViewModel
 import com.techzo.cambiazo.presentation.explorer.review.ReviewViewModel
 
 @Composable
-fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), exchangeId:Int, page: Int) {
+fun ExchangeDetailsScreen(
+    goBack: () -> Unit,
+    goToReviewScreen: (Int) -> Unit,
+    viewModel: ExchangeViewModel = hiltViewModel(),
+    exchangeId: Int,
+    page: Int
+) {
 
     LaunchedEffect(Unit) {
         viewModel.getExchangeById(exchangeId)
@@ -188,9 +195,9 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
             val authorId= if(boolean) exchange.userOwn.id else exchange.userChange.id
             val receptorId = if(boolean) exchange.userChange.id else exchange.userOwn.id
 
-            Column{
+            Column {
                 Column(modifier = Modifier.padding(start = 15.dp, end = 15.dp)) {
-
+                    val userId = if (boolean) exchange.userOwn.id else exchange.userChange.id
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -198,7 +205,14 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable(
+                                onClick = { goToReviewScreen(userId) },
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            )
+                        ) {
                             GlideImage(
                                 imageModel = { profilePicture},
                                 modifier = Modifier
