@@ -22,6 +22,11 @@ interface ReviewService {
     @POST("reviews")
     suspend fun addReview(@Body reviewDto: ReviewRequestDto): Response<ReviewDto>
 
+
+    @Headers("Content-Type: application/json", "Accept: application/json")
+    @GET("reviews/user-author/{userId}/exchange/{exchangeId}")
+    suspend fun getReviewsByUserId(@Path("userId") userId: Int, @Path("exchangeId") exchangeId: Int): Response<ExistReview>
+
     @Headers("Content-Type: application/json", "Accept: application/json")
     @DELETE("reviews/delete/{reviewId}")
     suspend fun deleteReview(@Path("reviewId") reviewId: Int): Response<ReviewDto>
