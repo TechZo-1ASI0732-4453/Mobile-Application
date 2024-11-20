@@ -42,6 +42,10 @@ class ChangePasswordViewModel @Inject constructor(
     private val _code = mutableStateOf("")
     val code: State<String> get() = _code
 
+    private val _errorCode = mutableStateOf(UIState<Boolean>(data = false, message = ""))
+    val errorCode: State<UIState<Boolean>> get() = _errorCode
+
+
     fun onEmailChange(email: String) {
         _email.value = email
     }
@@ -96,7 +100,16 @@ class ChangePasswordViewModel @Inject constructor(
     }
 
     fun validateCode(inputCode: String, codeGenerated : String): Boolean {
-        return inputCode == codeGenerated
+        if(inputCode.isBlank()){
+            _errorCode.value = UIState(data = true, message = "El campo de código no puede estar vacío")
+            return false
+        }
+        if(inputCode!=codeGenerated){
+            _errorCode.value = UIState(data = true, message = "Código incorrecto")
+            return false
+        }
+        _errorCode.value = UIState(data = false, message = "")
+        return true
     }
 
     fun changePassword(username: String, password: String) {
