@@ -1,5 +1,6 @@
     package com.techzo.cambiazo.presentation.explorer
 
+    import android.util.Log
     import androidx.compose.runtime.State
     import androidx.compose.runtime.mutableIntStateOf
     import androidx.compose.runtime.mutableStateOf
@@ -54,14 +55,12 @@
             viewModelScope.launch {
                 val result = productRepository.getProducts()
                 if (result is Resource.Success) {
-                    _allProducts.value = result.data ?: emptyList()
-                    _state.value = UIState(data = result.data ?: emptyList(), isLoading = false)
+                    _allProducts.value = result.data?.filter { it.available } ?: emptyList()
+                    applyFilter()
                 } else {
                     _state.value = UIState(message = result.message ?: "Ocurrió un error")
                 }
-                applyFilter()
             }
-
         }
 
         fun onProductCategorySelected(id: Int) {
@@ -77,37 +76,38 @@
         }
 
         private fun applyFilter() {
-            _state.value = UIState(isLoading = true)
-            val filteredList = _allProducts.value.filter { product ->
-                val matchesName = product.name.contains(_name.value, ignoreCase = true)
+            viewModelScope.launch {
+                val filteredList = _allProducts.value.filter { product ->
+                    val matchesName = product.name.contains(_name.value, ignoreCase = true)
 
-                val matchesCategory = Constants.filterValues.categoryId?.let { categoryId ->
-                    product.productCategory.id == categoryId
-                } ?: true
+                    val matchesCategory = Constants.filterValues.categoryId?.let { categoryId ->
+                        product.productCategory.id == categoryId
+                    } ?: true
 
-                val matchesCountry = Constants.filterValues.countryId?.let { countryId ->
-                    product.location.countryId == countryId
-                } ?: true
+                    val matchesCountry = Constants.filterValues.countryId?.let { countryId ->
+                        product.location.countryId == countryId
+                    } ?: true
 
-                val matchesDepartment = Constants.filterValues.departmentId?.let { departmentId ->
-                    product.location.departmentId == departmentId
-                } ?: true
+                    val matchesDepartment = Constants.filterValues.departmentId?.let { departmentId ->
+                        product.location.departmentId == departmentId
+                    } ?: true
 
-                val matchesDistrictId = Constants.filterValues.districtId?.let { districtId ->
-                    product.location.districtId == districtId
-                } ?: true
+                    val matchesDistrictId = Constants.filterValues.districtId?.let { districtId ->
+                        product.location.districtId == districtId
+                    } ?: true
 
-                val matchesMinPrice = Constants.filterValues.minPrice?.let { minPrice ->
-                    product.price >= minPrice
-                } ?: true
+                    val matchesMinPrice = Constants.filterValues.minPrice?.let { minPrice ->
+                        product.price >= minPrice
+                    } ?: true
 
-                val matchesMaxPrice = Constants.filterValues.maxPrice?.let { maxPrice ->
-                    product.price <= maxPrice
-                } ?: true
+                    val matchesMaxPrice = Constants.filterValues.maxPrice?.let { maxPrice ->
+                        product.price <= maxPrice
+                    } ?: true
 
-                matchesName && matchesCategory && matchesCountry && matchesDepartment && matchesDistrictId && matchesMinPrice && matchesMaxPrice
+                    matchesName && matchesCategory && matchesCountry && matchesDepartment && matchesDistrictId && matchesMinPrice && matchesMaxPrice
+                }
+                _state.value = UIState(data = filteredList, isLoading = false)
             }
-                _state.value = UIState(data = filteredList)
         }
 
         fun getProductCategories() {

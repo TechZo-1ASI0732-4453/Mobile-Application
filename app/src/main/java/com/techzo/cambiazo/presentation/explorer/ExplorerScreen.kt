@@ -12,15 +12,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.ElectricBolt
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,9 +52,12 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.components.CustomInput
+import com.techzo.cambiazo.common.components.EmptyStateMessage
+import com.techzo.cambiazo.common.components.LoadingMessage
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.Products
 import com.techzo.cambiazo.domain.Product
+import com.techzo.cambiazo.presentation.exchanges.ExchangeBox
 
 @Composable
 fun ExplorerScreen(
@@ -65,8 +71,8 @@ fun ExplorerScreen(
     val categories = viewModel.productCategories.value
     val state = viewModel.state.value
 
-    val boostProducts = state.data?.filter { it.available && it.boost } ?: emptyList()
-    val availableProducts = state.data?.filter { it.available && !it.boost } ?: emptyList()
+    val boostProducts = state.data?.filter { it.boost } ?: emptyList()
+    val availableProducts = state.data?.filter { !it.boost } ?: emptyList()
 
     val isRefreshing = remember { mutableStateOf(false) }
     val listState = rememberLazyListState(
@@ -205,9 +211,6 @@ fun ExplorerScreen(
                 }
             }
         }
-        if (state.isLoading || state.data.isNullOrEmpty()) {
-            SkeletonLoader()
-        } else {
             SwipeRefresh(
                 state = rememberSwipeRefreshState(isRefreshing.value),
                 onRefresh = { refreshData() },
@@ -221,7 +224,21 @@ fun ExplorerScreen(
                     )
                 }
             ) {
-                LazyColumn(state = listState) {
+            LazyColumn(state = listState) {
+                if (state.isLoading) {
+                    item {
+                        LoadingMessage()
+                    }
+                } else if ( state.data.isNullOrEmpty()) {
+                    item {
+                        EmptyStateMessage(
+                            icon = Icons.Default.Info,
+                            message = "No hay productos",
+                            subMessage = "No tienes intercambios en esta sección",
+                            modifier = Modifier.padding(20.dp)
+                        )
+                    }
+                } else {
                     if (boostProducts.isNotEmpty()) {
                         item {
                             Text(
@@ -259,22 +276,39 @@ fun ExplorerScreen(
                         }
                         item { Spacer(modifier = Modifier.height(90.dp)) }
                     }
+                    }
+                    if (availableProducts.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "Productos Recientes",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp)
+                            )
+                        }
+                        items(availableProducts.reversed()) { product ->
+                            Products(product, onProductClick)
+                        }
+                        item { Spacer(modifier = Modifier.height(90.dp)) }
+                    }
                 }
             }
-        }
+
     }
 }
 
 @Composable
 fun SkeletonLoader() {
-    val infiniteTransition = rememberInfiniteTransition()
+    val infiniteTransition = rememberInfiniteTransition(label = "")
     val animationValue by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             tween(durationMillis = 1100),
             repeatMode = RepeatMode.Restart
-        )
+        ), label = ""
     )
 
     val gradient = Brush.horizontalGradient(

@@ -1,4 +1,4 @@
-package com.techzo.cambiazo.presentation.profile.configuration
+package com.techzo.cambiazo.presentation.profile.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,7 +28,7 @@ import com.techzo.cambiazo.presentation.profile.ProfileOption
 import com.techzo.cambiazo.presentation.profile.ProfileViewModel
 
 @Composable
-fun ConfigurationScreen(
+fun SettingsScreen(
     deleteAccount: () -> Unit = {},
     changePassword: (String) -> Unit = {},
     back: () -> Unit = {},
