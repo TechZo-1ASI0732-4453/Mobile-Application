@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,12 @@ fun SettingsScreen(
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+    LaunchedEffect(viewModel.isLoggedOut.value) {
+        if (viewModel.isLoggedOut.value) {
+            deleteAccount()
+        }
+    }
+
     if (showDeleteDialog) {
         DialogApp(
             message = "Confirmación",
@@ -46,7 +53,6 @@ fun SettingsScreen(
             onClickButton1 = {
                 viewModel.deleteAccount()
                 showDeleteDialog = false
-                deleteAccount()
             },
             onClickButton2 = { showDeleteDialog = false }
         )

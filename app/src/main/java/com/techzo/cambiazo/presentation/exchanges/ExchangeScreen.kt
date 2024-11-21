@@ -233,12 +233,6 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .weight(1f)
-                    .clickable(
-                        onClick = { goToReviewScreen(userId) },
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    )
-
             ) {
                 GlideImage(
                     imageModel = { upperUserProfileImage },
