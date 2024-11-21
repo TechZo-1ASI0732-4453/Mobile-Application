@@ -53,7 +53,7 @@ import com.techzo.cambiazo.presentation.exchanges.ExchangeViewModel
 import com.techzo.cambiazo.presentation.explorer.review.ReviewViewModel
 
 @Composable
-fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), exchangeId:Int, page: Int) {
+fun ExchangeDetailsScreen(goBack: (Int) -> Unit, viewModel: ExchangeViewModel = hiltViewModel(), exchangeId:Int, page: Int) {
 
     LaunchedEffect(Unit) {
         viewModel.getExchangeById(exchangeId)
@@ -72,7 +72,7 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { goBack() }) {
+                IconButton(onClick = { goBack(page) }) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", modifier = Modifier.size(35.dp))                }
 
                 Text(
@@ -295,7 +295,7 @@ fun ExchangeDetailsScreen(goBack: () -> Unit, viewModel: ExchangeViewModel = hil
                 )
 
                 Column(modifier = Modifier.padding(start = 15.dp, end = 15.dp)) {
-                    BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id, goBack = goBack, userAuthor = authorId, userReceptor = receptorId)
+                    BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id, goBack = {goBack(page)}, userAuthor = authorId, userReceptor = receptorId)
 
                 }
             }
@@ -442,11 +442,11 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                     Button(onClick = {
                         showDialog2=true
                     },
-                        modifier = Modifier.weight(0.5f)
+                        modifier = Modifier.weight(0.5f).border(1.dp, Color.Red, RoundedCornerShape(10.dp))
                             .height(40.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFDCDCDC),
-                            contentColor = Color(0xFFA4A4A4)
+                            containerColor = Color.White,
+                            contentColor = Color.Red,
                         ),
                         shape = RoundedCornerShape(10.dp))
                     {
