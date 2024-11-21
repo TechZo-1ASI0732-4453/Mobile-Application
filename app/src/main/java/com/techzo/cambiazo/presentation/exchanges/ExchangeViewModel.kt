@@ -3,13 +3,16 @@ package com.techzo.cambiazo.presentation.exchanges
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.data.repository.ExchangeRepository
 import com.techzo.cambiazo.data.repository.LocationRepository
+import com.techzo.cambiazo.data.repository.ReviewRepository
 import com.techzo.cambiazo.domain.Department
 import com.techzo.cambiazo.domain.District
 import com.techzo.cambiazo.domain.Exchange
@@ -21,7 +24,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExchangeViewModel @Inject constructor(private val exchangeRepository: ExchangeRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val reviewRepository: ReviewRepository
 ) : ViewModel() {
 
     private val _exchangesSend = mutableStateOf(UIState<List<Exchange>>())
@@ -46,9 +50,21 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
     //val departments: State<List<Department>> get() = _departments
 
 
+    private val _existReview= mutableStateOf(false)
+    val existReview: State<Boolean> get() = _existReview
+
+
     init{
-        getExchangesByUserOwnId()
+
         getLocations()
+    }
+
+    fun fetchExchanges(page:Int){
+        when(page){
+            0 -> getExchangesByUserOwnId()
+            1 -> getExchangesByUserChangeId()
+            2 -> getFinishedExchanges()
+        }
     }
 
     private fun getLocations(){
@@ -113,6 +129,7 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
         viewModelScope.launch {
             val result = exchangeRepository.getExchangeById(exchangeId)
             if(result is Resource.Success){
+                _existReview.value= reviewRepository.getReviewsByUserAuthorIdAndExchangeId(Constants.user!!.id, exchangeId).data!!
                 _exchange.value = UIState(data = result.data)
             }else{
                 _exchange.value = UIState(message = result.message?:"Ocurrió un error")

@@ -262,10 +262,10 @@ fun NavScreen() {
                         )
                     )
                 },
+                page = navController.previousBackStackEntry?.savedStateHandle?.get<Int>("page") ?: 0,
                 goToReviewScreen = { userId ->
                     navController.navigate(Routes.Reviews.createRoute(userId.toString()))
-                }
-            )
+                }            )
         }
 
 
@@ -292,7 +292,10 @@ fun NavScreen() {
             val page = backStackEntry.arguments?.getString("page")?.toIntOrNull()
             if (exchange != null && page != null) {
                 ExchangeDetailsScreen(
-                    goBack = { navController.popBackStack() },
+                    goBack = {page->
+                        navController.currentBackStackEntry?.savedStateHandle?.set("page", page)
+                        navController.navigate(Routes.Exchange.route)
+                             },
                     goToReviewScreen = { userId ->
                         navController.navigate(Routes.Reviews.createRoute(userId.toString()))
                     },

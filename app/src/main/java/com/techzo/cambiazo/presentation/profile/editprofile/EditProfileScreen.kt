@@ -53,7 +53,6 @@ fun EditProfileScreen(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    var showSaveDialog by remember { mutableStateOf(false) }
 
     val state = viewModel.state.value
 
@@ -65,6 +64,7 @@ fun EditProfileScreen(
     val errorName = viewModel.errorName.value
     val errorPhoneNumber = viewModel.errorPhoneNumber.value
     val estateButton = viewModel.estateButton.value
+    val changesSaved = viewModel.changesSaved.value
 
 
 
@@ -95,17 +95,17 @@ fun EditProfileScreen(
         )
     }
 
-    if (showSaveDialog) {
+    if (changesSaved) {
         DialogApp(
             message = "Éxito",
             description = "Cambios guardados exitosamente.",
             labelButton1 = "Aceptar",
             onDismissRequest = {
-                showSaveDialog = false
+                viewModel.closeChangesSaved()
                 back()
             },
             onClickButton1 = {
-                showSaveDialog = false
+                viewModel.closeChangesSaved()
                 back()
             }
         )
@@ -203,7 +203,6 @@ fun EditProfileScreen(
                         "Guardar Cambios",
                         onClick = {
                             viewModel.saveProfile()
-                            showSaveDialog = true
                                   },
                         enable = estateButton)
 

@@ -2,6 +2,7 @@ package com.techzo.cambiazo.presentation.exchanges.exchangedetails
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -55,7 +56,7 @@ import com.techzo.cambiazo.presentation.explorer.review.ReviewViewModel
 
 @Composable
 fun ExchangeDetailsScreen(
-    goBack: () -> Unit,
+    goBack: (Int) -> Unit,
     goToReviewScreen: (Int) -> Unit,
     viewModel: ExchangeViewModel = hiltViewModel(),
     exchangeId: Int,
@@ -79,7 +80,7 @@ fun ExchangeDetailsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { goBack() }) {
+                IconButton(onClick = { goBack(page) }) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", modifier = Modifier.size(35.dp))                }
 
                 Text(
@@ -193,11 +194,11 @@ fun ExchangeDetailsScreen(
             val context = LocalContext.current
 
             val authorId= if(boolean) exchange.userOwn.id else exchange.userChange.id
-            val receptorId = if(boolean) exchange.userChange.id else exchange.userOwn.id
+            val receptorId = if(!boolean) exchange.userChange.id else exchange.userOwn.id
 
             Column {
                 Column(modifier = Modifier.padding(start = 15.dp, end = 15.dp)) {
-                    val userId = if (boolean) exchange.userOwn.id else exchange.userChange.id
+                    val userId = if (!boolean) exchange.userOwn.id else exchange.userChange.id
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -309,7 +310,7 @@ fun ExchangeDetailsScreen(
                 )
 
                 Column(modifier = Modifier.padding(start = 15.dp, end = 15.dp)) {
-                    BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id, goBack = goBack, userAuthor = authorId, userReceptor = receptorId)
+                    BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id, goBack = {goBack(page)}, userAuthor = authorId, userReceptor = receptorId)
 
                 }
             }
@@ -456,11 +457,11 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                     Button(onClick = {
                         showDialog2=true
                     },
-                        modifier = Modifier.weight(0.5f)
+                        modifier = Modifier.weight(0.5f).border(1.dp, Color.Red, RoundedCornerShape(10.dp))
                             .height(40.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFDCDCDC),
-                            contentColor = Color(0xFFA4A4A4)
+                            containerColor = Color.White,
+                            contentColor = Color.Red,
                         ),
                         shape = RoundedCornerShape(10.dp))
                     {
@@ -526,38 +527,40 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(10.dp))
-
-                        Button(onClick = {
-                            showDialog3=true
-                        },
-                            modifier = Modifier.fillMaxWidth()
-                                .height(40.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFFFD146),
-                                contentColor = Color.Black
-                            ),
-                            shape = RoundedCornerShape(10.dp))
-                        {
-                            Text(text = "Dejar Reseña",
-                                fontSize = 16.sp,
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.SansSerif)
-                            )
-                        }
-                        if(showDialog3){
-                            DialogApp(
-                                message = "Deja tu Reseña",
-                                isNewReview = true,
-                                labelButton1 = "Enviar",
-                                labelButton2 = "Cancelar",
-                                onClickButton1 = { showDialog3=false},
-                                onClickButton2 = {showDialog3=false},
-                                onSubmitReview = { newRating, newReview ->
-                                    reviewViewModel.addReview(newReview,newRating,"Enviado",userAuthor, userReceptor, exchangeId)
-                                    showDialog3 = false
-                                }
-                            )
+                        Log.d("Exist Review", viewModel.existReview.toString())
+                        if(!viewModel.existReview.value){
+                            Button(onClick = {
+                                showDialog3=true
+                            },
+                                modifier = Modifier.fillMaxWidth()
+                                    .height(40.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFFFD146),
+                                    contentColor = Color.Black
+                                ),
+                                shape = RoundedCornerShape(10.dp))
+                            {
+                                Text(text = "Dejar Reseña",
+                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.SansSerif)
+                                )
+                            }
+                            if(showDialog3){
+                                DialogApp(
+                                    message = "Deja tu Reseña",
+                                    isNewReview = true,
+                                    labelButton1 = "Enviar",
+                                    labelButton2 = "Cancelar",
+                                    onClickButton1 = { showDialog3=false},
+                                    onClickButton2 = {showDialog3=false},
+                                    onSubmitReview = { newRating, newReview ->
+                                        reviewViewModel.addReview(newReview,newRating,"Enviado",userAuthor, userReceptor, exchangeId)
+                                        showDialog3 = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }

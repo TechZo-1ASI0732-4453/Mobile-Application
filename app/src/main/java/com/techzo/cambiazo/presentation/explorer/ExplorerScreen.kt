@@ -1,5 +1,10 @@
 package com.techzo.cambiazo.presentation.explorer
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,7 +26,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +54,7 @@ import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.Products
 import com.techzo.cambiazo.domain.Product
 
+
 @Composable
 fun ExplorerScreen(
     viewModel: ExplorerListViewModel = hiltViewModel(),
@@ -63,11 +71,7 @@ fun ExplorerScreen(
     val availableProducts = state.data?.filter { it.available && !it.boost } ?: emptyList()
 
     val isRefreshing = remember { mutableStateOf(false) }
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = viewModel.scrollPosition.intValue,
-        initialFirstVisibleItemScrollOffset = viewModel.scrollOffset.intValue
-    )
-    val rowState = rememberLazyListState()
+
 
     fun refreshData() {
         isRefreshing.value = true
@@ -76,23 +80,10 @@ fun ExplorerScreen(
 
     LaunchedEffect(isRefreshing.value) {
         if (isRefreshing.value) {
-            listState.scrollToItem(0)
-            rowState.scrollToItem(0)
+            viewModel.resetListPosition()
             isRefreshing.value = false
         }
     }
-
-
-    LaunchedEffect(viewModel.categoryId.value) {
-        rowState.scrollToItem(0)
-        listState.scrollToItem(0)
-    }
-
-    LaunchedEffect(listState) {
-        viewModel.scrollPosition = mutableIntStateOf( listState.firstVisibleItemIndex)
-        viewModel.scrollOffset = mutableIntStateOf( listState.firstVisibleItemScrollOffset)
-    }
-
     MainScaffoldApp(
         bottomBar = bottomBar,
         paddingCard = PaddingValues(top = 5.dp),
@@ -199,61 +190,188 @@ fun ExplorerScreen(
                 }
             }
         }
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(isRefreshing.value),
-            onRefresh = { refreshData() },
-            refreshTriggerDistance = 35.dp,
-            indicator = { state, refreshTrigger ->
-                SwipeRefreshIndicator(
-                    state = state,
-                    refreshTriggerDistance = refreshTrigger,
-                    contentColor = Color(0xFFFFD146),
-                    backgroundColor = Color.Black.copy(alpha = 0.5f)
-                )
-            }
-        ) {
-            LazyColumn(state = listState) {
-                if (boostProducts.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "Productos destacados",
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp)
-                                .padding(bottom = 10.dp)
-                        )
-                        LazyRow(state = rowState) {
-                            item { Spacer(modifier = Modifier.width(20.dp)) }
-                            items(boostProducts.reversed()) { product ->
-                                ProductsRow(product, onProductClick)
-                            }
-                            item { Spacer(modifier = Modifier.width(10.dp)) }
-                        }
-                        Spacer(modifier = Modifier.height(20.dp))
-                    }
+
+        if (state.isLoading || state.data.isNullOrEmpty()) {
+           SkeletonLoader()
+        } else {
+            SwipeRefresh(
+                state = rememberSwipeRefreshState(isRefreshing.value),
+                onRefresh = { refreshData() },
+                refreshTriggerDistance = 35.dp,
+                indicator = { state, refreshTrigger ->
+                    SwipeRefreshIndicator(
+                        state = state,
+                        refreshTriggerDistance = refreshTrigger,
+                        contentColor = Color(0xFFFFD146),
+                        backgroundColor = Color.Black.copy(alpha = 0.5f)
+                    )
                 }
-                if (availableProducts.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "Productos Recientes",
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp)
-                        )
+            ) {
+                LazyColumn(state = viewModel.listState) {
+                    if (boostProducts.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "Productos destacados",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp)
+                                    .padding(bottom = 10.dp)
+                            )
+                            LazyRow(state = viewModel.rowState) {
+                                item { Spacer(modifier = Modifier.width(20.dp)) }
+                                items(boostProducts.reversed()) { product ->
+                                    ProductsRow(product, onProductClick)
+                                }
+                                item { Spacer(modifier = Modifier.width(10.dp)) }
+                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+                        }
                     }
-                    items(availableProducts.reversed()) { product ->
-                        Products(product, onProductClick)
+                    if (availableProducts.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "Productos Recientes",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp)
+                            )
+                        }
+                        items(availableProducts.reversed()) { product ->
+                            Products(product, onProductClick)
+                        }
+                        item { Spacer(modifier = Modifier.height(90.dp)) }
                     }
-                    item { Spacer(modifier = Modifier.height(90.dp)) }
                 }
             }
         }
     }
 }
+
+@Composable
+fun SkeletonLoader() {
+    val infiniteTransition = rememberInfiniteTransition()
+    val animationValue by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            tween(durationMillis = 1100),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
+    val gradient = Brush.horizontalGradient(
+        colors = listOf(
+            Color.Gray.copy(alpha = 0.2f),
+            Color.Gray.copy(alpha = 0.4f),
+            Color.Gray.copy(alpha = 0.2f)
+        ),
+        startX = animationValue * 600,
+        endX = animationValue * 1200
+    )
+
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+        Spacer(modifier = Modifier.height(20.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.4f)
+                .height(20.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(gradient)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Skeleton de "Productos destacados"
+        LazyRow {
+            items(5) {
+                Box(
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(gradient)
+                        .padding(8.dp)
+                ) {
+                    Column {
+                        Box(
+                            modifier = Modifier
+                                .height(120.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(gradient)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .height(15.dp)
+                                .fillMaxWidth(0.7f)
+                                .background(gradient)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .height(15.dp)
+                                .fillMaxWidth(0.5f)
+                                .background(gradient)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .height(20.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(gradient)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyColumn {
+            items(6) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(gradient)
+                        .height(120.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(gradient)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Box(
+                            modifier = Modifier
+                                .height(20.dp)
+                                .fillMaxWidth(0.6f)
+                                .background(gradient)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .height(15.dp)
+                                .fillMaxWidth(0.8f)
+                                .background(gradient)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun ProductsRow(product: Product, onProductClick: (String, String) -> Unit,
