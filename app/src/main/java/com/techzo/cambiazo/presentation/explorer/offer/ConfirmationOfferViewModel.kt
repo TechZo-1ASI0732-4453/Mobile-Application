@@ -30,6 +30,9 @@ class ConfirmationOfferViewModel @Inject constructor(
     private val _offerSuccess = MutableStateFlow(false)
     val offerSuccess: StateFlow<Boolean> get() = _offerSuccess
 
+    private val _offerFailure = MutableStateFlow(false)
+    val offerFailure : StateFlow<Boolean> get() = _offerFailure
+
     init {
         viewModelScope.launch {
             val desiredProductId: Int? = savedStateHandle.get<String>("desiredProductId")?.toIntOrNull()
@@ -57,7 +60,7 @@ class ConfirmationOfferViewModel @Inject constructor(
             )
 
             val result = exchangeRepository.createExchange(newExchangeRequest)
-            if (result is Resource.Success) _offerSuccess.value = true
+            if (result is Resource.Success) _offerSuccess.value = true else _offerFailure.value = true
         }
     }
 }

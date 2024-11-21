@@ -18,34 +18,52 @@ class AuthRepository(private val authService: AuthService) {
             val response = authService.signIn(UserSignInRequestDto(username, password)).execute()
             if(response.isSuccessful){
                 val user = response.body()?.toUserSignIn()
-                Log.d("user", "Response: ${response}")
                 if(user != null){
                     return@withContext Resource.Success(user)
                 }
                 return@withContext Resource.Error("Usuario no encontrado")
             }
-            Log.d("user", "Username: ${username}, Password: ${password}")
             return@withContext Resource.Error(response.message())
         }catch (e: Exception){
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
         }
     }
 
-    suspend fun signUp(username: String, password: String, name: String, phoneNumber: String, profilePicture: String, roles: List<String>): Resource<UserSignUp> = withContext(Dispatchers.IO){
-        try{
-            val response = authService.signUp(SignUpRequestDto(username, password, name, phoneNumber, profilePicture, roles)).execute()
-            if(response.isSuccessful){
+    suspend fun signUp(
+        username: String,
+        password: String,
+        name: String,
+        phoneNumber: String,
+        profilePicture: String,
+        roles: List<String>,
+        isGoogleAccount: Boolean // Nuevo parámetro para diferenciar registros
+    ): Resource<UserSignUp> = withContext(Dispatchers.IO) {
+        try {
+            // Actualización del DTO con el nuevo campo
+            val response = authService.signUp(
+                SignUpRequestDto(
+                    username = username,
+                    password = password,
+                    name = name,
+                    phoneNumber = phoneNumber,
+                    profilePicture = profilePicture,
+                    roles = roles,
+                    isGoogleAccount = isGoogleAccount
+                )
+            ).execute()
+
+            if (response.isSuccessful) {
                 val user = response.body()?.toUserSignUp()
-                Log.d("user", "Response: ${response}")
-                if(user != null){
+                if (user != null) {
                     return@withContext Resource.Success(user)
                 }
                 return@withContext Resource.Error("Usuario no encontrado")
             }
-            Log.d("user", "Username: ${username}, Password: ${password}, Name: ${name}, Phone Number: ${phoneNumber}, Profile Picture: ${profilePicture}, Roles: ${roles}")
+
             return@withContext Resource.Error(response.message())
-        }catch (e: Exception){
+        } catch (e: Exception) {
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
         }
     }
+
 }

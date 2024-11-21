@@ -52,7 +52,7 @@ fun CustomTabs(selectedTabIndex: Int,itemTabs: List<String> ,onTabSelected: (Int
                 ) {
                     Text(
                         text = title,
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         color = if(isSelected) Color.Black else Color.Gray,
                         fontWeight = FontWeight.Normal,
                     )

@@ -1,6 +1,5 @@
 package com.techzo.cambiazo.presentation.auth.changepassword.newpasswordscreen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -30,14 +30,20 @@ import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordViewModel
+import com.techzo.cambiazo.presentation.profile.ProfileViewModel
 
 @Composable
 fun NewPasswordScreen(
     goBack: () -> Unit,
     goSignIn: () -> Unit,
     email: String,
+    viewModel: ProfileViewModel = hiltViewModel(),
     changePasswordViewModel: ChangePasswordViewModel = hiltViewModel()
 ) {
+
+    val passwordError = remember { mutableStateOf(false) }
+    val messageError = remember {mutableStateOf("")}
+
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 10.dp),
         contentsHeader = {
@@ -104,8 +110,10 @@ fun NewPasswordScreen(
                 value = password,
                 placeHolder = "Contraseña",
                 type = "Password",
-                pressEnter = {},
+                isError = passwordError.value,
+                messageError = null,
                 onValueChange = {
+                    passwordError.value = false
                     password = it
                 }
             )
@@ -113,19 +121,34 @@ fun NewPasswordScreen(
                 value = repeatPassword,
                 placeHolder = "Contraseña",
                 type = "Password",
-                pressEnter = {},
+                isError = passwordError.value,
+                messageError = null,
                 onValueChange = {
+                    passwordError.value = false
                     repeatPassword = it
                 }
             )
+            if(passwordError.value){
+                Text(modifier = Modifier.fillMaxWidth(),
+                    text = "*${messageError.value}",
+                    color = Color.Red,
+                    fontSize = 14.sp
+                )
+            }
             ButtonApp(
                 text = "Cambiar contraseña",
                 onClick = {
-                    if (password == repeatPassword) {
-                        changePasswordViewModel.changePassword(email, password)
-                        showDialog = true
-                    } else {
-                        // Show error message or handle password mismatch
+                    if(password.isNotEmpty() && repeatPassword.isNotEmpty()) {
+                        if (password == repeatPassword) {
+                            changePasswordViewModel.changePassword(email, password)
+                            showDialog = true
+                        } else {
+                            passwordError.value = true
+                            messageError.value = "Las contraseñas no coinciden"
+                        }
+                    }else{
+                        passwordError.value = true
+                        messageError.value = "Por favor, llena todos los campos"
                     }
                 },
             )
@@ -137,6 +160,7 @@ fun NewPasswordScreen(
                     labelButton1 = "Iniciar Sesión",
                     onClickButton1 = {
                         showDialog=false
+                        viewModel.onLogout()
                         goSignIn()
                     }
                 )

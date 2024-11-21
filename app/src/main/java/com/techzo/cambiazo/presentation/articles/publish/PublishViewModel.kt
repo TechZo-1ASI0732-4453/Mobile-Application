@@ -2,6 +2,7 @@ package com.techzo.cambiazo.presentation.articles.publish
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +25,7 @@ import com.techzo.cambiazo.domain.ProductCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
 
@@ -135,20 +137,25 @@ class PublishViewModel @Inject constructor(
 
 
     fun validateReachingLimit(list: List<Product>) {
+        Log.d("PublishViewModel", "print: ${list}")
         val limit = when (Constants.userSubscription!!.plan.id) {
             1 -> 3
             2 -> 15
             else -> 35
         }
-        val inputDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        val startOfMonth = calendar.time
 
-        val startDate = inputDateFormat.parse(Constants.userSubscription!!.startDate)
-        val endDate = inputDateFormat.parse(Constants.userSubscription!!.endDate)
+        calendar.add(Calendar.MONTH, 1)
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.add(Calendar.DAY_OF_MONTH, -1)
+        val endOfMonth = calendar.time
 
         val productsAllowed = list.count {
-            (it.createdAt.after(startDate) && it.createdAt.before(endDate)) ||
-                    it.createdAt == startDate ||
-                    it.createdAt == endDate
+            ((it.createdAt.after(startOfMonth) && it.createdAt.before(endOfMonth)) ||
+                    it.createdAt == startOfMonth ||
+                    it.createdAt == endOfMonth)
         }
 
         if (productsAllowed >= limit) {
@@ -166,7 +173,11 @@ class PublishViewModel @Inject constructor(
         _descriptionError.value = null
     }
 
-    fun productDataToEdit(product: Product?,list: List<Product>){
+    fun hideDialog(){
+        limitReached.value = false
+    }
+
+    fun productDataToEdit(product: Product?){
         product?.let {
             productToEdit.value = product
             _name.value = product.name
@@ -189,7 +200,7 @@ class PublishViewModel @Inject constructor(
                 departmentId = product.location.departmentId
             )
         _image.value = Uri.parse(product.image)
-        }?:validateReachingLimit(list)
+        }
     }
 
     init {
@@ -258,6 +269,7 @@ class PublishViewModel @Inject constructor(
     fun deselectImage() {
         _image.value = null
     }
+
 
     private fun getLocations() {
         viewModelScope.launch {

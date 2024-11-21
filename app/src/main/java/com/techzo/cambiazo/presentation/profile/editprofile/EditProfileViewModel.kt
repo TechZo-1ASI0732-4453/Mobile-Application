@@ -2,6 +2,7 @@ package com.techzo.cambiazo.presentation.profile.editprofile
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -50,9 +51,11 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
     private val _estateButton = mutableStateOf<Boolean>(false)
     val estateButton: State<Boolean> get() = _estateButton
 
-
     private val _token = mutableStateOf(Constants.token?:"")
     val token: State<String> get() = _token
+
+    private val _isGoogleAccount = mutableStateOf(false)
+    val isGoogleAccount: State<Boolean> get() = _isGoogleAccount
 
     private fun updateToken(newToken: String) {
         _token.value = newToken
@@ -65,6 +68,13 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
     private fun updateUser(updatedUser: UserSignIn) {
         _user.value = updatedUser
         Constants.user = updatedUser
+    }
+
+    private val _changesSaved = mutableStateOf(false)
+    val changesSaved: State<Boolean> get() = _changesSaved
+
+    fun closeChangesSaved() {
+        _changesSaved.value = false
     }
 
 
@@ -137,6 +147,7 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
                 _username.value = user.data.username
                 _phoneNumber.value = user.data.phoneNumber
                 _profilePicture.value = user.data.profilePicture
+                _isGoogleAccount.value = user.data.isGoogleAccount
 
             } else {
                 _state.value = UIState(message = user.message ?: "Error")
@@ -196,6 +207,7 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
                 result.data?.let {
                     updateUser(it)
                     updateToken(it.token)
+                    _changesSaved.value = true
                 }
 
             } else {
@@ -203,18 +215,6 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
             }
         }
     }
-
-    fun deleteAccount() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val userId = Constants.user!!.id
-            val result = userRepository.deleteUser(userId)
-            if (result is Resource.Success) {
-                updateUser(UserSignIn(0, "", "", "", "", ""))
-                updateToken("")
-            }
-        }
-    }
-
 
 
 

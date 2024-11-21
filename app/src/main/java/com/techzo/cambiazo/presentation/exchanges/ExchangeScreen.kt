@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
@@ -46,6 +49,7 @@ import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.CustomTabs
 import com.techzo.cambiazo.common.components.EmptyStateMessage
+import com.techzo.cambiazo.common.components.LoadingMessage
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import com.techzo.cambiazo.domain.Exchange
@@ -56,13 +60,20 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ExchangeScreen(
-    bottomBar: Pair<@Composable () -> Unit, () -> Unit>, viewModel: ExchangeViewModel = hiltViewModel(),
+    bottomBar: Pair<@Composable () -> Unit, () -> Unit>,
+    viewModel: ExchangeViewModel = hiltViewModel(),
+    page: Int,
     goToDetailsScreen: (String, String) -> Unit,
+    goToReviewScreen: (Int) -> Unit
 ) {
 
     val state = viewModel.state.value
     //val exchangesSend=viewModel.exchangesSend.value
     //val exchangesReceived=viewModel.exchangesReceived.value
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchExchanges(page)
+    }
 
     MainScaffoldApp(bottomBar = bottomBar,
         paddingCard = PaddingValues(start = 15.dp, end = 15.dp, top = 20.dp),
@@ -72,7 +83,7 @@ fun ExchangeScreen(
             Spacer(modifier = Modifier.height(30.dp))
         }) {
         val pagerState = rememberPagerState(
-            pageCount = { 3 }, initialPage = 0
+            pageCount = { 3 }, initialPage = page
         )
 
         val coroutineScope = rememberCoroutineScope()
@@ -98,12 +109,7 @@ fun ExchangeScreen(
             state = pagerState, userScrollEnabled = false
         ) {
             if (state.isLoading) {
-                EmptyStateMessage(
-                    icon = Icons.Default.Info,
-                    message = "Cargando...",
-                    subMessage = "Por favor espere un momento",
-                    modifier = Modifier.padding(20.dp)
-                )
+                LoadingMessage()
             } else if (state.data.isNullOrEmpty()) {
                 EmptyStateMessage(
                     icon = Icons.Default.Info,
@@ -114,7 +120,7 @@ fun ExchangeScreen(
             } else {
                 LazyColumn {
                     itemsIndexed(state.data ?: emptyList()) { index, exchange ->
-                        ExchangeBox(exchange, pagerState.currentPage, goToDetailsScreen)
+                        ExchangeBox(exchange, pagerState.currentPage, goToDetailsScreen, goToReviewScreen)
                         if (index != (state.data?.size ?: 0) - 1) {
                             HorizontalDivider(color = Color(0xFFDCDCDC), thickness = 1.dp)
                         }
@@ -129,7 +135,7 @@ fun ExchangeScreen(
 
 
 @Composable
-fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, String) -> Unit) {
+fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, String) -> Unit, goToReviewScreen: (Int) -> Unit) {
     val boolean = exchange.userOwn.id == Constants.user?.id
 
     val textUpperImage = when (page) {
@@ -172,6 +178,12 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
         if (page == 0 && exchange.status == "Pendiente") Color(0xFFE8E8E8)
         else if(page==1) Color.Black
         else Color(0xFF38B000)
+    }
+
+    val userId = when (page) {
+        0 -> exchange.userChange.id
+        1 -> exchange.userOwn.id
+        else -> if (boolean) exchange.userChange.id else exchange.userOwn.id
     }
 
     val firstProductImage= when (page) {
@@ -217,7 +229,11 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .weight(1f)
+            ) {
                 GlideImage(
                     imageModel = { upperUserProfileImage },
                     modifier = Modifier
@@ -231,6 +247,7 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                     fontWeight = FontWeight.Bold
                 )
             }
+
             val context = LocalContext.current
 
             Text(
@@ -255,8 +272,8 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp
             )
-
         }
+
         Spacer(modifier = Modifier.height(15.dp))
 
         Row(

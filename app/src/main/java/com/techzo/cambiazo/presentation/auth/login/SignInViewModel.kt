@@ -71,6 +71,7 @@ class SignInViewModel @Inject constructor(
                     name = userPreferences.getName.first() ?: "",
                     phoneNumber = userPreferences.getPhoneNumber.first() ?: "",
                     profilePicture = userPreferences.getProfilePicture.first() ?: "",
+                    isGoogleAccount = userPreferences.getIsGoogleAccount.first() ?: false,
                     token = token
                 )
                 Constants.userSubscription = getUserSubscription(userPreferences.getId.first() ?: 0)
@@ -92,7 +93,7 @@ class SignInViewModel @Inject constructor(
                 _state.value = UIState(data = result.data)
                 result.data?.let{
                     if(_isChecked.value){
-                        userPreferences.saveUserSession(it.id, it.username, it.name, it.phoneNumber, it.profilePicture, it.token)
+                        userPreferences.saveUserSession(it.id, it.username, it.name, it.phoneNumber, it.profilePicture, it.token, it.isGoogleAccount)
                     }
                     Constants.token = it.token
                     Constants.user = it

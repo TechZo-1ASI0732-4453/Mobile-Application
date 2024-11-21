@@ -126,16 +126,27 @@ fun PublishScreen(
             descriptionError,
             "Regresar",
             "Comprar suscripción",
-            onClickButton1 = {back()},
-            onClickButton2 = {openSubscription()})
+            onClickButton1 = {
+                viewModel.hideDialog()
+                back()
+            },
+            onClickButton2 = {
+                viewModel.hideDialog()
+                openSubscription()
+            })
 
     }
 
-    val articlesState by articlesViewModel.products.collectAsState()
-    val articles = articlesState.data?: emptyList()
+    val articles =  articlesViewModel.products.value.data?: emptyList()
 
     LaunchedEffect(Unit) {
-        viewModel.productDataToEdit(product,articles)
+        viewModel.productDataToEdit(product)
+    }
+
+    LaunchedEffect(articles) {
+        if(productToEdit == null){
+            viewModel.validateReachingLimit(articles)
+        }
     }
 
     MainScaffoldApp(

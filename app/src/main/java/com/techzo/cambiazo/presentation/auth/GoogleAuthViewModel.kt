@@ -3,6 +3,7 @@ package com.techzo.cambiazo.presentation.auth
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,8 +16,13 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
+import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.common.UserPreferences
 import com.techzo.cambiazo.data.repository.AuthRepository
+import com.techzo.cambiazo.data.repository.SubscriptionRepository
 import com.techzo.cambiazo.data.repository.UserRepository
+import com.techzo.cambiazo.domain.Subscription
+import com.techzo.cambiazo.domain.UserSignIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -25,15 +31,26 @@ import javax.inject.Inject
 @HiltViewModel
 class GoogleAuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val userPreferences: UserPreferences,
+    private val subscriptionRepository: SubscriptionRepository
 ) : ViewModel() {
+
+    private val _subscription = mutableStateOf(UIState<Subscription>())
+    val subscription: State<UIState<Subscription>> get() = _subscription
+
+    private val _state = mutableStateOf(UIState<UserSignIn>())
+    val state: State<UIState<UserSignIn>> get() = _state
+
 
     private val auth = FirebaseAuth.getInstance()
     val phoneNumber = mutableStateOf("")
 
+
     fun onPhoneNumberChange(phone: String) {
         phoneNumber.value = phone
     }
+
 
     fun getGoogleSignInIntent(context: Context): Intent {
         val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -68,11 +85,13 @@ class GoogleAuthViewModel @Inject constructor(
 
             if (userExists) {
                 val signInResult = authRepository.signIn(email, auth.currentUser!!.uid)
-                if (signInResult is Resource.Success) {
-                    Constants.token = signInResult.data?.token
-                    Constants.user = signInResult.data
+                signInResult.data?.let{
+                    userPreferences.saveUserSession(it.id, it.username, it.name, it.phoneNumber, it.profilePicture, it.token, it.isGoogleAccount)
+                    Constants.token = it.token
+                    Constants.user = it
+                    Constants.userSubscription = getUserSubscription(it.id)
                     onResult(true, false)
-                } else {
+                } ?: run {
                     onResult(false, false)
                 }
             } else {
@@ -99,20 +118,35 @@ class GoogleAuthViewModel @Inject constructor(
                     name = name,
                     phoneNumber = phone,
                     profilePicture = profilePicture,
-                    roles = listOf("ROLE_USER")
+                    roles = listOf("ROLE_USER"),
+                    isGoogleAccount = true
                 )
 
                 if (signUpResult is Resource.Success) {
                     val signInResult = authRepository.signIn(email, firebaseUid)
-                    if (signInResult is Resource.Success) {
-                        Constants.token = signInResult.data?.token
-                        Constants.user = signInResult.data
+                    signInResult.data?.let{
+                        userPreferences.saveUserSession(it.id, it.username, it.name, it.phoneNumber, it.profilePicture, it.token, it.isGoogleAccount)
+                        Constants.token = it.token
+                        Constants.user = it
+                        Constants.userSubscription = getUserSubscription(it.id)
                         onComplete()
                     }
                 }
             } catch (e: Exception) {
                 Log.e("GoogleAuthViewModel", "Error during registration completion", e)
             }
+        }
+    }
+
+    private suspend fun getUserSubscription(userId: Int): Subscription? {
+        _subscription.value = UIState(isLoading = true)
+        val result = subscriptionRepository.getSubscriptionByUserId(userId)
+        return if (result is Resource.Success) {
+            _subscription.value = UIState(data = result.data)
+            result.data
+        } else {
+            _subscription.value = UIState(message = "Datos del usuario incorrectos")
+            null
         }
     }
 }

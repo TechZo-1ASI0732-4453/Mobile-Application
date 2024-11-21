@@ -236,7 +236,18 @@ fun SignUpScreen(
 
 
             if (state.isLoading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 30.dp, bottom = 31.dp)
+                ) {
+                    LinearProgressIndicator(
+                        color = Color(0xFFFFD146),
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .fillMaxWidth()
+                    )
+                }
             } else {
                 ButtonApp("Registrarse", onClick = {
                     viewModel.signUp()

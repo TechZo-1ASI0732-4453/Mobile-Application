@@ -28,18 +28,16 @@ class FavoritesViewModel @Inject constructor(
     private val _productToRemove = mutableStateOf<Product?>(null)
     val productToRemove: State<Product?> = _productToRemove
 
-    private val _favoriteProductsIds = mutableStateOf<Set<Int>>(emptySet())
-    val favoriteProductsIds: State<Set<Int>> = _favoriteProductsIds
-
     init {
         getFavoriteProductsByUserId()
     }
 
-    fun getFavoriteProductsByUserId() {
+    private fun getFavoriteProductsByUserId() {
+        _favoriteProducts.value = UIState(isLoading = true)
         viewModelScope.launch {
             val result = productDetailsRepository.getFavoriteProductByUserId(Constants.user!!.id)
             if (result is Resource.Success) {
-                val favoriteProducts = result.data ?: emptyList()
+                val favoriteProducts = result.data?.filter { it.product.available } ?: emptyList()
                 _favoriteProducts.value = UIState(data = favoriteProducts.map { it.product })
             } else {
                 _favoriteProducts.value = UIState(message = "Error al cargar favoritos.")

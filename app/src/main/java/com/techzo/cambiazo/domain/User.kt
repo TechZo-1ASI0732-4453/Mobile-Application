@@ -12,6 +12,7 @@ data class User(
     val phoneNumber: String,
     val profilePicture: String,
     val createdAt: Date,
+    val isGoogleAccount: Boolean,
     val roles: List<String>
 ): Parcelable
 
@@ -22,13 +23,15 @@ data class UserSignIn(
     val name: String,
     val phoneNumber: String,
     val profilePicture: String,
+    val isGoogleAccount: Boolean,
     val token: String
 )
 
 data class UserSignUp(
     val id: Int,
     val username: String,
-    val roles: List<String>
+    val roles: List<String>,
+    val isGoogleAccount: Boolean = false
 )
 
 data class UserEdit(
