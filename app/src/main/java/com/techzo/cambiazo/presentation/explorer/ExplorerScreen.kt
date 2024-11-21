@@ -252,24 +252,8 @@ fun ExplorerScreen(
                         }
                         item { Spacer(modifier = Modifier.height(90.dp)) }
                     }
-                    }
-                    if (availableProducts.isNotEmpty()) {
-                        item {
-                            Text(
-                                text = "Productos Recientes",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                                modifier = Modifier
-                                    .padding(horizontal = 20.dp)
-                            )
-                        }
-                        items(availableProducts.reversed()) { product ->
-                            Products(product, onProductClick)
-                        }
-                        item { Spacer(modifier = Modifier.height(90.dp)) }
-                    }
                 }
+            }
             }
 
     }
