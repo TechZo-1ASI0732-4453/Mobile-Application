@@ -1,5 +1,6 @@
     package com.techzo.cambiazo.presentation.explorer
 
+    import androidx.compose.foundation.lazy.LazyListState
     import androidx.compose.runtime.State
     import androidx.compose.runtime.mutableIntStateOf
     import androidx.compose.runtime.mutableStateOf
@@ -13,6 +14,8 @@
     import com.techzo.cambiazo.domain.Product
     import com.techzo.cambiazo.domain.ProductCategory
     import dagger.hilt.android.lifecycle.HiltViewModel
+    import kotlinx.coroutines.CoroutineScope
+    import kotlinx.coroutines.Dispatchers
     import kotlinx.coroutines.launch
     import javax.inject.Inject
 
@@ -30,14 +33,22 @@
         private val _name = mutableStateOf("")
         val name: State<String> get() = _name
 
-        private val _categoryId = mutableStateOf<Int?>(Constants.filterValues.categoryId)
+        private val _categoryId = mutableStateOf(Constants.filterValues.categoryId)
         val categoryId: State<Int?> get() = _categoryId
 
         private val _productCategories = mutableStateOf(UIState<List<ProductCategory>>())
         val productCategories: State<UIState<List<ProductCategory>>> = _productCategories
 
-        var scrollPosition = mutableIntStateOf(0)
-        var scrollOffset = mutableIntStateOf(0)
+        val listState = LazyListState()
+        val rowState = LazyListState()
+
+        fun resetListPosition() {
+            CoroutineScope(Dispatchers.Main).launch {
+                listState.scrollToItem(0)
+                rowState.scrollToItem(0)
+            }
+        }
+
 
         init {
             getProducts()
@@ -67,6 +78,7 @@
         fun onProductCategorySelected(id: Int) {
             _categoryId.value = if(_categoryId.value == id) null else id
             Constants.filterValues.categoryId = _categoryId.value
+            resetListPosition()
             applyFilter()
         }
 
