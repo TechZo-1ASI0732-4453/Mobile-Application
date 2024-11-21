@@ -21,10 +21,11 @@ class UserPreferences(context: Context) {
         val PHONE_NUMBER_KEY = stringPreferencesKey("phone_number")
         val PROFILE_PICTURE_KEY = stringPreferencesKey("profile_picture")
         val TOKEN_KEY = stringPreferencesKey("token")
+        val IS_GOOGLE_ACCOUNT_KEY = stringPreferencesKey("is_google_account")
     }
 
     // Función para guardar los datos de usuario
-    suspend fun saveUserSession(id: Int, username: String, name: String, phoneNumber: String, profilePicture: String, token: String) {
+    suspend fun saveUserSession(id: Int, username: String, name: String, phoneNumber: String, profilePicture: String, token: String, isGoogleAccount: Boolean) {
         dataStore.edit { preferences ->
             preferences[USERNAME_KEY] = username
             preferences[TOKEN_KEY] = token
@@ -32,6 +33,7 @@ class UserPreferences(context: Context) {
             preferences[NAME_KEY] = name
             preferences[PHONE_NUMBER_KEY] = phoneNumber
             preferences[PROFILE_PICTURE_KEY] = profilePicture
+            preferences[IS_GOOGLE_ACCOUNT_KEY] = isGoogleAccount.toString()
         }
     }
 
@@ -65,6 +67,11 @@ class UserPreferences(context: Context) {
     val getId: Flow<Int?> = dataStore.data
         .map { preferences ->
             preferences[ID_KEY]
+        }
+
+    val getIsGoogleAccount: Flow<Boolean?> = dataStore.data
+        .map { preferences ->
+            preferences[IS_GOOGLE_ACCOUNT_KEY]?.toBoolean()
         }
 
 

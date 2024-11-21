@@ -223,6 +223,7 @@ fun OtpCodeVerificationScreen(
                     val inputCode = firstDigit + secondDigit + thirdDigit + fourthDigit
                     if (changePasswordViewModel.validateCode(inputCode,changePasswordViewModel.code.value)) {
                         goNewPassword(email)
+
                     } else {
                         Log.e("CODE_VERIFICATION", "CODIGO INCORRECTO")
                     }

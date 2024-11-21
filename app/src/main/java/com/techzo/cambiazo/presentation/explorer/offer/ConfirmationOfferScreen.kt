@@ -33,6 +33,7 @@ fun ConfirmationOfferScreen(
     val desiredProduct by viewModel.desiredProduct.collectAsState()
     val offeredProduct by viewModel.offeredProduct.collectAsState()
     val offerSuccess by viewModel.offerSuccess.collectAsState()
+    val offerFailure by viewModel.offerFailure.collectAsState()
 
     MainScaffoldApp(
         paddingCard = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
@@ -101,6 +102,21 @@ fun ConfirmationOfferScreen(
                         DialogApp(
                             message = "¡Oferta Enviada!",
                             description = "Te notificaremos el estado de tu solicitud. Ya sea que el otro usuario acepte o decline tu oferta.",
+                            labelButton1 = "Volver",
+                            onClickButton1 = {
+                                navController.popBackStack(Routes.ProductDetails.route, inclusive = false)
+                                showDialog = false
+                            }
+                        )
+                    }
+                }
+                offerFailure.takeIf { it }?.let {
+                    var showDialog by remember { mutableStateOf(true) }
+
+                    showDialog.takeIf { it }?.let {
+                        DialogApp(
+                            message = "Oferta No Realizada",
+                            description = "Esta oferta ya ha sido rechazada anteriormente.",
                             labelButton1 = "Volver",
                             onClickButton1 = {
                                 navController.popBackStack(Routes.ProductDetails.route, inclusive = false)
