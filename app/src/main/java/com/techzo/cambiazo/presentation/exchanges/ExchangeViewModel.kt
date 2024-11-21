@@ -78,7 +78,6 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
             val result = exchangeRepository.getExchangesByUserOwnId(Constants.user!!.id)
-            Log.d("id", Constants.user?.id.toString())
             if (result is Resource.Success) {
                 val filteredData = result.data?.filter { exchange ->
                     exchange.productOwn.available && exchange.productChange.available &&
@@ -89,7 +88,6 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
             } else {
                 _state.value = UIState(message = result.message ?: "Ocurrió un error")
             }
-            Log.d("ExchangeViewModel", "getExchangesByUserOwnId: ${result.data}")
         }
     }
 

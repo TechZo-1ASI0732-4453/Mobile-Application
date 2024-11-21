@@ -158,8 +158,6 @@ class PublishViewModel @Inject constructor(
                     it.createdAt == endOfMonth)
         }
 
-        Log.d("PublishViewModel", "tamanio es: ${productsAllowed}")
-
         if (productsAllowed >= limit) {
             limitReached.value = true
             _messageError.value = "Límite de publicaciones alcanzado"

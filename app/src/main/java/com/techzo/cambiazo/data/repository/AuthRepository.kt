@@ -18,13 +18,11 @@ class AuthRepository(private val authService: AuthService) {
             val response = authService.signIn(UserSignInRequestDto(username, password)).execute()
             if(response.isSuccessful){
                 val user = response.body()?.toUserSignIn()
-                Log.d("user", "Response: ${response}")
                 if(user != null){
                     return@withContext Resource.Success(user)
                 }
                 return@withContext Resource.Error("Usuario no encontrado")
             }
-            Log.d("user", "Username: ${username}, Password: ${password}")
             return@withContext Resource.Error(response.message())
         }catch (e: Exception){
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
@@ -56,17 +54,12 @@ class AuthRepository(private val authService: AuthService) {
 
             if (response.isSuccessful) {
                 val user = response.body()?.toUserSignUp()
-                Log.d("user", "Response: ${response}")
                 if (user != null) {
                     return@withContext Resource.Success(user)
                 }
                 return@withContext Resource.Error("Usuario no encontrado")
             }
 
-            Log.d(
-                "user",
-                "Username: ${username}, Password: ${password}, Name: ${name}, Phone Number: ${phoneNumber}, Profile Picture: ${profilePicture}, Roles: ${roles}, IsGoogleAccount: $isGoogleAccount"
-            )
             return@withContext Resource.Error(response.message())
         } catch (e: Exception) {
             return@withContext Resource.Error(e.message ?: "Ocurrió un error")
