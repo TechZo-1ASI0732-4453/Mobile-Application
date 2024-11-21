@@ -3,7 +3,9 @@ package com.techzo.cambiazo.presentation.exchanges
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
@@ -47,13 +49,22 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
     private val _departments = mutableStateOf<List<Department>>(emptyList())
     //val departments: State<List<Department>> get() = _departments
 
+
     private val _existReview= mutableStateOf(false)
     val existReview: State<Boolean> get() = _existReview
 
 
     init{
-        getExchangesByUserOwnId()
+
         getLocations()
+    }
+
+    fun fetchExchanges(page:Int){
+        when(page){
+            0 -> getExchangesByUserOwnId()
+            1 -> getExchangesByUserChangeId()
+            2 -> getFinishedExchanges()
+        }
     }
 
     private fun getLocations(){

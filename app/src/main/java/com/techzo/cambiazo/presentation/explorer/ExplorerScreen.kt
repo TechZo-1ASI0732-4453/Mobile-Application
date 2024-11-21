@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -59,6 +60,7 @@ import com.techzo.cambiazo.common.components.Products
 import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.exchanges.ExchangeBox
 
+
 @Composable
 fun ExplorerScreen(
     viewModel: ExplorerListViewModel = hiltViewModel(),
@@ -75,11 +77,7 @@ fun ExplorerScreen(
     val availableProducts = state.data?.filter { !it.boost } ?: emptyList()
 
     val isRefreshing = remember { mutableStateOf(false) }
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = viewModel.scrollPosition.intValue,
-        initialFirstVisibleItemScrollOffset = viewModel.scrollOffset.intValue
-    )
-    val rowState = rememberLazyListState()
+
 
     fun refreshData() {
         isRefreshing.value = true
@@ -88,23 +86,10 @@ fun ExplorerScreen(
 
     LaunchedEffect(isRefreshing.value) {
         if (isRefreshing.value) {
-            listState.scrollToItem(0)
-            rowState.scrollToItem(0)
+            viewModel.resetListPosition()
             isRefreshing.value = false
         }
     }
-
-
-    LaunchedEffect(viewModel.categoryId.value) {
-        rowState.scrollToItem(0)
-        listState.scrollToItem(0)
-    }
-
-    LaunchedEffect(listState) {
-        viewModel.scrollPosition = mutableIntStateOf( listState.firstVisibleItemIndex)
-        viewModel.scrollOffset = mutableIntStateOf( listState.firstVisibleItemScrollOffset)
-    }
-
     MainScaffoldApp(
         bottomBar = bottomBar,
         paddingCard = PaddingValues(top = 5.dp),
@@ -233,8 +218,8 @@ fun ExplorerScreen(
                     item {
                         EmptyStateMessage(
                             icon = Icons.Default.Info,
-                            message = "No hay productos",
-                            subMessage = "No tienes intercambios en esta sección",
+                            message = "¡Vaya! Nada por aquí",
+                            subMessage = "Parece que esta sección está vacía.",
                             modifier = Modifier.padding(20.dp)
                         )
                     }

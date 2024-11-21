@@ -31,7 +31,7 @@ class ArticlesViewModel @Inject constructor(
         fetchProducts()
     }
 
-    private fun fetchProducts() {
+    fun fetchProducts() {
         _products.value = UIState(isLoading = true)
         viewModelScope.launch(Dispatchers.IO) {
             val result = productRepository.getProductsByUserId(Constants.user!!.id)

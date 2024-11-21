@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -59,7 +60,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ExchangeScreen(
-    bottomBar: Pair<@Composable () -> Unit, () -> Unit>, viewModel: ExchangeViewModel = hiltViewModel(),
+    bottomBar: Pair<@Composable () -> Unit, () -> Unit>,
+    viewModel: ExchangeViewModel = hiltViewModel(),
+    page: Int,
     goToDetailsScreen: (String, String) -> Unit,
     goToReviewScreen: (Int) -> Unit
 ) {
@@ -67,6 +70,10 @@ fun ExchangeScreen(
     val state = viewModel.state.value
     //val exchangesSend=viewModel.exchangesSend.value
     //val exchangesReceived=viewModel.exchangesReceived.value
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchExchanges(page)
+    }
 
     MainScaffoldApp(bottomBar = bottomBar,
         paddingCard = PaddingValues(start = 15.dp, end = 15.dp, top = 20.dp),
@@ -76,7 +83,7 @@ fun ExchangeScreen(
             Spacer(modifier = Modifier.height(30.dp))
         }) {
         val pagerState = rememberPagerState(
-            pageCount = { 3 }, initialPage = 0
+            pageCount = { 3 }, initialPage = page
         )
 
         val coroutineScope = rememberCoroutineScope()
