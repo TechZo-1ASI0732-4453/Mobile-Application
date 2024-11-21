@@ -30,12 +30,14 @@ import com.techzo.cambiazo.common.components.CustomInput
 import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordViewModel
+import com.techzo.cambiazo.presentation.profile.ProfileViewModel
 
 @Composable
 fun NewPasswordScreen(
     goBack: () -> Unit,
     goSignIn: () -> Unit,
     email: String,
+    viewModel: ProfileViewModel = hiltViewModel(),
     changePasswordViewModel: ChangePasswordViewModel = hiltViewModel()
 ) {
 
@@ -158,6 +160,7 @@ fun NewPasswordScreen(
                     labelButton1 = "Iniciar Sesión",
                     onClickButton1 = {
                         showDialog=false
+                        viewModel.onLogout()
                         goSignIn()
                     }
                 )

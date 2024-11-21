@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.presentation.profile.editprofile
 
 import ImageUploadDialog
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -15,9 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.skydoves.landscapist.glide.GlideImage
+import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.ButtonApp
 import com.techzo.cambiazo.common.components.ButtonIconHeaderApp
 import com.techzo.cambiazo.common.components.CustomInput
@@ -41,18 +41,15 @@ import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
-import com.techzo.cambiazo.presentation.profile.ProfileOption
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
 fun EditProfileScreen(
-    deleteAccount: () -> Unit = {},
     back: () -> Unit = {},
     viewModel: EditProfileViewModel = hiltViewModel()
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val state = viewModel.state.value
 
@@ -60,6 +57,7 @@ fun EditProfileScreen(
     val name = viewModel.name.value
     val phoneNumber = viewModel.phoneNumber.value
     val profilePicture = viewModel.profilePicture.value
+    val isGoogleAccount = viewModel.isGoogleAccount.value
     val errorUsername = viewModel.errorUsername.value
     val errorName = viewModel.errorName.value
     val errorPhoneNumber = viewModel.errorPhoneNumber.value
@@ -78,23 +76,7 @@ fun EditProfileScreen(
             viewModel = viewModel
         )
     }
-
-    if (showDeleteDialog) {
-        DialogApp(
-            message = "Confirmación",
-            description = "¿Está seguro de que desea eliminar tu cuenta?",
-            labelButton1 = "Aceptar",
-            labelButton2 = "Cancelar",
-            onDismissRequest = { showDeleteDialog = false },
-            onClickButton1 = {
-                viewModel.deleteAccount()
-                showDeleteDialog = false
-                deleteAccount()
-            },
-            onClickButton2 = { showDeleteDialog = false }
-        )
-    }
-
+    
     if (changesSaved) {
         DialogApp(
             message = "Éxito",
@@ -176,14 +158,19 @@ fun EditProfileScreen(
                         Spacer(modifier =Modifier.height(5.dp))
 
                         SubTitleText(subTittle = "Correo electrónico")
-                        CustomInput(
-                            value = username,
-                            type = "Email",
-                            placeHolder = "Correo electrónico",
-                            isError = errorUsername.data ?: false,
-                            messageError = errorUsername.message,
-                            onValueChange = { viewModel.onUsernameChange(it) }
-                        )
+
+
+                        Constants.user?.let {
+                            CustomInput(
+                                value = username,
+                                enabled = !it.isGoogleAccount,
+                                type = "Email",
+                                placeHolder = "Correo electrónico",
+                                isError = errorUsername.data ?: false,
+                                messageError = errorUsername.message,
+                                onValueChange = { viewModel.onUsernameChange(it) }
+                            )
+                        }
                         Spacer(modifier =Modifier.height(5.dp))
 
                         SubTitleText(subTittle = "Número de  teléfono")
@@ -197,7 +184,6 @@ fun EditProfileScreen(
                         )
                         Spacer(modifier =Modifier.height(5.dp))
                     }
-
 
                     ButtonApp(
                         "Guardar Cambios",
@@ -226,17 +212,6 @@ fun EditProfileScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
-
-                    ProfileOption(
-                        icon = Icons.Filled.Delete,
-                        text = "Eliminar Cuenta",
-                        onClick = {
-                            showDeleteDialog = true
-                        }
-                    )
                 } else {
                     Text(text = state.message, fontSize = 16.sp)
                 }

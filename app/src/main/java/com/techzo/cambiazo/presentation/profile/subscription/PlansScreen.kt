@@ -41,7 +41,7 @@ fun PlansScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 ButtonIconHeaderApp(Icons.Filled.ArrowBack, onClick = { back() })
-                TextTitleHeaderApp("Mi Suscripción")
+                TextTitleHeaderApp("Suscripción")
             }
         },
         content = {

@@ -1,5 +1,7 @@
 package com.techzo.cambiazo.presentation.articles
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
@@ -7,6 +9,7 @@ import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
 import com.techzo.cambiazo.common.deleteImageFromFirebase
 import com.techzo.cambiazo.data.repository.ProductRepository
+import com.techzo.cambiazo.domain.Exchange
 import com.techzo.cambiazo.domain.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +26,7 @@ class ArticlesViewModel @Inject constructor(
     private val _products = MutableStateFlow(UIState<List<Product>>())
     val products: StateFlow<UIState<List<Product>>> get() = _products
 
+
     init {
         fetchProducts()
     }
@@ -32,7 +36,8 @@ class ArticlesViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val result = productRepository.getProductsByUserId(Constants.user!!.id)
             _products.value = if (result is Resource.Success) {
-                UIState(data = result.data)
+                val filteredData = result.data?.filter { it.available } ?: emptyList()
+                UIState(data = filteredData)
             } else {
                 UIState(message = result.message ?: "Ocurrió un error")
             }

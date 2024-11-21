@@ -323,7 +323,7 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
     var showDialog by remember { mutableStateOf(false) }
     var showDialog2 by remember { mutableStateOf(false) }
     var showDialog3 by remember { mutableStateOf(false) }
-
+    var showDialog4 by remember { mutableStateOf(false) }
 
     if(page == 0){
         Box(
@@ -368,8 +368,7 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                         Spacer(modifier = Modifier.height(10.dp))
 
                         Button(onClick = {
-                            viewModel.deleteExchange(exchangeId)
-                            goBack()
+                            showDialog4 = true
                         },
                             modifier = Modifier.fillMaxWidth()
                                 .height(40.dp),
@@ -384,6 +383,22 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.SansSerif)
+                            )
+                        }
+                        if (showDialog4) {
+                            DialogApp(
+                                message = "¿Deseas cancelar esta oferta?",
+                                description = "Puedes cancelar esta oferta ahora y enviar otra más adelante si cambias de opinión.",
+                                labelButton1 = "Cancelar Oferta",
+                                labelButton2 = "Volver",
+                                onClickButton1 = {
+                                    viewModel.deleteExchange(exchangeId)
+                                    goBack()
+                                    showDialog4 = false
+                                },
+                                onClickButton2 = {
+                                    showDialog4 = false
+                                }
                             )
                         }
                     }

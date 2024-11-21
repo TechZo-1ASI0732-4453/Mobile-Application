@@ -42,6 +42,7 @@ import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.auth.register.SignUpScreen
 import com.techzo.cambiazo.presentation.auth.register.TyC.TermsAndConditionsScreen
 import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
+import com.techzo.cambiazo.presentation.profile.settings.SettingsScreen
 import com.techzo.cambiazo.presentation.profile.subscription.MySubscriptionScreen
 import com.techzo.cambiazo.presentation.profile.subscription.PaymentScreen
 import com.techzo.cambiazo.presentation.profile.subscription.PlansScreen
@@ -124,6 +125,7 @@ sealed class Routes(val route: String) {
     }
 
     object EditProfile : Routes("EditProfileScreen")
+    object Settings : Routes("SettingsScreen")
     object MyReviews : Routes("MyReviewsScreen")
     object Publish : Routes("PublishScreen")
     object Favorites : Routes("FavoritesScreen")
@@ -314,6 +316,7 @@ fun NavScreen() {
                 },
                 openMyReviews = { navController.navigate(Routes.MyReviews.route) },
                 openEditProfile = { navController.navigate(Routes.EditProfile.route) },
+                openConfiguration = { navController.navigate(Routes.Settings.route) },
                 openFavorites = { navController.navigate(Routes.Favorites.route) },
                 bottomBar = BottomBarNavigation(items,currentRoute),
                 openSubscription = { navController.navigate(Routes.MySubscription.route) }
@@ -334,10 +337,19 @@ fun NavScreen() {
         }
         composable(route = Routes.EditProfile.route) {
             EditProfileScreen(
+                back = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Routes.Settings.route) {
+            SettingsScreen(
                 deleteAccount = {
                     navController.navigate(Routes.SignIn.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                changePassword = { userEmail  ->
+                    navController.navigate(Routes.NewPassword.createRoute(userEmail))
                 },
                 back = { navController.popBackStack() }
             )

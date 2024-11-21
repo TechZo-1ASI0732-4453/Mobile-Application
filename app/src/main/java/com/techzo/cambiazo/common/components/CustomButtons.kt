@@ -23,6 +23,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -37,10 +39,10 @@ import com.techzo.cambiazo.R
 fun LoginGoogleApp(onClick: () -> Unit){
     Surface(
         modifier = Modifier
-            .size(56.dp)
+            .size(56.dp).shadow(2.dp, CircleShape)
+            .border(0.5.dp, Color(0xFFF2F2F2), CircleShape)
+            .clip(CircleShape)
             .clickable(onClick = onClick),
-        shape = CircleShape,
-        shadowElevation = 5.dp
     ) {
         Image(
             painter = painterResource(R.drawable.logo_gmail),

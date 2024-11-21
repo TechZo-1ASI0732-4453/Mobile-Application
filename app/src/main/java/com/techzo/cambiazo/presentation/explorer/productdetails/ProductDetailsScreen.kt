@@ -289,16 +289,18 @@ fun ProductDetails(
 
         Spacer(modifier = Modifier.weight(6f))
 
-        ButtonApp(
-            text = "Intercambiar",
-            onClick = {
-                if ( userProducts.isEmpty() ) {
-                    showDialog = true
-                } else {
-                    onMakeOffer(product)
+        if ( product.user.id != Constants.user?.id ) {
+            ButtonApp(
+                text = "Intercambiar",
+                onClick = {
+                    if ( userProducts.isEmpty() ) {
+                        showDialog = true
+                    } else {
+                        onMakeOffer(product)
+                    }
                 }
-            }
-        )
+            )
+        }
 
         if (showDialog) {
             DialogApp(

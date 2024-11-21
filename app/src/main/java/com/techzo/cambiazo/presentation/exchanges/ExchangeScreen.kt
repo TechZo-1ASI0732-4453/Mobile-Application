@@ -49,6 +49,7 @@ import com.techzo.cambiazo.R
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.CustomTabs
 import com.techzo.cambiazo.common.components.EmptyStateMessage
+import com.techzo.cambiazo.common.components.LoadingMessage
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import com.techzo.cambiazo.domain.Exchange
@@ -108,12 +109,7 @@ fun ExchangeScreen(
             state = pagerState, userScrollEnabled = false
         ) {
             if (state.isLoading) {
-                EmptyStateMessage(
-                    icon = Icons.Default.Info,
-                    message = "Cargando...",
-                    subMessage = "Por favor espere un momento",
-                    modifier = Modifier.padding(20.dp)
-                )
+                LoadingMessage()
             } else if (state.data.isNullOrEmpty()) {
                 EmptyStateMessage(
                     icon = Icons.Default.Info,
