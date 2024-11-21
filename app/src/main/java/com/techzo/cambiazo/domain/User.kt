@@ -23,6 +23,7 @@ data class UserSignIn(
     val name: String,
     val phoneNumber: String,
     val profilePicture: String,
+    val isGoogleAccount: Boolean,
     val token: String
 )
 

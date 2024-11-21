@@ -17,7 +17,7 @@ data class UserDto(
     val profilePicture: String,
     @SerializedName ("createdAt")
     val createdAt: Date,
-    @SerializedName ("is_google_account")
+    @SerializedName ("isGoogleAccount")
     val isGoogleAccount: Boolean,
     @SerializedName("roles")
     val roles: List<String>

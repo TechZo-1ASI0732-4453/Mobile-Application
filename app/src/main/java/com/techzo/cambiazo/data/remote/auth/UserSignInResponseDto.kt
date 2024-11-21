@@ -14,6 +14,8 @@ data class UserSignInResponseDto(
     val phoneNumber: String,
     @SerializedName("profilePicture")
     val profilePicture: String,
+    @SerializedName("isGoogleAccount")
+    val isGoogleAccount: Boolean,
     @SerializedName("token")
     val token: String,
 
@@ -25,5 +27,6 @@ fun UserSignInResponseDto.toUserSignIn() = UserSignIn(
     name = name,
     phoneNumber = phoneNumber,
     profilePicture = profilePicture,
+    isGoogleAccount = isGoogleAccount,
     token = token
 )

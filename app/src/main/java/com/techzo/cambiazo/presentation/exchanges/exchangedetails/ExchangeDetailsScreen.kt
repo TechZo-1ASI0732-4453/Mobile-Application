@@ -542,7 +542,6 @@ fun BoxUnderExchange(textUnderImage:String, image:String, productName: String, p
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(10.dp))
-                        Log.d("Exist Review", viewModel.existReview.toString())
                         if(!viewModel.existReview.value){
                             Button(onClick = {
                                 showDialog3=true
