@@ -253,7 +253,7 @@ fun NavScreen() {
 
         composable(route = Routes.Exchange.route) {
             ExchangeScreen(
-                bottomBar = BottomBarNavigation(items,currentRoute) ,
+                bottomBar = BottomBarNavigation(items, currentRoute),
                 goToDetailsScreen = { exchangeId, page ->
                     navController.navigate(
                         Routes.ExchangeDetails.createExchangeDetailsRoute(
@@ -262,9 +262,12 @@ fun NavScreen() {
                         )
                     )
                 },
-                page = navController.previousBackStackEntry?.savedStateHandle?.get<Int>("page") ?: 0
-            )
+                page = navController.previousBackStackEntry?.savedStateHandle?.get<Int>("page") ?: 0,
+                goToReviewScreen = { userId ->
+                    navController.navigate(Routes.Reviews.createRoute(userId.toString()))
+                }            )
         }
+
 
         composable(route = Routes.Article.route) {
             ArticlesScreen(
@@ -293,6 +296,9 @@ fun NavScreen() {
                         navController.currentBackStackEntry?.savedStateHandle?.set("page", page)
                         navController.navigate(Routes.Exchange.route)
                              },
+                    goToReviewScreen = { userId ->
+                        navController.navigate(Routes.Reviews.createRoute(userId.toString()))
+                    },
                     exchangeId = exchange,
                     page = page
                 )

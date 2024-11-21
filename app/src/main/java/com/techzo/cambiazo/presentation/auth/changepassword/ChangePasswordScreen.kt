@@ -17,8 +17,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,6 +41,7 @@ fun ChangePasswordScreen(
     val email = changePasswordViewModel.email.collectAsState().value
     val isEmailSent = changePasswordViewModel.isEmailSent.value
     val codeGenerated = changePasswordViewModel.code.value
+    val errorEmail = changePasswordViewModel.errorEmail.value
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 10.dp),
@@ -102,8 +106,10 @@ fun ChangePasswordScreen(
                 value = email,
                 placeHolder = "Correo Electrónico",
                 type = "Email",
-                pressEnter = {},
+                isError = errorEmail.data?:false,
+                messageError = errorEmail.data?.let{ errorEmail.message},
             ) {
+                changePasswordViewModel.resetEmailError()
                 changePasswordViewModel.onEmailChange(it)
             }
 
@@ -115,7 +121,7 @@ fun ChangePasswordScreen(
                     if (email.isNotBlank()) {
                         changePasswordViewModel.sendEmail(email)
                     } else {
-                        Log.e("EMAIL_VERIFICATION", "El correo está vacío")
+                        changePasswordViewModel.emailIsEmpty()
                     }
                 }
             )

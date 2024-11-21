@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.glide)
     implementation (libs.accompanist.swiperefresh)
     annotationProcessor(libs.room.compiler)
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
 
     // Firebase and Google Auth
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
