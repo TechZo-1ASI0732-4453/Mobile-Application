@@ -50,6 +50,9 @@ class ChangePasswordViewModel @Inject constructor(
         _email.value = email
     }
 
+    fun onCodeChange(code: String) {
+        _code.value = code
+    }
     fun resetEmailState() {
         _isEmailSent.value = false
     }

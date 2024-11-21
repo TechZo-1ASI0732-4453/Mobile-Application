@@ -56,6 +56,7 @@ fun OtpCodeVerificationScreen(
         changePasswordViewModel.resetEmailState()
     }
     changePasswordViewModel.onEmailChange(email)
+    changePasswordViewModel.onCodeChange(codeGenerated)
 
     var firstDigit by remember { mutableStateOf("") }
     var secondDigit by remember { mutableStateOf("") }
@@ -216,6 +217,7 @@ fun OtpCodeVerificationScreen(
                     text2 = "Reenviar código"
                 )
             }
+
 
             ButtonApp(
                 text = "Verificar",
