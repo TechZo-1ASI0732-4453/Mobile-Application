@@ -1,5 +1,8 @@
 package com.techzo.cambiazo.presentation.profile.editprofile
 
+import android.content.Context
+import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -7,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.common.UIState
+import com.techzo.cambiazo.common.deleteImageFromFirebase
+import com.techzo.cambiazo.common.uploadImageToFirebase
 import com.techzo.cambiazo.data.repository.UserRepository
 import com.techzo.cambiazo.domain.User
 import com.techzo.cambiazo.domain.UserEdit
@@ -46,9 +51,11 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
     private val _estateButton = mutableStateOf<Boolean>(false)
     val estateButton: State<Boolean> get() = _estateButton
 
-
     private val _token = mutableStateOf(Constants.token?:"")
     val token: State<String> get() = _token
+
+    private val _isGoogleAccount = mutableStateOf(false)
+    val isGoogleAccount: State<Boolean> get() = _isGoogleAccount
 
     private fun updateToken(newToken: String) {
         _token.value = newToken
@@ -63,9 +70,63 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
         Constants.user = updatedUser
     }
 
+    private val _changesSaved = mutableStateOf(false)
+    val changesSaved: State<Boolean> get() = _changesSaved
+
+    fun closeChangesSaved() {
+        _changesSaved.value = false
+    }
+
 
     fun onProfilePictureChanged(newUrl: String) {
         _profilePicture.value = newUrl
+    }
+
+    fun imageToUploadFromFirebase(uri: Uri, context: Context, isUpload: (Boolean) -> Unit, onDismiss: () -> Unit) {
+        val currentProfilePicture = profilePicture.value
+        viewModelScope.launch {
+            if (currentProfilePicture.startsWith("https://firebasestorage.googleapis.com")) {
+                deleteImageFromFirebase(
+                    imageUrl = currentProfilePicture,
+                    onSuccess = {
+                        uploadImageToFirebase(
+                            context = context,
+                            fileUri = uri,
+                            onSuccess = { imageUrl ->
+                                onProfilePicture(imageUrl)
+                                saveProfile()
+                                onProfilePictureChanged(imageUrl)
+                                onDismiss()
+                            },
+                            onFailure = {
+                                // Handle failure if needed
+                            },
+                            onUploadStateChange = { isUpload(it) },
+                            path = "profiles"
+                        )
+                    },
+                    onFailure = {
+                        // Handle failure if needed
+                    }
+                )
+            } else {
+                uploadImageToFirebase(
+                    context = context,
+                    fileUri = uri,
+                    onSuccess = { imageUrl ->
+                        onProfilePicture(imageUrl)
+                        saveProfile()
+                        onProfilePictureChanged(imageUrl)
+                        onDismiss()
+                    },
+                    onFailure = {
+                        // Handle failure if needed
+                    },
+                    onUploadStateChange = { isUpload(it) },
+                    path = "profiles"
+                )
+            }
+        }
     }
 
     private val _editState = mutableStateOf(UIState<UserSignIn>())
@@ -86,6 +147,7 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
                 _username.value = user.data.username
                 _phoneNumber.value = user.data.phoneNumber
                 _profilePicture.value = user.data.profilePicture
+                _isGoogleAccount.value = user.data.isGoogleAccount
 
             } else {
                 _state.value = UIState(message = user.message ?: "Error")
@@ -145,6 +207,7 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
                 result.data?.let {
                     updateUser(it)
                     updateToken(it.token)
+                    _changesSaved.value = true
                 }
 
             } else {
@@ -152,18 +215,6 @@ class EditProfileViewModel @Inject constructor(private val userRepository: UserR
             }
         }
     }
-
-    fun deleteAccount() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val userId = Constants.user!!.id
-            val result = userRepository.deleteUser(userId)
-            if (result is Resource.Success) {
-                updateUser(UserSignIn(0, "", "", "", "", ""))
-                updateToken("")
-            }
-        }
-    }
-
 
 
 

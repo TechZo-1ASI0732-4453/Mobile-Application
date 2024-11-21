@@ -89,4 +89,19 @@ class ReviewRepository(private val reviewService: ReviewService) {
             return@withContext Resource.Error(e.message ?: "An error occurred")
         }
     }
+
+    suspend fun getReviewsByUserAuthorIdAndExchangeId(userId: Int, exchangeId: Int): Resource<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val response = reviewService.getReviewsByUserId(userId, exchangeId)
+            if (response.isSuccessful) {
+                response.body()?.let { existReview ->
+                    return@withContext Resource.Success(data = existReview.existReview)
+                }
+                return@withContext Resource.Error("No review found")
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "An error occurred")
+        }
+    }
 }

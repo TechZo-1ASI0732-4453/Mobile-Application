@@ -83,6 +83,8 @@ class ProductRepository(private val productService: ProductService) {
         }
     }
 
+
+
     suspend fun getProductsByIds(ids: Set<Int>): Resource<List<Product>> = withContext(Dispatchers.IO) {
         val products = mutableListOf<Product>()
         ids.forEach { id ->
@@ -94,6 +96,18 @@ class ProductRepository(private val productService: ProductService) {
             }
         }
         return@withContext Resource.Success(data = products)
+    }
+
+    suspend fun updateProduct(productId: Int, product: CreateProductDto): Resource<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val response = productService.updateProduct(productId, product)
+            if (response.isSuccessful) {
+                return@withContext Resource.Success(data = Unit)
+            }
+            return@withContext Resource.Error(response.message())
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "Ocurrió un error")
+        }
     }
 
 }

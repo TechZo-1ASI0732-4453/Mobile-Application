@@ -53,6 +53,7 @@ fun CustomInput(
     messageError: String? = "Campo Inválido",
     pressEnter: () -> Unit = {},
     readOnly: Boolean = false,
+    enabled: Boolean = true,
     onValueChange: (String) -> Unit = {},
 ){
     val focusManager = LocalFocusManager.current
@@ -82,6 +83,10 @@ fun CustomInput(
         else -> Constraints.Text
     }
 
+    val borderColor = if(enabled) color.value else Color(0xFFDBDBDB)
+    val backgroundColor = if(enabled) Color.White else Color(0xFFECECEC)
+    val textColor = if(enabled) Color.Black else Color(0xFF9F9F9F)
+
     val hidePassword = remember { mutableStateOf(constraints.type == Constraints.Password.type) }
     Column{
         BasicTextField(
@@ -91,8 +96,8 @@ fun CustomInput(
             },
             modifier = modifier
                 .height(constraints.height)
-                .background(Color.White, RoundedCornerShape(8.dp))
-                .border(borderThickness, color.value, RoundedCornerShape(8.dp)),
+                .background(backgroundColor, RoundedCornerShape(8.dp))
+                .border(borderThickness, borderColor, RoundedCornerShape(8.dp)),
             singleLine = constraints.singleLine,
             maxLines = if(constraints.singleLine) 1 else 3,
             keyboardOptions = KeyboardOptions(
@@ -104,11 +109,12 @@ fun CustomInput(
                 focusManager.clearFocus()//clear the focus
             }),
             readOnly = readOnly,
+            enabled = enabled,
             interactionSource = interactionSource,
             textStyle = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                color = Color.Black
+                color = textColor
             ),
             visualTransformation =  if(hidePassword.value) PasswordVisualTransformation() else VisualTransformation.None,
             decorationBox = { innerTextField ->

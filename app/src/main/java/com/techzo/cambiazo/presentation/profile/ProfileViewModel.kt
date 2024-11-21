@@ -2,6 +2,7 @@ package com.techzo.cambiazo.presentation.profile
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techzo.cambiazo.common.Constants
@@ -13,7 +14,9 @@ import com.techzo.cambiazo.domain.Review
 import com.techzo.cambiazo.data.repository.UserRepository
 import com.techzo.cambiazo.domain.ReviewAverageUser
 import com.techzo.cambiazo.domain.User
+import com.techzo.cambiazo.domain.UserSignIn
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,6 +40,7 @@ class ProfileViewModel@Inject constructor(
     private val _state = mutableStateOf(UIState<Pair<ReviewAverageUser, List<Review>>>())
     val state: State<UIState<Pair<ReviewAverageUser, List<Review>>>> get() = _state
 
+
     init {
         getReviewData()
     }
@@ -45,23 +49,45 @@ class ProfileViewModel@Inject constructor(
     fun getReviewData() {
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
-            val result = reviewRepository.getAverageRatingAndReviewsByUserId(Constants.user!!.id)
-            if (result is Resource.Success) {
-                _averageRating.value = result.data?.first?.averageRating
-                _countReviews.value = result.data?.first?.countReviews
-                _state.value = UIState(data = result.data)
+            val userId = Constants.user?.id
+            if (userId != null) {
+                val result = reviewRepository.getAverageRatingAndReviewsByUserId(userId)
+                if (result is Resource.Success) {
+                    _averageRating.value = result.data?.first?.averageRating
+                    _countReviews.value = result.data?.first?.countReviews
+                    _state.value = UIState(data = result.data)
+                } else {
+                    _state.value = UIState(message = result.message ?: "Ocurrió un error")
+                }
             } else {
-                _state.value = UIState(message = result.message ?: "Ocurrió un error")
+                _state.value = UIState(message = "Usuario no encontrado")
             }
         }
     }
+
 
     fun onLogout() {
         viewModelScope.launch {
             Constants.user = null
             Constants.token = ""
+            Constants.userSubscription = null
             userPreferences.clearSession()
             _isLoggedOut.value = true
         }
     }
+
+    fun deleteAccount() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val userId = Constants.user!!.id
+            val result = userRepository.deleteUser(userId)
+            if (result is Resource.Success) {
+                Constants.user = null
+                Constants.token = ""
+                Constants.userSubscription = null
+                userPreferences.clearSession()
+                _isLoggedOut.value = true
+            }
+        }
+    }
+
 }

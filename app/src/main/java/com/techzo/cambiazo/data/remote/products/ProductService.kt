@@ -6,6 +6,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface ProductService {
@@ -37,5 +38,10 @@ interface ProductService {
     @Headers("Content-Type: application/json","Accept: application/json")
     @POST("products")
     suspend fun createProduct(@Body productDto: CreateProductDto): Response<CreateProductDto>
+
+
+    @Headers("Content-Type: application/json","Accept: application/json")
+    @PUT("products/edit/{productId}")
+    suspend fun updateProduct(@Path("productId") productId: Int, @Body productDto: CreateProductDto): Response<CreateProductDto>
 
 }
