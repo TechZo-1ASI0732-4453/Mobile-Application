@@ -16,17 +16,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Diamond
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Logout
+import androidx.compose.material.icons.outlined.Password
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,24 +44,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techzo.cambiazo.common.Constants
+import com.techzo.cambiazo.common.components.DialogApp
 import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.ProfileImage
 import com.techzo.cambiazo.common.components.StarRating
+import com.techzo.cambiazo.presentation.profile.editprofile.EditProfileViewModel
 
 @Composable
 fun ProfileScreen(
     logOut: () -> Unit = {},
     openMyReviews: () -> Unit = {},
     openEditProfile: () -> Unit = {},
+    openConfiguration: () -> Unit = {},
     openFavorites: () -> Unit = {},
+    bottomBar: Pair<@Composable () -> Unit, () -> Unit>,
     openSubscription: () -> Unit = {},
-    bottomBar: @Composable () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()) {
 
     val averageRating = viewModel.averageRating.value
     val countReviews = viewModel.countReviews.value
 
     val user = Constants.user
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel.isLoggedOut.value) {
         if (viewModel.isLoggedOut.value) {
@@ -61,6 +73,21 @@ fun ProfileScreen(
         }
     }
 
+
+    if (showLogoutDialog) {
+        DialogApp(
+            message = "Cerrar Sesión",
+            description = "¿Estás seguro de que deseas cerrar sesión?",
+            labelButton1 = "Sí",
+            labelButton2 = "No",
+            onDismissRequest = { showLogoutDialog = false },
+            onClickButton1 = {
+                viewModel.onLogout()
+                showLogoutDialog = false
+            },
+            onClickButton2 = { showLogoutDialog = false }
+        )
+    }
 
     MainScaffoldApp(
         bottomBar = bottomBar,
@@ -128,6 +155,7 @@ fun ProfileScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(top = 15.dp)
                         .padding(horizontal = 30.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -136,29 +164,42 @@ fun ProfileScreen(
                         text = "Editar Perfil",
                         onClick = { openEditProfile() }
                     )
-                    HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
+
+                    if(Constants.user?.isGoogleAccount == false) {
+                        ProfileOption(
+                            icon = Icons.Outlined.Settings,
+                            text = "Configuración",
+                            onClick = { openConfiguration() }
+                        )
+                    }
+
+                    HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 2.dp, modifier = Modifier.padding(vertical = 12.dp))
+
                     ProfileOption(
                         icon = Icons.Outlined.FavoriteBorder,
                         text = "Favoritos",
-                        onClick = { openFavorites() })
-                    HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
+                        onClick = { openFavorites() }
+                    )
+
                     ProfileOption(
                         icon = Icons.Outlined.StarOutline,
-                        text = "Mis Reseñas",
+                        text = "Reseñas",
                         onClick = { openMyReviews()}
                     )
-                    HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
+
                     ProfileOption(
                         icon = Icons.Outlined.Diamond,
-                        text = "Mi Suscripción",
+                        text = "Suscripción",
                         onClick = { openSubscription() }
                     )
-                    HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 1.5.dp)
+
+                    HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 2.dp, modifier = Modifier.padding(vertical = 12.dp))
+
                     ProfileOption(
                         icon = Icons.Outlined.Logout,
                         text = "Cerrar Sesión",
                         onClick = {
-                            viewModel.onLogout()
+                            showLogoutDialog = true
                         }
                     )
                 }
@@ -172,13 +213,13 @@ fun ProfileScreen(
 fun ProfileOption(icon: ImageVector, text: String, onClick: () -> Unit = {}) {
     val isLogout = text == "Cerrar Sesión" || text == "Eliminar Cuenta"
     val iconTint = if (isLogout) Color.Red else Color.Gray
-    val textColor = if (isLogout) Color.Red else Color.Black
+    val textColor = if (isLogout) Color.Red else Color(0xFF333333)
 
     Row(
         modifier = Modifier
-            .padding(16.dp, 22.dp)
-            .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .padding(16.dp, 14.dp)
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

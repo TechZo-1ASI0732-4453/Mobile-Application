@@ -17,6 +17,8 @@ data class UserDto(
     val profilePicture: String,
     @SerializedName ("createdAt")
     val createdAt: Date,
+    @SerializedName ("isGoogleAccount")
+    val isGoogleAccount: Boolean,
     @SerializedName("roles")
     val roles: List<String>
 )
@@ -28,5 +30,6 @@ fun UserDto.toUser() = User(
     phoneNumber = phoneNumber,
     profilePicture = profilePicture,
     createdAt = createdAt,
+    isGoogleAccount = isGoogleAccount,
     roles = roles
 )

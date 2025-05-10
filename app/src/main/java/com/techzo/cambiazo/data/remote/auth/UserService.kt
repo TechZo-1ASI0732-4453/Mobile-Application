@@ -25,6 +25,11 @@ interface UserService {
 
     @Headers("Content-Type: application/json",
         "Accept: application/json")
+    @GET("users/username/{username}")
+    suspend fun getUserByUsername(@Path("username") username: String): Response<Unit>
+
+    @Headers("Content-Type: application/json",
+        "Accept: application/json")
     @PUT("users/edit/profile/{id}")
     suspend fun updateUserById(@Path("id") id: Int, @Body user: UserEdit): Response<UserSignIn>
 
@@ -32,5 +37,16 @@ interface UserService {
         "Accept: application/json")
     @DELETE("users/delete/{userId}")
     suspend fun deleteUser(@Path("userId") userId: Int): Response<Unit>
+
+    @Headers("Content-Type: application/json",
+        "Accept: application/json")
+    @GET("users/email/{email}")
+    suspend fun getUserByEmail(@Path("email") email: String): Response<SendEmailResponseDto>
+
+
+    @Headers("Content-Type: application/json",
+        "Accept: application/json")
+    @PUT("users/edit/password/{username}")
+    suspend fun updateUserPassword(@Path("username") username: String, @Body newPassword: NewPassword): Response<Unit>
 
 }

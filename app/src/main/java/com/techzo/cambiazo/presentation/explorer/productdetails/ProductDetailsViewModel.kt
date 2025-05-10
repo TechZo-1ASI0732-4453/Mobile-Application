@@ -75,9 +75,13 @@ class ProductDetailsViewModel @Inject constructor(
                 val isFavoriteResult = isFavoriteDeferred.await()
                 val reviewsAndRatingResult = reviewsAndRatingDeferred.await()
 
-                when (productResult) {
-                    is Resource.Success -> _product.value = UIState(data = productResult.data)
-                    is Resource.Error -> _product.value = UIState(message = productResult.message ?: "Error al cargar detalles del producto")
+                if (productResult is Resource.Success && productResult.data == null) {
+                    _product.value = UIState(message = "No tienes productos")
+                } else {
+                    when (productResult) {
+                        is Resource.Success -> _product.value = UIState(data = productResult.data)
+                        is Resource.Error -> _product.value = UIState(message = productResult.message ?: "Error al cargar detalles del producto")
+                    }
                 }
 
                 when (isFavoriteResult) {
@@ -107,6 +111,7 @@ class ProductDetailsViewModel @Inject constructor(
             }
         }
     }
+
 
     fun addProductToFavorites(productId: Int) {
         viewModelScope.launch {

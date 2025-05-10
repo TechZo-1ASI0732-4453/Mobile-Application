@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,13 +33,17 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -58,13 +63,16 @@ import com.techzo.cambiazo.common.components.MainScaffoldApp
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import com.techzo.cambiazo.domain.Product
+import com.techzo.cambiazo.presentation.articles.ArticlesViewModel
 
 @Composable
 fun PublishScreen(
     viewModel: PublishViewModel = hiltViewModel(),
+    articlesViewModel: ArticlesViewModel = hiltViewModel(),
     back : () -> Unit = {},
     product: Product? = null,
-    openMyArticles: () -> Unit = {}
+    openMyArticles: () -> Unit = {},
+    openSubscription: () -> Unit = {}
 ) {
 
     val productToEdit = remember { product }
@@ -96,24 +104,50 @@ fun PublishScreen(
     val errorDistrict = viewModel.errorDistrict.value
     val errorObjectChange = viewModel.errorObjectChange.value
     val errorImage = viewModel.errorImage.value
-
+    val messageError = viewModel.messageError.value
+    val descriptionError = viewModel.descriptionError.value
     val image = viewModel.image.value
-    val buttonEdit = viewModel.buttonEdit.value
 
     val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.selectImage(uri)
     }
+    val buttonEnable = viewModel.buttonEdit.value
 
     val productState = viewModel.productState.value
     val context = LocalContext.current
     val spaceHeight = 20.dp
 
+    val limitReached  = viewModel.limitReached.value
+
+
+    if(limitReached){
+        DialogApp(
+            message = messageError?: "¡Has alcanzado el límite de publicaciones!",
+            descriptionError,
+            "Regresar",
+            "Comprar suscripción",
+            onClickButton1 = {
+                viewModel.hideDialog()
+                back()
+            },
+            onClickButton2 = {
+                viewModel.hideDialog()
+                openSubscription()
+            })
+
+    }
+
+    val articles =  articlesViewModel.products.value.data?: emptyList()
+
     LaunchedEffect(Unit) {
         viewModel.productDataToEdit(product)
     }
 
-
-
+    LaunchedEffect(articles) {
+        if(productToEdit == null){
+            viewModel.validateReachingLimit(articles)
+        }
+    }
 
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
@@ -124,7 +158,6 @@ fun PublishScreen(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ){
-
                 ButtonIconHeaderApp(Icons.Filled.Close, onClick = {back()})
                 TextTitleHeaderApp(action)
             }
@@ -136,7 +169,13 @@ fun PublishScreen(
 
                 SubTitleText(subTittle = "Imagen")
                 image?.let { uri ->
-                    Box {
+                    Box(modifier = Modifier
+                        .shadow(
+                            3.dp,
+                            RoundedCornerShape(10.dp),
+                            ambientColor = Color(0xFFFFD146),
+                            spotColor = Color.Black
+                        )) {
                         Image(
                             painter = rememberImagePainter(uri),
                             contentDescription = null,
@@ -258,7 +297,7 @@ fun PublishScreen(
                 SubTitleText(subTittle = "Ubicación")
                 DropdownList(
                     selectedOption = countrySelected,
-                    label ="Seeleccione un País",
+                    label ="Seleccione un País",
                     itemList = countries.data ?: emptyList(),
                     onItemClick ={viewModel.selectCountry(it)},
                     isError = errorCountry,
@@ -268,7 +307,7 @@ fun PublishScreen(
 
                 DropdownList(
                     selectedOption = departmentSelected,
-                    label ="Seeleccione un Departamento",
+                    label ="Seleccione un Departamento",
                     itemList = departments.data ?: emptyList(),
                     onItemClick ={ viewModel.selectDepartment(it) },
                     isError = errorDepartment,
@@ -278,7 +317,7 @@ fun PublishScreen(
 
                 DropdownList(
                     selectedOption = districtSelected,
-                    label ="Seeleccione un Distrito",
+                    label ="Seleccione un Distrito",
                     itemList = districts.data ?: emptyList(),
                     onItemClick ={ viewModel.selectDistrict(it)},
                     isError = errorDistrict,
@@ -367,19 +406,22 @@ fun PublishScreen(
                         CircularProgressIndicator(color = Color(0xFFFFD146))
                     }
                 }else{
-                    if (productState.data != null) {
-                         DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { openMyArticles() },)
+                    messageError?.let {
+                        DialogApp(it,descriptionError,"Entendido",onClickButton1 = {back()})
+                    }?:if (productState.data != null) {
+                        DialogApp(messages,descriptionMessage,"Entendido",onClickButton1 = { product?.let {openMyArticles()}?:viewModel.clearData() })
                     }else{
-                        if (product == null) {
-                            ButtonApp(text = action) {
+                        productToEdit?.let {
+                            ButtonApp(text = action, enable = buttonEnable) {
                                 viewModel.validateDataToUploadImage(context)
                             }
-                            }else{
-                                ButtonApp(text = action, enable = buttonEdit) {
-                                    viewModel.validateDataToUploadImage(context)
-                                }
-                            }
+                        }?:
+                        ButtonApp(text = action) {
+                            viewModel.validateDataToUploadImage(context)
+                        }
+
                     }
+
                 }
                 Spacer(modifier =   Modifier.height(30.dp))
 

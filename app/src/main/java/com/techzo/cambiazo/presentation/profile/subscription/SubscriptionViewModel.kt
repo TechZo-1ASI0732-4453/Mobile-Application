@@ -98,6 +98,10 @@ class SubscriptionViewModel @Inject constructor(
         }
     }
 
+    fun cancelSubscription() {
+        createSubscription(1)
+    }
+
 
 
 }

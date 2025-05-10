@@ -1,14 +1,13 @@
 package com.techzo.cambiazo.presentation.navigate
 
 import android.net.Uri
-import android.os.Parcelable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Handshake
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.outlined.Handshake
+import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Sell
@@ -25,8 +24,10 @@ import androidx.navigation.navArgument
 import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.articles.publish.PublishScreen
+import com.techzo.cambiazo.presentation.auth.changepassword.ChangePasswordScreen
+import com.techzo.cambiazo.presentation.auth.changepassword.newpasswordscreen.NewPasswordScreen
+import com.techzo.cambiazo.presentation.auth.changepassword.otpcodeverificationscreen.OtpCodeVerificationScreen
 import com.techzo.cambiazo.presentation.explorer.productdetails.ProductDetailsScreen
-import com.techzo.cambiazo.presentation.donations.DonationsScreen
 import com.techzo.cambiazo.presentation.exchanges.exchangedetails.ExchangeDetailsScreen
 import com.techzo.cambiazo.presentation.exchanges.ExchangeScreen
 import com.techzo.cambiazo.presentation.explorer.ExplorerScreen
@@ -41,10 +42,10 @@ import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.auth.register.SignUpScreen
 import com.techzo.cambiazo.presentation.auth.register.TyC.TermsAndConditionsScreen
 import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
+import com.techzo.cambiazo.presentation.profile.settings.SettingsScreen
 import com.techzo.cambiazo.presentation.profile.subscription.MySubscriptionScreen
 import com.techzo.cambiazo.presentation.profile.subscription.PaymentScreen
 import com.techzo.cambiazo.presentation.profile.subscription.PlansScreen
-import okhttp3.Route
 
 sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, val title: String,val route: String, val navigate: () -> Unit = {}) {
     data class Explorer(val onNavigate: () -> Unit = {}) : ItemsScreens(
@@ -64,6 +65,14 @@ sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, v
         route = Routes.Exchange.route
     )
 
+    data class Publish(val onNavigate: () -> Unit = {}) : ItemsScreens(
+        iconSelected = Icons.Filled.AddCircle,
+        icon = Icons.Outlined.AddCircleOutline,
+        title = "Publicar",
+        navigate = onNavigate,
+        route = Routes.Publish.route
+    )
+
     data class Articles(val onNavigate: () -> Unit = {}) : ItemsScreens(
         iconSelected = Icons.Filled.Sell,
         icon = Icons.Outlined.Sell,
@@ -72,13 +81,6 @@ sealed class ItemsScreens(val icon: ImageVector,val iconSelected: ImageVector, v
         route = Routes.Article.route
     )
 
-    data class Donation(val onNavigate: () -> Unit = {}) : ItemsScreens(
-        iconSelected = Icons.Filled.Handshake,
-        icon = Icons.Outlined.Handshake,
-        title = "Donaciones",
-        navigate = onNavigate,
-        route = Routes.Donation.route
-    )
 
     data class Profile(val onNavigate: () -> Unit = {}) : ItemsScreens(
         iconSelected = Icons.Filled.Person,
@@ -95,7 +97,6 @@ sealed class Routes(val route: String) {
     object Filter : Routes("FilterScreen")
     object Explorer : Routes("ExplorerScreen")
     object Article : Routes("ArticleScreen")
-    object Donation : Routes("DonationScreen")
     object Profile : Routes("ProfileScreen")
     object Exchange : Routes("ExchangeScreen")
     object TermsAndConditions : Routes("TermsAndConditionsScreen")
@@ -124,13 +125,26 @@ sealed class Routes(val route: String) {
     }
 
     object EditProfile : Routes("EditProfileScreen")
+    object Settings : Routes("SettingsScreen")
     object MyReviews : Routes("MyReviewsScreen")
     object Publish : Routes("PublishScreen")
     object Favorites : Routes("FavoritesScreen")
     object MySubscription : Routes("MySubscriptionScreen")
     object Plans : Routes("PlansScreen")
-
-
+    object ChangePassword : Routes("ChangePasswordScreen")
+    object OtpCodeVerification : Routes("OtpCodeVerificationScreen/{email}/{codeGenerated}") {
+        fun createRoute(email: String, codeGenerated: String): String {
+            val encodedEmail = Uri.encode(email)
+            val encodedCode = Uri.encode(codeGenerated)
+            return "OtpCodeVerificationScreen/$encodedEmail/$encodedCode"
+        }
+    }
+    object NewPassword:Routes("NewPasswordScreen/{email}"){
+        fun createRoute(email: String): String {
+            val encodedEmail = Uri.encode(email)
+            return "NewPasswordScreen/$encodedEmail"
+        }
+    }
 }
 
 @Composable
@@ -142,8 +156,11 @@ fun NavScreen() {
     val items = listOf(
         ItemsScreens.Explorer(onNavigate = { navController.navigate(Routes.Explorer.route) }),
         ItemsScreens.Exchange(onNavigate = { navController.navigate(Routes.Exchange.route) }),
+        ItemsScreens.Publish(onNavigate = {
+            navController.currentBackStackEntry?.savedStateHandle?.set("product", null)
+            navController.navigate(Routes.Publish.route)
+        }),
         ItemsScreens.Articles(onNavigate = { navController.navigate(Routes.Article.route) }),
-        ItemsScreens.Donation(onNavigate = { navController.navigate(Routes.Donation.route) }),
         ItemsScreens.Profile(onNavigate = { navController.navigate(Routes.Profile.route) })
     )
 
@@ -152,20 +169,71 @@ fun NavScreen() {
             SignUpScreen(
                 back = { navController.popBackStack() },
                 openLogin = { navController.navigate(Routes.SignIn.route) },
-                navigateToTermsAndConditions = { navController.navigate(Routes.TermsAndConditions.route) }
+                navigateToTermsAndConditions = { navController.navigate(Routes.TermsAndConditions.route) },
+                openApp = { navController.navigate(Routes.Explorer.route) }
             )
         }
 
         composable(route = Routes.SignIn.route) {
             SignInScreen(
                 openRegister = { navController.navigate(Routes.SignUp.route) },
-                openApp = { navController.navigate(Routes.Explorer.route) }
+                openApp = { navController.navigate(Routes.Explorer.route) },
+                openForgotPassword = { navController.navigate(Routes.ChangePassword.route) }
+            )
+        }
+
+        composable(route = Routes.ChangePassword.route) {
+            ChangePasswordScreen(
+                goBack = { navController.popBackStack() },
+                goOtpCodeVerificationScreen = { email, codeGenerated ->
+                    navController.navigate(Routes.OtpCodeVerification.createRoute(email,
+                        codeGenerated.toString()
+                    ))
+                }
+            )
+        }
+
+
+        composable(
+            route = Routes.OtpCodeVerification.route,
+            arguments = listOf(
+                navArgument("email") { type = NavType.StringType },
+                navArgument("codeGenerated") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            val codeGenerated = backStackEntry.arguments?.getString("codeGenerated") ?: ""
+            OtpCodeVerificationScreen(
+                email = email,
+                codeGenerated = codeGenerated,
+                goBack = {
+                    navController.popBackStack()
+                },
+                goNewPassword = { userEmail  ->
+                    navController.navigate(Routes.NewPassword.createRoute(userEmail))
+                }
+            )
+        }
+
+
+        composable(route=Routes.NewPassword.route,
+            arguments = listOf(
+                navArgument("email") { type = NavType.StringType },
+            )){ backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            NewPasswordScreen(
+                email = email,
+                goBack = { navController.popBackStack() },
+                goSignIn = { navController.navigate(Routes.SignIn.route){
+                    popUpTo(0) { inclusive = true }
+                } }
+
             )
         }
 
         composable(route = Routes.Explorer.route) {
             ExplorerScreen(
-                bottomBar = { BottomBarNavigation(items,currentRoute) },
+                bottomBar =  BottomBarNavigation(items,currentRoute) ,
                 onFilter = { navController.navigate(Routes.Filter.route) },
                 onProductClick = { productId, userId ->
                     navController.navigate(
@@ -187,7 +255,7 @@ fun NavScreen() {
 
         composable(route = Routes.Exchange.route) {
             ExchangeScreen(
-                bottomBar = { BottomBarNavigation(items,currentRoute) },
+                bottomBar = BottomBarNavigation(items, currentRoute),
                 goToDetailsScreen = { exchangeId, page ->
                     navController.navigate(
                         Routes.ExchangeDetails.createExchangeDetailsRoute(
@@ -195,14 +263,18 @@ fun NavScreen() {
                             page
                         )
                     )
-                }
-            )
+                },
+                page = navController.previousBackStackEntry?.savedStateHandle?.get<Int>("page") ?: 0,
+                goToReviewScreen = { userId ->
+                    navController.navigate(Routes.Reviews.createRoute(userId.toString()))
+                }            )
         }
+
 
         composable(route = Routes.Article.route) {
             ArticlesScreen(
-                bottomBar = { BottomBarNavigation(items,currentRoute) },
-                onPublish = {
+                bottomBar = BottomBarNavigation(items,currentRoute) ,
+                editProduct = {
                     navController.currentBackStackEntry?.savedStateHandle?.set("product", it)
                     navController.navigate(Routes.Publish.route)
                             },
@@ -214,7 +286,6 @@ fun NavScreen() {
                         )
                     )
                 }
-
             )
         }
 
@@ -223,7 +294,13 @@ fun NavScreen() {
             val page = backStackEntry.arguments?.getString("page")?.toIntOrNull()
             if (exchange != null && page != null) {
                 ExchangeDetailsScreen(
-                    goBack = { navController.popBackStack() },
+                    goBack = {page->
+                        navController.currentBackStackEntry?.savedStateHandle?.set("page", page)
+                        navController.navigate(Routes.Exchange.route)
+                             },
+                    goToReviewScreen = { userId ->
+                        navController.navigate(Routes.Reviews.createRoute(userId.toString()))
+                    },
                     exchangeId = exchange,
                     page = page
                 )
@@ -239,15 +316,10 @@ fun NavScreen() {
                 },
                 openMyReviews = { navController.navigate(Routes.MyReviews.route) },
                 openEditProfile = { navController.navigate(Routes.EditProfile.route) },
+                openConfiguration = { navController.navigate(Routes.Settings.route) },
                 openFavorites = { navController.navigate(Routes.Favorites.route) },
-                openSubscription = { navController.navigate(Routes.MySubscription.route) },
-                bottomBar = { BottomBarNavigation(items,currentRoute) }
-            )
-        }
-
-        composable(route = Routes.Donation.route) {
-            DonationsScreen(
-                bottomBar = { BottomBarNavigation(items,currentRoute) }
+                bottomBar = BottomBarNavigation(items,currentRoute),
+                openSubscription = { navController.navigate(Routes.MySubscription.route) }
             )
         }
 
@@ -265,10 +337,19 @@ fun NavScreen() {
         }
         composable(route = Routes.EditProfile.route) {
             EditProfileScreen(
+                back = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Routes.Settings.route) {
+            SettingsScreen(
                 deleteAccount = {
                     navController.navigate(Routes.SignIn.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                changePassword = { userEmail  ->
+                    navController.navigate(Routes.NewPassword.createRoute(userEmail))
                 },
                 back = { navController.popBackStack() }
             )
@@ -304,6 +385,7 @@ fun NavScreen() {
             PublishScreen(
                 back = {navController.popBackStack()},
                 openMyArticles = {navController.navigate(Routes.Article.route)},
+                openSubscription = {navController.navigate(Routes.MySubscription.route)},
                 product = navController.previousBackStackEntry?.savedStateHandle?.get<Product>("product")
             )
         }
@@ -333,7 +415,11 @@ fun NavScreen() {
                             planId
                         )
                     )
-                }
+                },
+                goToMySubscription = {navController.navigate(Routes.MySubscription.route){
+                    popUpTo(0) { inclusive = true }
+                } }
+
             )
         }
 

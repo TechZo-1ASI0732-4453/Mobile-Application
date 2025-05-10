@@ -7,7 +7,9 @@ class AuthInterceptor(private val tokenProvider: () -> String) : Interceptor {
     // Añade aquí los paths que NO requieren autenticación
     private val unauthenticatedPaths = listOf(
         "authentication/sign-in",
-        "authentication/sign-up")
+        "authentication/sign-up",
+        "users/username"
+    )
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
@@ -24,6 +26,6 @@ class AuthInterceptor(private val tokenProvider: () -> String) : Interceptor {
     }
 
     private fun shouldAuthenticate(path: String): Boolean {
-        return !unauthenticatedPaths.any { path.startsWith(it) }
+        return unauthenticatedPaths.none { path.startsWith(it) }
     }
 }
