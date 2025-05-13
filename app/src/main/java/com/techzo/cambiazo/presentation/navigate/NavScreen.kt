@@ -15,12 +15,14 @@ import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.techzo.cambiazo.MainActivity
 import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.articles.ArticlesScreen
 import com.techzo.cambiazo.presentation.articles.publish.PublishScreen
@@ -148,7 +150,7 @@ sealed class Routes(val route: String) {
 }
 
 @Composable
-fun NavScreen() {
+fun NavScreen(activity: FragmentActivity) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route?:""
@@ -418,7 +420,8 @@ fun NavScreen() {
                 },
                 goToMySubscription = {navController.navigate(Routes.MySubscription.route){
                     popUpTo(0) { inclusive = true }
-                } }
+                } },
+                activity = activity,
 
             )
         }

@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.presentation.profile.subscription
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,10 +13,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.techzo.cambiazo.MainActivity
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.components.*
 import com.techzo.cambiazo.domain.Plan
@@ -25,11 +29,14 @@ fun PlansScreen(
     viewModel: SubscriptionViewModel = hiltViewModel(),
     back: () -> Unit = {},
     goToMySubscription: () -> Unit = {},
-    onPlanClick: (String) -> Unit
+    onPlanClick: (String) -> Unit,
+    activity: FragmentActivity? = null
 ) {
     val state = viewModel.state.value
     val availablePlans = state.data?.filter { it.id != Constants.userSubscription?.plan?.id } ?: emptyList()
     var showCancelDialog by remember { mutableStateOf(false) }
+
+
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 20.dp),
@@ -49,7 +56,7 @@ fun PlansScreen(
                 SubTitleText("Otros planes de suscripción")
                 Spacer(modifier = Modifier.height(10.dp))
                 availablePlans.reversed().forEach { plan ->
-                    SubscriptionPlanCard(plan, onPlanClick = { onPlanClick(it) }, showCancelDialog = { showCancelDialog = true })
+                    SubscriptionPlanCard(plan, onPlanClick = { onPlanClick(it) }, showCancelDialog = { showCancelDialog = true }, activity = activity)
                     Spacer(modifier = Modifier.height(20.dp))
                 }
             }
@@ -76,8 +83,10 @@ fun PlansScreen(
 @Composable
 fun SubscriptionPlanCard(
     plan: Plan,
+    viewModel: SubscriptionViewModel = hiltViewModel(),
     onPlanClick: (String) -> Unit,
-    showCancelDialog: () -> Unit
+    showCancelDialog: () -> Unit,
+    activity: FragmentActivity? = null
 ) {
     val actualPlanName = Constants.userSubscription?.plan?.name ?: ""
     val backgroundColor = when (plan.id) {
@@ -206,7 +215,13 @@ fun SubscriptionPlanCard(
                         bgColor = Color.Black,
                         fColor = Color.White,
                         bColor = Color.Black,
-                        onClick = { if (plan.id == 1) showCancelDialog() else onPlanClick(plan.id.toString()) }
+                        onClick = {
+                            if (activity != null) {
+                                viewModel.startOrder(activity)
+                            }
+
+                        }
+//                        onClick = { if (plan.id == 1) showCancelDialog() else onPlanClick(plan.id.toString()) }
                     )
                 }
             }
