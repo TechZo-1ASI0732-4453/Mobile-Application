@@ -21,10 +21,11 @@ interface SubscriptionService {
     @POST("subscriptions")
     suspend fun createSubscription(@Body subscriptionDto: SubscriptionRequestDto): Response<SubscriptionResponseDto>
 
-    @Headers("Content-Type: application/json","Accept: application/json")
     @PUT("subscriptions/status/{subscriptionId}")
-    suspend fun updateSubscription(@Path("subscriptionId") subscriptionId: Int, @Body subscriptionRequestDto: SubscriptionRequestDto): Response<SubscriptionResponseDto>
-
+    suspend fun updateSubscription(
+        @Path("subscriptionId") subscriptionId: Int,
+        @Body subscriptionRequest: SubscriptionRequestDto
+    ): Response<SubscriptionResponseDto>
 
     //PLANS
     @Headers("Content-Type: application/json", "Accept: application/json")

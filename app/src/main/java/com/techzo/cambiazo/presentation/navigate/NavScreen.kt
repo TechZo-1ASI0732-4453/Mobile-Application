@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.fragment.app.FragmentActivity
@@ -43,6 +44,7 @@ import com.techzo.cambiazo.presentation.profile.favorites.FavoritesScreen
 import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.auth.register.SignUpScreen
 import com.techzo.cambiazo.presentation.auth.register.TyC.TermsAndConditionsScreen
+import com.techzo.cambiazo.presentation.donations.DonationScreen
 import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
 import com.techzo.cambiazo.presentation.profile.settings.SettingsScreen
 import com.techzo.cambiazo.presentation.profile.subscription.MySubscriptionScreen
@@ -98,6 +100,7 @@ sealed class Routes(val route: String) {
     object SignIn : Routes("SignInScreen")
     object Filter : Routes("FilterScreen")
     object Explorer : Routes("ExplorerScreen")
+    object Donations : Routes("DonationsScreen")
     object Article : Routes("ArticleScreen")
     object Profile : Routes("ProfileScreen")
     object Exchange : Routes("ExchangeScreen")
@@ -150,18 +153,30 @@ sealed class Routes(val route: String) {
 }
 
 @Composable
-fun NavScreen(activity: FragmentActivity) {
+fun NavScreen(
+    activity: FragmentActivity,
+    navViewModel: NavigationViewModel
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route?:""
+    val currentRoute = navBackStackEntry?.destination?.route ?: ""
+
+    LaunchedEffect(navViewModel.redirectToSubscription.value) {
+        if (navViewModel.redirectToSubscription.value) {
+            navController.navigate(Routes.Profile.route) {
+                popUpTo(0) { inclusive = true }
+            }
+            navViewModel.resetRedirect()
+        }
+    }
 
     val items = listOf(
         ItemsScreens.Explorer(onNavigate = { navController.navigate(Routes.Explorer.route) }),
         ItemsScreens.Exchange(onNavigate = { navController.navigate(Routes.Exchange.route) }),
         ItemsScreens.Publish(onNavigate = {
-            navController.currentBackStackEntry?.savedStateHandle?.set("product", null)
-            navController.navigate(Routes.Publish.route)
+            navController.navigate(Routes.Donations.route)
         }),
+
         ItemsScreens.Articles(onNavigate = { navController.navigate(Routes.Article.route) }),
         ItemsScreens.Profile(onNavigate = { navController.navigate(Routes.Profile.route) })
     )
@@ -247,6 +262,14 @@ fun NavScreen(activity: FragmentActivity) {
                 }
             )
         }
+
+        composable(route = Routes.Donations.route) {
+            DonationScreen(
+                back = { navController.popBackStack() },
+                onOngClick = { /* lo que desees hacer al tocar una ONG */ }
+            )
+        }
+
 
         composable(route = Routes.Filter.route) {
             FilterScreen(

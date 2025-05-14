@@ -6,7 +6,9 @@ import com.techzo.cambiazo.data.local.AppDatabase
 import com.techzo.cambiazo.data.local.FavoriteProductDao
 import com.techzo.cambiazo.data.remote.auth.AuthService
 import com.techzo.cambiazo.data.remote.auth.UserService
+import com.techzo.cambiazo.data.remote.donations.DonationsService
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
+import com.techzo.cambiazo.data.remote.invoice.InvoiceService
 import com.techzo.cambiazo.data.remote.location.DepartmentService
 import com.techzo.cambiazo.data.remote.location.DistrictService
 import com.techzo.cambiazo.data.remote.products.FavoriteProductService
@@ -16,8 +18,10 @@ import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.remote.reviews.ReviewService
 import com.techzo.cambiazo.data.remote.subscriptions.SubscriptionService
 import com.techzo.cambiazo.data.repository.AuthRepository
+import com.techzo.cambiazo.data.repository.DonationsRepository
 import com.techzo.cambiazo.data.repository.ProductDetailsRepository
 import com.techzo.cambiazo.data.repository.ExchangeRepository
+import com.techzo.cambiazo.data.repository.InvoiceRepository
 import com.techzo.cambiazo.data.repository.LocationRepository
 import com.techzo.cambiazo.data.repository.ProductCategoryRepository
 import com.techzo.cambiazo.data.repository.ProductRepository
@@ -154,6 +158,18 @@ object CambiazoModule {
         return retrofit.create(SubscriptionService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideInvoiceService(retrofit: Retrofit): InvoiceService {
+        return retrofit.create(InvoiceService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDonationsService(retrofit: Retrofit): DonationsService {
+        return retrofit.create(DonationsService::class.java)
+    }
+
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS REPOSITORIOS
 
     @Provides
@@ -206,6 +222,19 @@ object CambiazoModule {
                                  districtService: DistrictService): LocationRepository {
         return LocationRepository(countryService,departmentService,districtService)
     }
+
+    @Provides
+    @Singleton
+    fun provideDonationsRepository(donationsService: DonationsService): DonationsRepository {
+        return DonationsRepository(donationsService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideInvoiceRepository(invoiceApiService: InvoiceService): InvoiceRepository {
+        return InvoiceRepository(invoiceApiService)
+    }
+
 
     @Provides
     @Singleton

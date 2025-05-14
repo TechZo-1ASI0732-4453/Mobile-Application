@@ -33,10 +33,10 @@ fun PlansScreen(
     activity: FragmentActivity? = null
 ) {
     val state = viewModel.state.value
-    val availablePlans = state.data?.filter { it.id != Constants.userSubscription?.plan?.id } ?: emptyList()
+    val subscription by viewModel.subscription
+    val availablePlans = state.data?.filter { it.id != subscription.plan.id } ?: emptyList()
+
     var showCancelDialog by remember { mutableStateOf(false) }
-
-
 
     MainScaffoldApp(
         paddingCard = PaddingValues(top = 20.dp),
@@ -88,7 +88,7 @@ fun SubscriptionPlanCard(
     showCancelDialog: () -> Unit,
     activity: FragmentActivity? = null
 ) {
-    val actualPlanName = Constants.userSubscription?.plan?.name ?: ""
+    val actualPlanName = viewModel.subscription.value.plan.name
     val backgroundColor = when (plan.id) {
         1 -> Color.Gray
         2 -> Color.Black
@@ -217,7 +217,7 @@ fun SubscriptionPlanCard(
                         bColor = Color.Black,
                         onClick = {
                             if (activity != null) {
-                                viewModel.startOrder(activity)
+                                viewModel.startOrder(activity, plan.price, plan.id)
                             }
 
                         }
