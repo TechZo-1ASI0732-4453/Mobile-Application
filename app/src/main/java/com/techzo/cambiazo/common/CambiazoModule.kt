@@ -11,6 +11,9 @@ import com.techzo.cambiazo.data.remote.location.DepartmentService
 import com.techzo.cambiazo.data.remote.location.DistrictService
 import com.techzo.cambiazo.data.remote.products.FavoriteProductService
 import com.techzo.cambiazo.data.remote.location.CountryService
+import com.techzo.cambiazo.data.remote.paypal.PaypalConfig
+import com.techzo.cambiazo.data.remote.paypal.PaypalRemoteDataSource
+import com.techzo.cambiazo.data.remote.paypal.PaypalService
 import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.remote.reviews.ReviewService
@@ -153,8 +156,6 @@ object CambiazoModule {
     fun provideSubscriptionService(retrofit: Retrofit): SubscriptionService {
         return retrofit.create(SubscriptionService::class.java)
     }
-
-    // AQUI SOLO AGREGAR LOS PROVIDES DE LOS REPOSITORIOS
 
     @Provides
     @Singleton

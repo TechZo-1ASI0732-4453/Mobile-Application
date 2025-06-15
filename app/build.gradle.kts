@@ -45,7 +45,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
         resources {
@@ -60,12 +60,14 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
+    implementation ("com.paypal.checkout:android-sdk:0.9.+")
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.glide)
     implementation (libs.accompanist.swiperefresh)
+    implementation(libs.firebase.crashlytics.buildtools)
     annotationProcessor(libs.room.compiler)
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
 

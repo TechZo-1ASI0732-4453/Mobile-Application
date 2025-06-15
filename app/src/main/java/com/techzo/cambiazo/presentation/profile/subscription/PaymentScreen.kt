@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.presentation.profile.subscription
 
+import android.content.Intent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +28,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -47,16 +49,24 @@ import com.techzo.cambiazo.common.components.PaymentText
 import com.techzo.cambiazo.common.components.SubTitleText
 import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import java.util.Locale
+import androidx.core.net.toUri
+import com.techzo.cambiazo.data.repository.PaypalRepository
+import kotlinx.coroutines.launch
 
 @Composable
 fun PaymentScreen(
     back: () -> Unit = {},
     goToMySubscription: () -> Unit = {},
-    subscriptionViewModel: SubscriptionViewModel = hiltViewModel()
+    subscriptionViewModel: SubscriptionViewModel = hiltViewModel(),
+    paypalViewModel: PaypalViewModel = hiltViewModel()
+
 ) {
     val selectedPlan = subscriptionViewModel.selectedPlan.value
+    val context = LocalContext.current
+    val scope   = rememberCoroutineScope()
+    var orderId by remember { mutableStateOf<String?>(null) }
+    var error   by remember { mutableStateOf<String?>(null) }
     val plan = subscriptionViewModel.state.value.data?.find { it.id == selectedPlan }
-
     var cardHolderName by remember { mutableStateOf("") }
     var cardNumber by remember { mutableStateOf("") }
     var expiryDate by remember { mutableStateOf("") }
@@ -89,6 +99,16 @@ fun PaymentScreen(
         else -> false
     }
     val isFormValid = cardHolderName.isNotEmpty() && isCardNumberValid && isExpiryDateValid && isCvvValid && isCardTypeValid
+
+    LaunchedEffect(orderId) {
+        orderId?.let {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                "https://www.sandbox.paypal.com/checkoutnow?token=$it".toUri()
+            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        }
+    }
 
 
     LaunchedEffect(cardNumber) {
@@ -279,6 +299,21 @@ fun PaymentScreen(
                             }
 
                         }
+
+                        ButtonApp(
+                            text = "Pagar con PayPal",
+                            enable = true,
+                            onClick = {
+                                scope.launch {
+                                    try {
+                                        val price = String.format(java.util.Locale.US, "%.2f", plan?.price ?: 0.0)
+                                        orderId = PaypalRepository.createOrder(price)
+                                    } catch (t: Throwable) {
+                                        error = t.message
+                                    }
+                                }
+                            }
+                        )
 
                     } else {
                         Box(
