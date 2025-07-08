@@ -16,6 +16,7 @@ import com.techzo.cambiazo.data.repository.ReviewRepository
 import com.techzo.cambiazo.domain.Department
 import com.techzo.cambiazo.domain.District
 import com.techzo.cambiazo.domain.Exchange
+import com.techzo.cambiazo.presentation.explorer.offer.sendOfferEmail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -141,16 +142,49 @@ class ExchangeViewModel @Inject constructor(private val exchangeRepository: Exch
         return "${district?.name}, ${department?.name}"
     }
 
-    fun updateExchangeStatus(exchangeId: Int, status: String){
+    fun updateExchangeStatus(exchangeId: Int, status: String) {
         viewModelScope.launch {
-            val result = exchangeRepository.updateExchangeStatus(exchangeId, status)
-            if(result is Resource.Success){
-                Log.d("ExchangeViewModel", "updateExchangeStatus: ${result.data}")
-            }else{
-                Log.d("ExchangeViewModel", "updateExchangeStatus: ${result.message}")
+            val updateResult = exchangeRepository.updateExchangeStatus(exchangeId, status)
+
+            if (updateResult is Resource.Success) {
+                val exchangeResult = exchangeRepository.getExchangeById(exchangeId)
+
+                if (exchangeResult is Resource.Success) {
+                    val updatedExchange = exchangeResult.data
+                    val userName = updatedExchange?.userOwn?.name
+                    val userEmail = updatedExchange?.userOwn?.username
+                    val itemTitle = updatedExchange?.productOwn?.name
+
+                    val estadoFormateado = when (status.lowercase()) {
+                        "aceptado" -> "Aceptada"
+                        "rechazado" -> "Rechazada"
+                        else -> status.uppercase()
+                    }
+
+                    if (!userName.isNullOrEmpty() && !userEmail.isNullOrEmpty() && !itemTitle.isNullOrEmpty()) {
+                        sendOfferEmail(
+                            name = userName,
+                            email = userEmail,
+                            itemTitle = itemTitle,
+                            status = estadoFormateado
+                        )
+                    } else {
+                        Log.w("ExchangeViewModel", "Faltan datos para enviar el correo (nombre, correo o título vacío)")
+                    }
+
+                } else {
+                    Log.e("ExchangeViewModel", "Error al obtener datos del intercambio: ${exchangeResult.message}")
+                }
+
+            } else {
+                Log.e("ExchangeViewModel", "No se pudo actualizar el estado del intercambio: ${updateResult.message}")
             }
         }
     }
+
+
+
+
 
     fun deleteExchange(exchangeId: Int){
         viewModelScope.launch {

@@ -33,6 +33,18 @@ class ConfirmationOfferViewModel @Inject constructor(
     private val _offerFailure = MutableStateFlow(false)
     val offerFailure : StateFlow<Boolean> get() = _offerFailure
 
+    private val _createdExchangeId = MutableStateFlow<Int?>(null)
+    val createdExchangeId: StateFlow<Int?> get() = _createdExchangeId
+
+    private val _targetUserEmail = MutableStateFlow<String?>(null)
+    val targetUserEmail: StateFlow<String?> get() = _targetUserEmail
+
+    private val _targetUserName = MutableStateFlow<String?>(null)
+    val targetUserName: StateFlow<String?> get() = _targetUserName
+
+    private val _offeredProductName = MutableStateFlow<String?>(null)
+    val offeredProductName: StateFlow<String?> get() = _offeredProductName
+
     init {
         viewModelScope.launch {
             val desiredProductId: Int? = savedStateHandle.get<String>("desiredProductId")?.toIntOrNull()
@@ -60,7 +72,40 @@ class ConfirmationOfferViewModel @Inject constructor(
             )
 
             val result = exchangeRepository.createExchange(newExchangeRequest)
-            if (result is Resource.Success) _offerSuccess.value = true else _offerFailure.value = true
+
+            if (result is Resource.Success) {
+                val exchangeId = result.data?.id
+
+                val exchangeResult = exchangeId?.let { exchangeRepository.getExchangeById(it) }
+                if (exchangeResult is Resource.Success) {
+                    val exchange = exchangeResult.data
+
+                    val productTitle = exchange?.productChange?.name
+                    val targetUserName = exchange?.userChange?.name
+                    val targetUserEmail = exchange?.userChange?.username
+
+                    _offeredProductName.value = productTitle
+                    _targetUserName.value = targetUserName
+                    _targetUserEmail.value = targetUserEmail
+
+                    if (targetUserName != null) {
+                        if (targetUserEmail != null) {
+                            if (productTitle != null) {
+                                sendOfferEmail(
+                                    name = targetUserName,
+                                    email = targetUserEmail,
+                                    itemTitle = productTitle,
+                                    status = "Recibida"
+                                )
+                            }
+                        }
+                    }
+                }
+
+                _offerSuccess.value = true
+            } else {
+                _offerFailure.value = true
+            }
         }
     }
 }

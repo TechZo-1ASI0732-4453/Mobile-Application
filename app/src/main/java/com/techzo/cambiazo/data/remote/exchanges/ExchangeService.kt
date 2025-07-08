@@ -27,7 +27,7 @@ interface ExchangeService {
 
     @Headers("Content-Type: application/json", "Accept: application/json")
     @POST("exchanges")
-    suspend fun createExchange(@Body exchange: ExchangeRequestDto): Response<Void>
+    suspend fun createExchange(@Body exchange: ExchangeRequestDto): Response<ExchangeResponseDto>
   
     @Headers("Content-Type: application/json",
         "Accept: application/json")

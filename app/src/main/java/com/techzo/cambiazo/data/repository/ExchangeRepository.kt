@@ -3,6 +3,7 @@ package com.techzo.cambiazo.data.repository
 import com.techzo.cambiazo.common.Resource
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeDto
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeRequestDto
+import com.techzo.cambiazo.data.remote.exchanges.ExchangeResponseDto
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeStatusRequestDto
 import com.techzo.cambiazo.data.remote.exchanges.toExchange
@@ -83,7 +84,7 @@ class ExchangeRepository(private val exchangeService: ExchangeService
         }
     }
 
-    suspend fun updateExchangeStatus(exchangeId: Int, status: String): Resource<Exchange> =
+    suspend fun updateExchangeStatus(exchangeId: Int, status: String): Resource<Boolean> =
         withContext(Dispatchers.IO) {
             try {
                 val response = exchangeService.updateExchangeStatus(
@@ -91,11 +92,7 @@ class ExchangeRepository(private val exchangeService: ExchangeService
                     ExchangeStatusRequestDto(status)
                 )
                 if (response.isSuccessful) {
-                    response.body()?.let { exchangeDto ->
-                        val exchange = exchangeDto.toExchange()
-                        return@withContext Resource.Success(data = exchange)
-                    }
-                    return@withContext Resource.Error("Exchange not found")
+                    return@withContext Resource.Success(true)
                 }
                 return@withContext Resource.Error(response.message())
             } catch (e: Exception) {
@@ -103,20 +100,22 @@ class ExchangeRepository(private val exchangeService: ExchangeService
             }
         }
 
-    suspend fun createExchange(exchangeRequestDto: ExchangeRequestDto): Resource<Boolean> {
+
+    suspend fun createExchange(exchangeRequestDto: ExchangeRequestDto): Resource<ExchangeResponseDto> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = exchangeService.createExchange(exchangeRequestDto)
-                if (response.isSuccessful) {
-                    Resource.Success(true)
+                if (response.isSuccessful && response.body() != null) {
+                    Resource.Success(response.body()!!)
                 } else {
-                    Resource.Error("Failed to create exchange")
+                    Resource.Error("Error al crear el intercambio: ${response.code()}")
                 }
             } catch (e: Exception) {
-                Resource.Error(e.message ?: "Unknown error")
+                Resource.Error("Excepción al crear intercambio: ${e.message}")
             }
         }
     }
+
 
     suspend fun checkIfExchangeExists(
         userId: Int,
