@@ -45,7 +45,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
         resources {
@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.glide)
     implementation (libs.accompanist.swiperefresh)
     implementation(libs.androidx.appcompat)
+    implementation(libs.firebase.appcheck.debug)
     annotationProcessor(libs.room.compiler)
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
 
@@ -123,7 +124,12 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.datastore.preferences)
+    implementation ("androidx.core:core-splashscreen:1.0.1")
+    implementation("com.google.firebase:firebase-appcheck-debug:17.1.1")
+    implementation("com.google.android.play:integrity:1.3.0")
 
     //Paypal
     implementation ("com.paypal.android:paypal-web-payments:1.5.0")
+    implementation("com.google.firebase:firebase-appcheck-debug:17.1.1")
+
 }

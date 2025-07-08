@@ -16,6 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
         tools:targetApi="31">
+        <meta-data
+            android:name="com.google.android.gms.security.SafetynetRecaptchaApiKey"
+            android:value="6LcJQUorAAAAAOYbo-uVM_Fxb-rWRGq5clT9RJ1D"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

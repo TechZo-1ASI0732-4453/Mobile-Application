@@ -48,6 +48,7 @@ import com.techzo.cambiazo.common.components.TextLink
 import com.techzo.cambiazo.presentation.auth.GoogleAuthViewModel
 import com.techzo.cambiazo.presentation.auth.PhoneInputScreen
 import kotlinx.coroutines.launch
+import androidx.compose.material3.AlertDialog
 
 
 @Composable
@@ -59,20 +60,38 @@ fun SignUpScreen(
     viewModel: SignUpViewModel = hiltViewModel(),
     googleAuthViewModel: GoogleAuthViewModel = hiltViewModel()
 ) {
-    val name = viewModel.name.value
-    val password = viewModel.password.value
-    val email = viewModel.username.value
-    val phoneNumber = googleAuthViewModel.phoneNumber.value
-    val phone = viewModel.phoneNumber.value
-    val showPassword = viewModel.showPassword.value
-    val showPasswordRepeat = viewModel.showPasswordRepeat.value
-    val repeatPassword = viewModel.repitePassword.value
-    val isChecked = viewModel.isChecked
-    var showPhoneInput by remember { mutableStateOf(false) }
+    val name by viewModel.name
+    val password by viewModel.password
+    val email by viewModel.username
+    val phone by viewModel.phoneNumber
+    val repeatPassword by viewModel.repitePassword
+    val isChecked = viewModel.isChecked.value
+    val captchaToken by viewModel.captchaToken
+    val phoneNumber by googleAuthViewModel.phoneNumber
     val state = viewModel.state.value
-    val successDialog = viewModel.successDialog.value
+    val successDialog by viewModel.successDialog
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+    val captchaPair = remember { listOf(
+        "¿Cuánto es 3 + 4?" to "7",
+        "¿Cuánto es 5 - 2?" to "3",
+        "Escribe la palabra 'cambiazo'" to "cambiazo",
+        "¿Cuánto es 6 + 1?" to "7",
+        "¿Cuánto es 10 - 3?" to "7"
+    ).random() }
+
+    val preguntaActual = captchaPair.first
+    val respuestaCorrecta = captchaPair.second
+
+    var showCaptchaDialog by remember { mutableStateOf(false) }
+    var dialogError by remember { mutableStateOf(false) }
+    val captchaPassed = viewModel.captchaToken.value != null
+
+    var captchaInput by remember { mutableStateOf("") }
+    var isCaptchaCorrect by remember { mutableStateOf(false) }
+    var showPhoneInput by remember { mutableStateOf(false) }
+
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -189,7 +208,7 @@ fun SignUpScreen(
                 horizontalArrangement = Arrangement.Start
             ) {
                 Checkbox(
-                    checked = isChecked.value,
+                    checked = isChecked,
                     onCheckedChange = { viewModel.onCheckedChange(it) },
                     modifier = Modifier.size(20.dp),
                     colors = CheckboxDefaults.colors(
@@ -205,8 +224,64 @@ fun SignUpScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.size(15.dp))
+            Spacer(Modifier.height(10.dp))
 
+            ButtonApp(
+                text   = if (captchaPassed) "✔️ Verificado" else "No soy un robot",
+                enable = !captchaPassed,
+                onClick = { showCaptchaDialog = true }
+            )
+
+            if (showCaptchaDialog) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = {
+                        showCaptchaDialog = false
+                        dialogError = false
+                        captchaInput = ""
+                    },
+                    title = { Text("Verificación humana") },
+                    text = {
+                        Column {
+                            Text(preguntaActual, fontSize = 16.sp)
+                            Spacer(Modifier.height(8.dp))
+                            CustomInput(
+                                value = captchaInput,
+                                type = "Text",
+                                placeHolder = "Tu respuesta",
+                                onValueChange = { captchaInput = it }
+                            )
+                            if (dialogError) {
+                                Spacer(Modifier.height(4.dp))
+                                Text("Respuesta incorrecta", color = Color.Red, fontSize = 14.sp)
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        ButtonApp(
+                            text = "Verificar",
+                            enable = true
+                        ) {
+                            if (captchaInput.trim().lowercase() == respuestaCorrecta.lowercase()) {
+                                viewModel.setCaptchaVerified(true)
+                                showCaptchaDialog = false
+                                dialogError = false
+                            } else {
+                                dialogError = true
+                            }
+                        }
+                    },
+                    dismissButton = {
+                        ButtonApp(
+                            text = "Cancelar",
+                            enable = true
+                        ) {
+                            showCaptchaDialog = false
+                            dialogError = false
+                            captchaInput = ""
+                        }
+                    }
+                )
+            }
 
             if (state.message.isEmpty()) {
                 Spacer(modifier = Modifier.height(22.dp))
@@ -249,9 +324,11 @@ fun SignUpScreen(
                     )
                 }
             } else {
-                ButtonApp("Registrarse", onClick = {
-                    viewModel.signUp()
-                })
+                ButtonApp(
+                    text   = "Registrarse",
+                    enable = captchaToken != null,
+                    onClick = { viewModel.signUp() }
+                )
             }
 
             Row(

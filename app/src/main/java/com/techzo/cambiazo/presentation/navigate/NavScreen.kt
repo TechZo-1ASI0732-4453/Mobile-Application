@@ -174,7 +174,8 @@ fun NavScreen(
         ItemsScreens.Explorer(onNavigate = { navController.navigate(Routes.Explorer.route) }),
         ItemsScreens.Exchange(onNavigate = { navController.navigate(Routes.Exchange.route) }),
         ItemsScreens.Publish(onNavigate = {
-            navController.navigate(Routes.Donations.route)
+            navController.currentBackStackEntry?.savedStateHandle?.set("product", null)
+            navController.navigate(Routes.Publish.route)
         }),
 
         ItemsScreens.Articles(onNavigate = { navController.navigate(Routes.Article.route) }),
@@ -209,7 +210,6 @@ fun NavScreen(
                 }
             )
         }
-
 
         composable(
             route = Routes.OtpCodeVerification.route,
@@ -266,8 +266,9 @@ fun NavScreen(
         composable(route = Routes.Donations.route) {
             DonationScreen(
                 back = { navController.popBackStack() },
-                onOngClick = { /* lo que desees hacer al tocar una ONG */ }
-            )
+                onOngClick = { /* lo que desees hacer al tocar una ONG */ },
+                openDonations = { navController.navigate(Routes.Donations.route) }
+                )
         }
 
 
@@ -344,7 +345,8 @@ fun NavScreen(
                 openConfiguration = { navController.navigate(Routes.Settings.route) },
                 openFavorites = { navController.navigate(Routes.Favorites.route) },
                 bottomBar = BottomBarNavigation(items,currentRoute),
-                openSubscription = { navController.navigate(Routes.MySubscription.route) }
+                openSubscription = { navController.navigate(Routes.MySubscription.route) },
+                openDonationsScreen = { navController.navigate(Routes.Donations.route) }
             )
         }
 

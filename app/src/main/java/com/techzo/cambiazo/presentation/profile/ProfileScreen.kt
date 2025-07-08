@@ -26,6 +26,7 @@ import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material.icons.outlined.VolunteerActivism
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -59,6 +60,8 @@ fun ProfileScreen(
     openFavorites: () -> Unit = {},
     bottomBar: Pair<@Composable () -> Unit, () -> Unit>,
     openSubscription: () -> Unit = {},
+    openDonationsScreen: () -> Unit = {},
+
     viewModel: ProfileViewModel = hiltViewModel()) {
 
     val averageRating = viewModel.averageRating.value
@@ -191,6 +194,12 @@ fun ProfileScreen(
                         icon = Icons.Outlined.Diamond,
                         text = "Suscripción",
                         onClick = { openSubscription() }
+                    )
+
+                    ProfileOption(
+                        icon = Icons.Outlined.VolunteerActivism,
+                        text = "ONGs Afiliadas",
+                        onClick = { openDonationsScreen() }
                     )
 
                     HorizontalDivider(color = Color(0xFFF2F2F2), thickness = 2.dp, modifier = Modifier.padding(vertical = 12.dp))

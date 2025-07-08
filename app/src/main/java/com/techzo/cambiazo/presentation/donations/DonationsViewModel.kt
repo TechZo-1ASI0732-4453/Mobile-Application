@@ -31,14 +31,11 @@ class DonationsViewModel @Inject constructor(
     fun getOngs() {
         viewModelScope.launch {
             _ongs.value = UIState(isLoading = true)
-            when (val result = donationsRepository.getAllOngs()) {
-                is Resource.Success<*> -> {
-                    val data = result.data as? List<OngDto> ?: emptyList()
-                    _ongs.value = UIState(data = data)
-                }
-                is Resource.Error<*> -> {
-                    _ongs.value = UIState(message = result.message ?: "Error desconocido")
-                }
+            try {
+                val data = donationsRepository.getAllOngs()
+                _ongs.value = UIState(data = data)
+            } catch (e: Exception) {
+                _ongs.value = UIState(message = e.message ?: "Error desconocido")
             }
         }
     }

@@ -13,7 +13,6 @@ object Constants {
     var user: UserSignIn? = null
     var userSubscription: Subscription? = null
     var selectedPlanId: Int? = null
-
     val filterValues = FilterValues()
 
 }

@@ -193,8 +193,9 @@ fun ExchangeDetailsScreen(
 
             val context = LocalContext.current
 
-            val authorId= if(boolean) exchange.userOwn.id else exchange.userChange.id
-            val receptorId = if(!boolean) exchange.userChange.id else exchange.userOwn.id
+            val currentUserId = Constants.user!!.id
+            val otherUserId = if (exchange.userOwn.id == currentUserId) exchange.userChange.id else exchange.userOwn.id
+
 
             Column {
                 Column(modifier = Modifier.padding(start = 15.dp, end = 15.dp)) {
@@ -310,8 +311,17 @@ fun ExchangeDetailsScreen(
                 )
 
                 Column(modifier = Modifier.padding(start = 15.dp, end = 15.dp)) {
-                    BoxUnderExchange(textUnderImage2,productImage2, productName2, price2.toString(), page, exchangeId = exchange.id, goBack = {goBack(page)}, userAuthor = authorId, userReceptor = receptorId)
-
+                    BoxUnderExchange(
+                        textUnderImage2,
+                        productImage2,
+                        productName2,
+                        price2.toString(),
+                        page,
+                        exchangeId = exchange.id,
+                        goBack = { goBack(page) },
+                        userAuthor = currentUserId,
+                        userReceptor = otherUserId
+                    )
                 }
             }
         }

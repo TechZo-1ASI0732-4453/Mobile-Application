@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -36,11 +39,13 @@ import com.techzo.cambiazo.data.remote.donations.OngDto
 @Composable
 fun DonationScreen(
     back: () -> Unit = {},
-    onOngClick: (OngDto) -> Unit = {}
+    onOngClick: (OngDto) -> Unit = {},
+    openDonations: ()-> Unit = {}
 ) {
     val viewModel: DonationsViewModel = hiltViewModel()
     val state = viewModel.ongs.value
     val search = viewModel.searchQuery.value
+
 
     val filteredOngs = state.data?.filter {
         it.name.contains(search, ignoreCase = true)
@@ -56,38 +61,40 @@ fun DonationScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 ButtonIconHeaderApp(Icons.Filled.ArrowBack, onClick = { back() })
-                TextTitleHeaderApp("Haz tu Donación")
+                TextTitleHeaderApp("ONGs")
             }
         },
         content = {
-            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp)) {
-                CustomInput(
-                    value = search,
-                    placeHolder = "Buscar",
-                    type = "Text",
-                    isError = false,
-                    messageError = ""
-                ) {
-                    viewModel.onSearchQueryChange(it)
+            LazyColumn(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp, vertical = 5.dp)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
+                item {
+                    CustomInput(
+                        value = search,
+                        placeHolder = "Buscar",
+                        type = "Text",
+                        isError = false,
+                        messageError = ""
+                    ) {
+                        viewModel.onSearchQueryChange(it)
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
                 when {
                     state.isLoading -> {
-                        Text("Cargando ONGs...", color = Color.Gray)
+                        item { Text("Cargando ONGs...", color = Color.Gray) }
                     }
-
                     !state.message.isNullOrEmpty() -> {
-                        Text("Error: ${state.message}", color = Color.Red)
+                        item { Text("Error: ${state.message}", color = Color.Red) }
                     }
-
                     filteredOngs.isEmpty() -> {
-                        Text("No se encontraron resultados", color = Color.Gray)
+                        item { Text("No se encontraron resultados", color = Color.Gray) }
                     }
-
                     else -> {
-                        filteredOngs.forEach { ong ->
+                        items(filteredOngs) { ong ->
                             OngCard(ong = ong, onClick = { onOngClick(ong) })
                             Spacer(modifier = Modifier.height(10.dp))
                         }
@@ -103,56 +110,60 @@ fun OngCard(
     ong: OngDto,
     onClick: () -> Unit
 ) {
+    val addressParts = ong.address.split(",")
+    val distrito = addressParts.getOrNull(1)?.trim() ?: ""
+    val ciudad = addressParts.getOrNull(2)?.trim() ?: ""
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFF9F9FB)),
+        shape = RoundedCornerShape(18.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         onClick = { onClick() }
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .background(Color.White)
-                .padding(15.dp)
+                .padding(18.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                AsyncImage(
-                    model = ong.logo,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .background(Color.LightGray, shape = RoundedCornerShape(10.dp))
+            AsyncImage(
+                model = ong.logo,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(60.dp)
+                    .background(Color(0xFFF2F2F2), shape = RoundedCornerShape(18.dp))
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = ong.name,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF222222)
                 )
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = ong.type,
-                        fontSize = 12.sp,
-                        color = Color.Gray
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        tint = Color(0xFF24A19C),
+                        modifier = Modifier.size(18.dp)
                     )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = ong.name,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.Black
-                    )
-                    Text(
-                        text = ong.address,
-                        fontSize = 12.sp,
-                        color = Color.Gray
+                        text = "$distrito, $ciudad",
+                        fontSize = 14.sp,
+                        color = Color(0xFF8B8B8B),
+                        fontWeight = FontWeight.Medium
                     )
                 }
-
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .rotate(180f),
-                    tint = Color(0xFFFFD146)
-                )
             }
         }
     }
 }
+
