@@ -163,21 +163,27 @@ fun SignUpScreen(
                 value = name,
                 type = "Text",
                 placeHolder = "Nombre",
-                onValueChange = { viewModel.onNameChange(it) }
+                onValueChange = { viewModel.onNameChange(it) },
+                isError = viewModel.nameError.value != null,
+                supportingText = viewModel.nameError.value ?: ""
             )
             Spacer(modifier = Modifier.size(10.dp))
             CustomInput(
                 value = phone,
                 type = "Number",
                 placeHolder = "Numero de Telefono",
-                onValueChange = { viewModel.onPhoneNumberChange(it) }
+                onValueChange = { viewModel.onPhoneNumberChange(it) },
+                isError = viewModel.phoneError.value != null,
+                supportingText = viewModel.phoneError.value ?: ""
             )
             Spacer(modifier = Modifier.size(10.dp))
             CustomInput(
                 value = email,
                 type = "Text",
                 placeHolder = "Correo electrónico",
-                onValueChange = { viewModel.onUsernameChange(it) }
+                onValueChange = { viewModel.onUsernameChange(it) },
+                isError = viewModel.emailError.value != null,
+                supportingText = viewModel.emailError.value ?: ""
             )
 
             Spacer(modifier = Modifier.size(10.dp))
@@ -187,7 +193,10 @@ fun SignUpScreen(
                 value = password,
                 type = "Password",
                 placeHolder = "Contraseña",
-                onValueChange = { viewModel.onPasswordChange(it) })
+                onValueChange = { viewModel.onPasswordChange(it) },
+                isError = viewModel.passwordError.value != null,
+                supportingText = viewModel.passwordError.value ?: ""
+            )
 
 
             Spacer(modifier = Modifier.size(10.dp))
@@ -196,7 +205,10 @@ fun SignUpScreen(
                 value = repeatPassword,
                 type = "Password",
                 placeHolder = "Confirmar contraseña",
-                onValueChange = { viewModel.onRepitePasswordChange(it) })
+                onValueChange = { viewModel.onRepitePasswordChange(it) },
+                isError = viewModel.repeatPasswordError.value != null,
+                supportingText = viewModel.repeatPasswordError.value ?: ""
+            )
 
 
             Spacer(modifier = Modifier.size(10.dp))

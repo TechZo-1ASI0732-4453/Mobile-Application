@@ -49,6 +49,7 @@ fun CustomInput(
     trailingIcon: @Composable (() -> Unit)? = null,
     prefix: String? = null,
     suffix: String? = null,
+    supportingText: String = "",
     isError: Boolean = false,
     messageError: String? = "Campo Inválido",
     pressEnter: () -> Unit = {},
