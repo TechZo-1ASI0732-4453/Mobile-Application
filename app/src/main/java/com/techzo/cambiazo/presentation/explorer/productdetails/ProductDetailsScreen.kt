@@ -1,6 +1,8 @@
 package com.techzo.cambiazo.presentation.explorer.productdetails
 
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -167,6 +171,7 @@ fun ProductDetails(
     articlesViewModel: ArticlesViewModel = hiltViewModel()
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val context: Context = LocalContext.current
 
     val articlesState by articlesViewModel.products.collectAsState()
     val userProducts = articlesState.data?.filter { it.available } ?: emptyList()
@@ -286,6 +291,40 @@ fun ProductDetails(
 
         Text(text = "Le interesa:", fontWeight = FontWeight.Bold, fontSize = 18.sp)
         Text(text = product.desiredObject, fontSize = 16.sp, color = Color.Gray)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Button(
+                onClick = {
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "Mira este producto: ${product.name}\n${product.image}"
+                        )
+                    }
+                    val chooser = Intent.createChooser(shareIntent, "Compartir producto").apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(chooser)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD146))
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Share,
+                    contentDescription = "Compartir",
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text("Compartir")
+            }
+        }
 
         Spacer(modifier = Modifier.weight(6f))
 

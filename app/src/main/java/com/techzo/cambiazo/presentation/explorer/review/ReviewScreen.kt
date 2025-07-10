@@ -1,5 +1,7 @@
 package com.techzo.cambiazo.presentation.explorer.review
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,8 +20,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.techzo.cambiazo.common.Constants.user
 import com.techzo.cambiazo.common.components.ArticlesOwn
 import com.techzo.cambiazo.common.components.CustomTabs
 import com.techzo.cambiazo.common.components.EmptyStateMessage
@@ -37,9 +42,10 @@ fun ReviewScreen(
     viewModel: ReviewViewModel = hiltViewModel()
 ) {
     val selectedTabIndex = remember { mutableStateOf(0) }
-
-    val reviewAverageUser by viewModel.reviewAverageUser
+    val context = LocalContext.current
     val reviewsState by viewModel.reviews
+    val reviewUser = reviewsState.data?.firstOrNull()?.userReceptor
+    val reviewAverageUser by viewModel.reviewAverageUser
     val articlesState by viewModel.articles
     val errorMessage by viewModel.errorMessage
 
@@ -137,7 +143,33 @@ fun ReviewScreen(
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
 
+                    reviewUser?.let { user ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                         Button(
+                             onClick = {
+                                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                     type = "text/plain"
+                                     putExtra(Intent.EXTRA_TEXT, "Conoce a ${user.name}: ${user.profilePicture}")
+                                 }
+                                 val chooser = Intent.createChooser(shareIntent, "Compartir perfil").apply {
+                                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                 }
+                                 context.startActivity(chooser)
+                             },
+                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD146))
+                         ) {
+                             Icon(imageVector = Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(20.dp))
+                             Spacer(Modifier.width(4.dp))
+                             Text("Compartir perfil")
+                         }
+                        }
+                    }
                     Spacer(modifier = Modifier.height(20.dp))
 
                     CustomTabs(
