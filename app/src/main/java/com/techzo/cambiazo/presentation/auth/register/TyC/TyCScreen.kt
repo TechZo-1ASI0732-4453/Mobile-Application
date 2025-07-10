@@ -41,14 +41,14 @@ fun TermsAndConditionsScreen(back: () -> Unit) {
                         .padding(top = 20.dp)
                 ) {
                     Text(
-                        text = "Términos y",
+                        text = "Acuerdo de Servicio",
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
-                        text = "Condiciones",
+                        text = "(SaaS)",
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -66,13 +66,13 @@ fun TermsAndConditionsScreen(back: () -> Unit) {
         ) {
             item {
                 Text(
-                    "Última actualización: 21/10/2024",
+                    "Última actualización: 01/07/2025",
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp),
                     textAlign = TextAlign.Justify
                 )
                 Text(
-                    "Bienvenido a TechZo y su aplicación CambiaZo. Al usar nuestra aplicación, usted acepta cumplir con los siguientes términos y condiciones. Estos términos son importantes tanto para usted como para nosotros, ya que están diseñados para crear un entorno seguro, justo y legal.",
+                    "Bienvenido a CambiaZo, una plataforma que permite intercambiar o donar objetos de forma voluntaria, promoviendo la economía circular y evitando el desperdicio. Al usar CambiaZo aceptas estos términos y condiciones. Si no estás de acuerdo, por favor no utilices la plataforma.",
                     color = Color.Gray,
                     modifier = Modifier.padding(bottom = 16.dp),
                     textAlign = TextAlign.Justify
@@ -80,108 +80,72 @@ fun TermsAndConditionsScreen(back: () -> Unit) {
             }
 
             item {
-                Text(
-                    "1. Uso de la Aplicación",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Justify
-                )
+                Text("1. Objeto del Servicio", fontWeight = FontWeight.Bold, textAlign = TextAlign.Justify)
                 AnnotatedText(
-                    boldText = "1.1. Objetivo:",
-                    normalText = " La Aplicación está diseñada para ayudarte a intercambiar y donar objetos que ya no utilizas y deseas darle una segunda vida.",
-                    textAlign = TextAlign.Justify
-                )
-                AnnotatedText(
-                    boldText = "1.2. Uso Apropiado:",
-                    normalText = " Te comprometes a utilizar la Aplicación de manera legal, ética y apropiada. No debes utilizar la Aplicación de manera que viole la ley o los derechos de terceros.",
+                    boldText = "1.1. ",
+                    normalText = "CambiaZo ofrece un espacio digital donde los usuarios pueden publicar objetos que ya no necesitan para que otros los intercambien o reciban como donación, siempre de manera voluntaria y sin fines de lucro.",
                     textAlign = TextAlign.Justify
                 )
             }
 
             item {
-                Text(
-                    "2. Privacidad y Datos",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Justify
-                )
+                Text("2. Obligaciones del Usuario", fontWeight = FontWeight.Bold, textAlign = TextAlign.Justify)
                 AnnotatedText(
-                    boldText = "2.1. Privacidad del Usuario:",
-                    normalText = " Respetamos tu privacidad. La información personal que proporciones a la aplicación se regirá por nuestra Política de Privacidad. Al utilizar la aplicación, consientes la recopilación y el uso de datos de acuerdo con nuestra Política de Privacidad.",
-                    textAlign = TextAlign.Justify
-                )
-                AnnotatedText(
-                    boldText = "2.2. Control de Datos:",
-                    normalText = " Tienes el control de tus datos personales y la capacidad de configurar la privacidad en la Aplicación, incluyendo la revocación de permisos para acceder a la cámara y la ubicación.",
+                    boldText = "2.1. ",
+                    normalText = "Los usuarios deben brindar información veraz y actualizada, usar la plataforma de forma ética y responsable, cumplir con la legislación vigente y no publicar contenido prohibido, ilegal u ofensivo.",
                     textAlign = TextAlign.Justify
                 )
             }
 
             item {
-                Text(
-                    "3. Propiedad Intelectual",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Justify
-                )
+                Text("3. Obligaciones de CambiaZo", fontWeight = FontWeight.Bold, textAlign = TextAlign.Justify)
                 AnnotatedText(
-                    boldText = "3.1. Derechos de Autor:",
-                    normalText = " La aplicación y su contenido, incluyendo pero no limitado a texto, imágenes, logotipos y marcas registradas, están protegidos por derechos de autor y otras leyes de propiedad intelectual. No tienes permiso para copiar, modificar, distribuir o reproducir dicho contenido sin autorización.",
+                    boldText = "3.1. ",
+                    normalText = "CambiaZo se compromete a ofrecer acceso ininterrumpido (salvo mantenimiento o fuerza mayor), proteger la privacidad de los usuarios, brindar soporte básico y notificar cambios importantes en el servicio o términos.",
                     textAlign = TextAlign.Justify
                 )
             }
 
             item {
-                Text(
-                    "4. Actualizaciones y Cambios",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Justify
-                )
+                Text("4. Restricciones de Uso", fontWeight = FontWeight.Bold, textAlign = TextAlign.Justify)
                 AnnotatedText(
-                    boldText = "4.1. Actualizaciones:",
-                    normalText = " Podemos realizar actualizaciones y cambios en la aplicación de vez en cuando. Es responsabilidad del usuario mantener la aplicación actualizada para disfrutar de las últimas características y correcciones.",
+                    boldText = "4.1. ",
+                    normalText = "Está prohibido usar CambiaZo para fines comerciales, emplear técnicas automatizadas, o compartir contenido ilegal, violento o discriminatorio que perjudique la experiencia en la plataforma.",
                     textAlign = TextAlign.Justify
                 )
             }
 
             item {
-                Text(
-                    "5. Terminación",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Justify
-                )
+                Text("5. Propiedad Intelectual", fontWeight = FontWeight.Bold, textAlign = TextAlign.Justify)
                 AnnotatedText(
-                    boldText = "5.1. Terminación por el Usuario:",
-                    normalText = " Puedes dejar de utilizar la aplicación en cualquier momento.",
-                    textAlign = TextAlign.Justify
-                )
-                AnnotatedText(
-                    boldText = "5.2. Terminación por Nosotros:",
-                    normalText = " Nos reservamos el derecho de suspender o cancelar tu acceso a la aplicación en caso de incumplimiento de estos términos.",
+                    boldText = "5.1. ",
+                    normalText = "El contenido publicado por los usuarios sigue siendo de su propiedad. Sin embargo, al publicarlo en CambiaZo, se otorga una licencia limitada para mostrarlo y distribuirlo dentro de la plataforma y permitir que otros lo vean e interactúen.",
                     textAlign = TextAlign.Justify
                 )
             }
 
             item {
-                Text(
-                    "6. Disposiciones Finales",
-                    fontWeight = FontWeight.Bold,
+                Text("6. Modificaciones del Servicio", fontWeight = FontWeight.Bold, textAlign = TextAlign.Justify)
+                AnnotatedText(
+                    boldText = "6.1. ",
+                    normalText = "CambiaZo puede actualizar o cambiar sus servicios y términos en cualquier momento, notificando a los usuarios por medios electrónicos. El uso continuo implica la aceptación de dichos cambios.",
                     textAlign = TextAlign.Justify
                 )
+            }
+
+            item {
+                Text("7. Terminación de Cuentas", fontWeight = FontWeight.Bold, textAlign = TextAlign.Justify)
                 AnnotatedText(
-                    boldText = "6.1. Ley Aplicable:",
-                    normalText = " Estos términos se rigen por las leyes del Perú y cualquier disputa se someterá a la jurisdicción de los tribunales del Perú.",
-                    textAlign = TextAlign.Justify
-                )
-                AnnotatedText(
-                    boldText = "6.2. Cambios en los Términos:",
-                    normalText = " Nos reservamos el derecho de modificar estos términos en cualquier momento. Te notificaremos de cualquier cambio importante. Si continúas utilizando la Aplicación después de los cambios, se considerará que aceptas los nuevos términos.",
+                    boldText = "7.1. ",
+                    normalText = "CambiaZo puede suspender o eliminar cuentas que incumplan estos términos, presenten información falsa, contenido prohibido o afecten el funcionamiento normal de la plataforma.",
                     textAlign = TextAlign.Justify
                 )
             }
 
             item {
                 Spacer(modifier = Modifier.height(15.dp))
-
                 Text(
-                    "Te agradecemos por utilizar CambiaZo. Si tienes alguna pregunta sobre estos términos, no dudes en contactarnos.",
+                    "Gracias por usar CambiaZo. Si tienes alguna duda sobre este acuerdo, puedes contactarnos.",
                     modifier = Modifier.padding(top = 16.dp),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Justify
