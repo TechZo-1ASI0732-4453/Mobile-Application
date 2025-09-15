@@ -24,9 +24,9 @@ import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.domain.ProductCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
+import com.techzo.cambiazo.data.remote.ai.AiSuggestionDto
+import com.techzo.cambiazo.data.repository.GeminiAiRepository
 import java.util.Calendar
-import java.util.Locale
 import javax.inject.Inject
 
 
@@ -36,10 +36,14 @@ class PublishViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val productRepository: ProductRepository
 ):ViewModel() {
-
+    private val aiRepo = GeminiAiRepository(
+        apiKey = Constants.GEMINI_API_KEY,
+        modelName = "gemini-1.5-flash-8b-latest"
+    )
     private val productToEdit = mutableStateOf<Product?>(null)
      val limitReached = mutableStateOf(false)
 
+    private val _forceAiOverwrite = mutableStateOf(false)
 
     private val _allCountries = mutableStateOf<List<Country>>(emptyList())
     private val _allDepartments = mutableStateOf<List<Department>>(emptyList())
@@ -115,6 +119,159 @@ class PublishViewModel @Inject constructor(
 
     private val _productState = mutableStateOf(UIState<Any>())
     val productState: State<UIState<Any>> get() = _productState
+
+    private val _aiLoading = mutableStateOf(false)
+    val aiLoading: State<Boolean> get() = _aiLoading
+    private val _aiSuggestion = mutableStateOf<AiSuggestionDto?>(null)
+    val aiSuggestion: State<AiSuggestionDto?> get() = _aiSuggestion
+
+    private val _showAiTips = mutableStateOf(false)
+    val showAiTips: State<Boolean> get() = _showAiTips
+
+    private val _aiImprovementTips = mutableStateOf<List<String>>(emptyList())
+    val aiImprovementTips: State<List<String>> get() = _aiImprovementTips
+
+    private val _aiPhotoTips = mutableStateOf<List<String>>(emptyList())
+    val aiPhotoTips: State<List<String>> get() = _aiPhotoTips
+
+    private fun List<String>?.orElseEmpty(): List<String> = this ?: emptyList()
+
+    private fun List<String>.trimShort(maxItems: Int, maxLen: Int): List<String> =
+        asSequence()
+            .map { it.trim().replace(Regex("""^[•·\-\–\—]+\s*"""), "") }
+            .filter { it.isNotBlank() }
+            .map { if (it.length > maxLen) it.take(maxLen).trimEnd() else it }
+            .take(maxItems)
+            .toList()
+    fun hideAiTips() { _showAiTips.value = false }
+
+    fun formattedAiTips(): String {
+        val s = _aiSuggestion.value
+        val sb = StringBuilder()
+
+        s?.conditionScore?.let { score ->
+            sb.append("Estado estimado: ").append(score).append("/10")
+            s.conditionComment?.takeIf { it.isNotBlank() }?.let { sb.append(" — ").append(it) }
+            sb.append("\n\n")
+        }
+
+        if (_aiImprovementTips.value.isNotEmpty()) {
+            sb.append("Consejos para tu publicación:\n")
+            _aiImprovementTips.value.forEach { sb.append("• ").append(it).append('\n') }
+            sb.append('\n')
+        }
+        if (_aiPhotoTips.value.isNotEmpty()) {
+            sb.append("Consejos para tus fotos:\n")
+            _aiPhotoTips.value.forEach { sb.append("• ").append(it).append('\n') }
+        }
+        return sb.toString().trim()
+    }
+
+    fun analyzeImageWithAI(context: Context, forceOverride: Boolean? = null) {
+        val uri = _image.value ?: run { _errorImage.value = true; return }
+        _aiLoading.value = true
+        _messageError.value = null; _descriptionError.value = null
+
+        val shouldOverride = forceOverride ?: _forceAiOverwrite.value
+
+        viewModelScope.launch {
+            when (val res = aiRepo.analyzeImage(context, uri)) {
+                is Resource.Success -> {
+                    _aiSuggestion.value = res.data
+                    applyAiSuggestion(res.data, overrideExisting = shouldOverride)
+
+                    _aiImprovementTips.value = res.data?.improvementTips ?: emptyList()
+                    _aiPhotoTips.value = res.data?.photoTips ?: emptyList()
+                    _showAiTips.value = (_aiImprovementTips.value + _aiPhotoTips.value).isNotEmpty()
+
+                    _aiLoading.value = false
+                    _forceAiOverwrite.value = false
+                }
+                is Resource.Error -> {
+                    _aiLoading.value = false
+                    _messageError.value = "No pude analizar la imagen"
+                    _descriptionError.value = res.message ?: "Intenta nuevamente"
+                }
+            }
+        }
+    }
+
+    private fun applyAiSuggestion(s: AiSuggestionDto?, overrideExisting: Boolean = false) {
+        if (s == null) return
+
+        val conditionLine = s.conditionScore?.let { score ->
+            buildString {
+                append("Estado estimado: ").append(score).append("/10")
+                if (!s.conditionComment.isNullOrBlank()) append(" — ").append(s.conditionComment)
+            }
+        }
+
+        fun setName() {
+            s.titleSuggestion?.takeIf { it.isNotBlank() }?.let {
+                _name.value = it.take(70); _errorName.value = false
+            }
+        }
+
+        fun setDescription() {
+            val base = s.descriptionSuggestion?.take(400)
+            val newDesc = listOfNotNull(base, conditionLine).joinToString("\n").trim()
+            if (newDesc.isNotBlank()) {
+                _description.value = newDesc.take(450); _errorDescription.value = false
+            }
+        }
+
+        fun setCategory() {
+            findCategoryByExternalKeyOrLabels(s.categoryExternalKey, s.labels ?: emptyList())?.let {
+                _categorySelected.value = it; _errorCategory.value = false
+            }
+        }
+
+        fun setPrice() {
+            clampPrice(s.priceEstimate)?.let { p ->
+                _price.value = p.toString(); _errorPrice.value = false
+            }
+        }
+
+        if (overrideExisting) {
+            setName(); setDescription(); setCategory(); setPrice()
+        } else {
+            if (_name.value.isBlank()) setName()
+
+            if (_description.value.isBlank()) {
+                setDescription()
+            } else if (!conditionLine.isNullOrBlank() &&
+                !_description.value.contains("Estado estimado:", ignoreCase = true)
+            ) {
+                _description.value = (_description.value + "\n" + conditionLine).trim().take(450)
+            }
+
+            if (_categorySelected.value == null) setCategory()
+            if (_price.value.isBlank()) setPrice()
+        }
+    }
+    private fun findCategoryByExternalKeyOrLabels(
+        externalKey: String?, labels: List<String>?
+    ): ProductCategory? {
+        val cats = _categories.value.data ?: emptyList()
+        val byKey = when (externalKey) {
+            "shoes" -> cats.find { it.name.contains("calzado", true) || it.name.contains("zapat", true) }
+            "electronics.laptop" -> cats.find { it.name.contains("laptop", true) || it.name.contains("portátil", true) }
+            "electronics.phone" -> cats.find { it.name.contains("celular", true) || it.name.contains("teléfono", true) }
+            "furniture" -> cats.find { it.name.contains("mueble", true) }
+            else -> null
+        }
+        if (byKey != null) return byKey
+
+        labels.orEmpty().forEach { lab ->
+            cats.firstOrNull { it.name.contains(lab, true) }?.let { return it }
+        }
+        return null
+    }
+
+    private fun clampPrice(p: Int?): Int? {
+        if (p == null) return null
+        return p.coerceIn(1, 50_000)
+    }
 
     val buttonEdit = derivedStateOf {
         !(_name.value == productToEdit.value?.name &&
@@ -263,7 +420,18 @@ class PublishViewModel @Inject constructor(
 
     fun selectImage(image: Uri?) {
         if (image != null) _errorImage.value = false
+
+        val isNew = image?.toString() != _image.value?.toString()
         _image.value = image
+
+        if (isNew && image != null) {
+            _aiSuggestion.value = null
+            _showAiTips.value = false
+            _aiImprovementTips.value = emptyList()
+            _aiPhotoTips.value = emptyList()
+
+            _forceAiOverwrite.value = true
+        }
     }
 
     fun deselectImage() {
@@ -317,10 +485,12 @@ class PublishViewModel @Inject constructor(
         _productState.value = UIState(isLoading = true)
 
         viewModelScope.launch {
-            if (isEmptyData()) return@launch
+            if (isEmptyData()) {
+                _productState.value = UIState(isLoading = false)
+                return@launch
+            }
 
             productToEdit.value?.let { product ->
-
                 if (_image.value.toString() == product.image) {
                     editProduct(product.id, product.image)
                     return@launch
@@ -330,9 +500,7 @@ class PublishViewModel @Inject constructor(
             productToEdit.value?.let {
                 deleteProductFromFirebase(context)
             } ?: uploadImageToFirebase(context)
-
         }
-
     }
 
     private suspend fun uploadImageToFirebase(context: Context){
@@ -345,6 +513,7 @@ class PublishViewModel @Inject constructor(
                 )
             },
             onFailure = {
+                _productState.value = UIState(isLoading = false)
                 _messageError.value = "Ocurrió un error al subir la imagen"
                 _descriptionError.value = "Hubo un error al subir la imagen, porfavor intenta de nuevo"
             },

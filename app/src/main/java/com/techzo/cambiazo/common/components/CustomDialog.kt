@@ -44,36 +44,35 @@ import androidx.compose.ui.window.DialogProperties
 @Composable
 fun DialogApp(
     message: String,
-    description: String?= null,
+    description: String? = null,
     labelButton1: String? = null,
-    labelButton2: String?= null,
+    labelButton2: String? = null,
     isNewReview: Boolean = false,
+    isLoading: Boolean = false,
     isEmailIcon: Boolean = false,
     onDismissRequest: () -> Unit = {},
     onClickButton1: () -> Unit = {},
-    onClickButton2: () -> Unit= {},
+    onClickButton2: () -> Unit = {},
     onSubmitReview: (Int, String) -> Unit = { _, _ -> }
 ) {
     var rating by remember { mutableIntStateOf(0) }
     var review by remember { mutableStateOf("") }
 
-    Dialog(onDismissRequest = onDismissRequest,
+    Dialog(
+        onDismissRequest = onDismissRequest,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
         )
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp)
                 .background(Color.White, shape = RoundedCornerShape(25.dp))
                 .padding(30.dp),
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-
-            ) {
-
-            if(isEmailIcon) {
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (isEmailIcon) {
                 // Icon
                 Box(
                     modifier = Modifier
@@ -94,7 +93,8 @@ fun DialogApp(
                 Spacer(modifier = Modifier.padding(10.dp))
             }
 
-            Text(text =message,
+            Text(
+                text = message,
                 color = Color.Black,
                 textAlign = TextAlign.Center,
                 style = TextStyle(
@@ -105,14 +105,17 @@ fun DialogApp(
             )
             Spacer(modifier = Modifier.padding(8.dp))
 
-            if(isNewReview) {
+            if (isNewReview) {
                 OutlinedTextField(
                     value = review,
                     placeholder = {
-                        Text("Comentario...", color = Color.Gray,
-                            style= MaterialTheme.typography.bodyLarge.copy(
+                        Text(
+                            "Comentario...", color = Color.Gray,
+                            style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Normal,
-                                fontFamily = FontFamily.SansSerif))
+                                fontFamily = FontFamily.SansSerif
+                            )
+                        )
                     },
                     onValueChange = { review = it },
                     modifier = Modifier
@@ -122,28 +125,13 @@ fun DialogApp(
                         .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
                     shape = RoundedCornerShape(10.dp),
                 )
-                /*
-                OutlinedTextField(
-                    value = review,
-                    onValueChange = {
-                        review = it
-                    },
-                    label = { Text("Escribe tu reseña") },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Normal
-                    ),
-                    maxLines = 5
-                )
 
-                 */
                 Spacer(modifier = Modifier.padding(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(-10.dp)) {
                     repeat(5) { index ->
                         IconButton(
                             onClick = {
-                                rating = if (index +1 == rating) 0 else index + 1
+                                rating = if (index + 1 == rating) 0 else index + 1
                             }
                         ) {
                             Icon(
@@ -157,8 +145,9 @@ fun DialogApp(
                 }
             }
 
-            if(description != null) {
-                Text(text =description,
+            if (description != null) {
+                Text(
+                    text = description,
                     textAlign = TextAlign.Center,
                     color = Color.Gray,
                     style = TextStyle(
@@ -169,21 +158,29 @@ fun DialogApp(
             }
             Spacer(modifier = Modifier.padding(8.dp))
 
-            if(labelButton1 != null) {
-                ButtonApp(text =labelButton1) { onClickButton1()
-                    if(isNewReview) {
+            if (labelButton1 != null) {
+                ButtonApp(
+                    text = labelButton1,
+                    isLoading = isLoading,
+                    enable = !isLoading
+                ) {
+                    onClickButton1()
+                    if (isNewReview) {
                         onSubmitReview(rating, review)
                     }
                 }
             }
 
-            if(labelButton2 != null) {
-                ButtonApp(text =labelButton2
-                    , bgColor = Color.White
-                    , fColor = Color(0xFFFFD146)
-                ) { onClickButton2()}
+            if (labelButton2 != null) {
+                ButtonApp(
+                    text = labelButton2,
+                    bgColor = Color.White,
+                    fColor = Color(0xFFFFD146),
+                    enable = !isLoading
+                ) {
+                    onClickButton2()
+                }
             }
-
         }
     }
 }

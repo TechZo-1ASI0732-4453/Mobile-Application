@@ -57,34 +57,45 @@ fun LoginGoogleApp(onClick: () -> Unit){
 }
 
 @Composable
-fun ButtonApp(text:String,
-              bgColor: Color = Color(0xFFFFD146),
-              fColor: Color = Color.Black,
-              bColor: Color = Color(0xFFFFD146),
-              enable: Boolean = true,
-              onClick: ()-> Unit){
+fun ButtonApp(
+    text: String,
+    bgColor: Color = Color(0xFFFFD146),
+    fColor: Color = Color.Black,
+    bColor: Color = Color(0xFFFFD146),
+    enable: Boolean = true,
+    isLoading: Boolean = false,
+    onClick: () -> Unit
+) {
     Button(
         onClick = { onClick() },
         modifier = Modifier
             .fillMaxWidth().height(65.dp)
             .padding(bottom = 10.dp, top = 10.dp)
-            .border(1.5.dp,color = if (enable)bColor else Color.Transparent,RoundedCornerShape(10.dp)),
+            .border(1.5.dp, color = if (enable) bColor else Color.Transparent, RoundedCornerShape(10.dp)),
         colors = ButtonDefaults.buttonColors(
             containerColor = bgColor,
             contentColor = fColor,
         ),
-        enabled = enable,
+        enabled = enable && !isLoading,
         shape = RoundedCornerShape(10.dp),
     ) {
-        Text(
-            text = text,
-            fontSize = 18.sp,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif)
-        )
+        if (isLoading) {
+            androidx.compose.material3.CircularProgressIndicator(
+                color = Color(0xFFFFD146),
+                strokeWidth = 3.dp,
+                modifier = Modifier.size(28.dp)
+            )
+        } else {
+            Text(
+                text = text,
+                fontSize = 18.sp,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.SansSerif
+                )
+            )
+        }
     }
-
 }
 
 @Composable

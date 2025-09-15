@@ -70,9 +70,13 @@ dependencies {
     implementation(libs.firebase.appcheck.debug)
     annotationProcessor(libs.room.compiler)
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    // Firebase and Google Auth
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.android.gms:play-services-auth:20.7.0")

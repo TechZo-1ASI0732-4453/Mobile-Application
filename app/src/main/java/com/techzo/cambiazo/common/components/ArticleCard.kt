@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -43,11 +45,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import com.techzo.cambiazo.R
 import com.techzo.cambiazo.domain.Product
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ArticlesOwn(
@@ -60,6 +68,8 @@ fun ArticlesOwn(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var showActions by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+
 
     if (showDialog) {
         DialogApp(
@@ -67,8 +77,18 @@ fun ArticlesOwn(
             description = "Recuerda que una vez eliminada la publicación, no se podrá deshacer.",
             labelButton1 = "Eliminar",
             labelButton2 = "Cancelar",
+            isLoading = isLoading,
             onDismissRequest = { showDialog = false; showActions = false },
-            onClickButton1 = { deleteProduct(product.id); showDialog = false; showActions = false },
+            onClickButton1 = {
+                isLoading = true
+                CoroutineScope(Dispatchers.Main).launch {
+                    deleteProduct(product.id)
+                    delay(1000)
+                    showDialog = false
+                    showActions = false
+                    isLoading = false
+                }
+            },
             onClickButton2 = { showDialog = false; showActions = false }
         )
     }
@@ -139,6 +159,29 @@ fun ArticlesOwn(
                 fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun YellowLoader() {
+    Popup(
+        alignment = Alignment.Center,
+        properties = PopupProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .background(Color.Black.copy(alpha = 0.5f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(60.dp),
+                color = Color(0xFFFFD700) // Yellow color
             )
         }
     }
