@@ -58,6 +58,7 @@ import com.techzo.cambiazo.presentation.explorer.review.ReviewViewModel
 fun ExchangeDetailsScreen(
     goBack: (Int) -> Unit,
     goToReviewScreen: (Int) -> Unit,
+    openChat: () -> Unit,
     viewModel: ExchangeViewModel = hiltViewModel(),
     exchangeId: Int,
     page: Int
@@ -135,7 +136,7 @@ fun ExchangeDetailsScreen(
 
             val status= if (page == 0 && exchange.status == "Pendiente") "Enviado"
             else if(page==1) exchange.status
-            else "WhatsApp"
+            else "Chat"
 
             val description= when (page) {
                 0 -> exchange.productChange.description
@@ -235,16 +236,7 @@ fun ExchangeDetailsScreen(
                                 .clip(RoundedCornerShape(50.dp))
                                 .background(textBackgroundColor)
                                 .padding(horizontal = 20.dp, vertical = 3.dp)
-                                .clickable {
-                                    if(page==2){
-                                        val formattedNumber = phoneNumber.replace("+", "").replace(" ", "")
-                                        val url = "https://wa.me/$formattedNumber"
-                                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                                            data = Uri.parse(url)
-                                        }
-                                        context.startActivity(intent)
-                                    }
-                                }
+                                .clickable {openChat()}
                             ,
                             fontWeight = FontWeight.Bold, fontSize = 14.sp,
                         )

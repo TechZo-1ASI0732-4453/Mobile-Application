@@ -11,6 +11,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
+import com.techzo.cambiazo.presentation.exchanges.chat.ChatScreen
 import com.techzo.cambiazo.presentation.navigate.NavScreen
 import com.techzo.cambiazo.presentation.navigate.NavigationViewModel
 import com.techzo.cambiazo.presentation.profile.subscription.SubscriptionViewModel
@@ -34,30 +35,30 @@ class MainActivity : AppCompatActivity() {
             CambiazoTheme {
                 val backgroundColor = ScreenBackground
                 window.statusBarColor = backgroundColor.toArgb()
-                WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
+               WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
 
                 NavScreen(
                     activity = this,
                     navViewModel = navViewModel
                 )
-            }
+           }
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        intent?.data?.let { uri ->
-            if (uri.scheme == "com.techzo.cambiazo" && uri.host == "paypalpay") {
-                val token = uri.getQueryParameter("token")
-                if (token != null) {
-                    val viewModel = ViewModelProvider(this)[SubscriptionViewModel::class.java]
-                    val navViewModel = ViewModelProvider(this)[NavigationViewModel::class.java]
-
-                    viewModel.captureOrder(token) {
-                        navViewModel.triggerRedirectToSubscription()
-                    }
-                }
-            }
-        }
-    }
+//    override fun onNewIntent(intent: Intent?) {
+//        super.onNewIntent(intent)
+//        intent?.data?.let { uri ->
+//            if (uri.scheme == "com.techzo.cambiazo" && uri.host == "paypalpay") {
+//                val token = uri.getQueryParameter("token")
+//                if (token != null) {
+//                    val viewModel = ViewModelProvider(this)[SubscriptionViewModel::class.java]
+//                    val navViewModel = ViewModelProvider(this)[NavigationViewModel::class.java]
+//
+//                    viewModel.captureOrder(token) {
+//                        navViewModel.triggerRedirectToSubscription()
+//                    }
+//                }
+//            }
+//        }
+//    }
 }

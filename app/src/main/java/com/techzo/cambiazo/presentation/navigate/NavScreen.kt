@@ -45,6 +45,7 @@ import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.auth.register.SignUpScreen
 import com.techzo.cambiazo.presentation.auth.register.TyC.TermsAndConditionsScreen
 import com.techzo.cambiazo.presentation.donations.DonationScreen
+import com.techzo.cambiazo.presentation.exchanges.chat.ChatScreen
 import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
 import com.techzo.cambiazo.presentation.profile.settings.SettingsScreen
 import com.techzo.cambiazo.presentation.profile.subscription.MySubscriptionScreen
@@ -150,6 +151,8 @@ sealed class Routes(val route: String) {
             return "NewPasswordScreen/$encodedEmail"
         }
     }
+
+    object Chat: Routes("ChatScreen")
 }
 
 @Composable
@@ -327,6 +330,7 @@ fun NavScreen(
                     goToReviewScreen = { userId ->
                         navController.navigate(Routes.Reviews.createRoute(userId.toString()))
                     },
+                    openChat = {navController.navigate(Routes.Chat.route)},
                     exchangeId = exchange,
                     page = page
                 )
@@ -457,6 +461,12 @@ fun NavScreen(
                 goToMySubscription = {navController.navigate(Routes.MySubscription.route){
                     popUpTo(0) { inclusive = true }
                 } })
+        }
+
+        composable(route = Routes.Chat.route){
+            ChatScreen(
+                onExit = {navController.popBackStack()}
+            )
         }
     }
 }

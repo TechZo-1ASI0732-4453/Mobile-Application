@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:name=".CambiazoApp"
@@ -19,6 +21,9 @@
         <meta-data
             android:name="com.google.android.gms.security.SafetynetRecaptchaApiKey"
             android:value="6LcJQUorAAAAAOYbo-uVM_Fxb-rWRGq5clT9RJ1D"/>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBN-TsK9dK4iW4-Osvadaf9IAxi0Jym0NM"/>
 
         <activity
             android:name=".MainActivity"
