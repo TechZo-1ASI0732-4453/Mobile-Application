@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.techzo.cambiazo.data.local.AppDatabase
 import com.techzo.cambiazo.data.local.FavoriteProductDao
+import com.techzo.cambiazo.data.remote.ai.AiService
 import com.techzo.cambiazo.data.remote.auth.AuthService
 import com.techzo.cambiazo.data.remote.auth.UserService
 import com.techzo.cambiazo.data.remote.donations.DonationsService
@@ -17,6 +18,7 @@ import com.techzo.cambiazo.data.remote.products.ProductCategoryService
 import com.techzo.cambiazo.data.remote.products.ProductService
 import com.techzo.cambiazo.data.remote.reviews.ReviewService
 import com.techzo.cambiazo.data.remote.subscriptions.SubscriptionService
+import com.techzo.cambiazo.data.repository.AiRepository
 import com.techzo.cambiazo.data.repository.AuthRepository
 import com.techzo.cambiazo.data.repository.DonationsRepository
 import com.techzo.cambiazo.data.repository.ProductDetailsRepository
@@ -170,6 +172,12 @@ object CambiazoModule {
         return retrofit.create(DonationsService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideAiService(retrofit: Retrofit): AiService {
+        return retrofit.create(AiService::class.java)
+    }
+
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS REPOSITORIOS
 
     @Provides
@@ -242,4 +250,9 @@ object CambiazoModule {
         return SubscriptionRepository(service)
     }
 
+    @Provides
+    @Singleton
+    fun provideAiRepository(service: AiService): AiRepository {
+        return AiRepository(service)
+    }
 }

@@ -8,7 +8,6 @@ object Constants {
     const val BASE_URL = "https://cambiazo-techzo-gzdtcfcca4fxeaec.westus-01.azurewebsites.net/api/v2/"
     const val DEFAULT_PROFILE_PICTURE = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6lqpQj3oAmc1gtyM78oJCbTaDrD7Fj9NRlceOPDZiHA&s"
     const val DEFAULT_ROLE = "ROLE_USER"
-    const val GEMINI_API_KEY = "AIzaSyAT1r2a4UcKap97M95SCpXjApejKA0U4dA"
     var token: String? = null
     var user: UserSignIn? = null
     var userSubscription: Subscription? = null

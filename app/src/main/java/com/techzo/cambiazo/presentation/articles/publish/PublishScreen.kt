@@ -64,6 +64,15 @@ import com.techzo.cambiazo.common.components.TextTitleHeaderApp
 import com.techzo.cambiazo.domain.Product
 import com.techzo.cambiazo.presentation.articles.ArticlesViewModel
 
+
+fun formatHms(ms: Long): String {
+    val total = (ms / 1000).coerceAtLeast(0)
+    val h = total / 3600
+    val m = (total % 3600) / 60
+    val s = total % 60
+    return "%02d:%02d:%02d".format(h, m, s)
+}
+
 @Composable
 fun PublishScreen(
     viewModel: PublishViewModel = hiltViewModel(),
@@ -106,6 +115,8 @@ fun PublishScreen(
     val messageError = viewModel.messageError.value
     val descriptionError = viewModel.descriptionError.value
     val image = viewModel.image.value
+    val isBanned = viewModel.isBanned.value
+    val banRemainingMs = viewModel.banRemainingMs.value
 
     val selectedImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.selectImage(uri)
@@ -150,18 +161,13 @@ fun PublishScreen(
 
     LaunchedEffect(image) {
         if (image != null && viewModel.aiSuggestion.value == null && !viewModel.aiLoading.value) {
-            viewModel.analyzeImageWithAI(context)
+            viewModel.analyzeImageWithAI(
+                context = context,
+                userId = Constants.user!!.id.toLong()
+            )
         }
     }
 
-    if (viewModel.showAiTips.value) {
-        DialogApp(
-            "Sugerencias de IA",
-            viewModel.formattedAiTips(),
-            "Entendido",
-            onClickButton1 = { viewModel.hideAiTips() }
-        )
-    }
     MainScaffoldApp(
         paddingCard = PaddingValues(start = 30.dp, end = 30.dp, top = 25.dp),
         contentsHeader = {
@@ -226,7 +232,9 @@ fun PublishScreen(
                         .height(150.dp)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
-                        .clickable { selectedImageLauncher.launch("image/*") }
+                        .clickable(enabled = !isBanned) {
+                            if (!isBanned) selectedImageLauncher.launch("image/*")
+                        }
                 ) {
                     Canvas(modifier = Modifier.matchParentSize()) {
                         drawRoundRect(
@@ -261,19 +269,30 @@ fun PublishScreen(
                 }
                 Spacer(modifier = Modifier.height(spaceHeight))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    ButtonApp(
-                        text = if (viewModel.aiLoading.value) "Analizando..." else "Rellenar con IA",
-                        enable = !viewModel.aiLoading.value && image != null
+                if (viewModel.aiLoading.value) {
+                    Spacer(Modifier.size(12.dp))
+                    CircularProgressIndicator(color = Color(0xFFFFD146))
+                }
+
+                val ai = viewModel.aiSuggestion.value
+                if (ai != null && (!ai.suggest.isNullOrBlank() || (ai.score ?: 0) > 0)) {
+                    Spacer(Modifier.height(12.dp))
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0xFFF8FAFC))
+                            .padding(12.dp)
                     ) {
-                        viewModel.analyzeImageWithAI(context, forceOverride = true)
-                    }
-                    if (viewModel.aiLoading.value) {
-                        Spacer(Modifier.size(12.dp))
-                        CircularProgressIndicator(color = Color(0xFFFFD146))
+                        Text("Sugerencias de foto (IA)", fontSize = 14.sp, color = Color(0xFF0F172A))
+                        ai.suggest?.takeIf { it.isNotBlank() }?.let {
+                            Spacer(Modifier.height(6.dp))
+                            Text(it, fontSize = 13.sp, color = Color(0xFF334155))
+                        }
+                        ai.score?.takeIf { it in 1..10 }?.let {
+                            Spacer(Modifier.height(6.dp))
+                            Text("Puntaje: $it/10", fontSize = 12.sp, color = Color(0xFF64748B))
+                        }
                     }
                 }
 
@@ -286,6 +305,7 @@ fun PublishScreen(
                     )
                 }
             }
+
 
             //----------------TITULO------------------
             item{
