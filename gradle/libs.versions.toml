@@ -33,6 +33,12 @@ firebaseAppcheckDebug = "18.0.0"
 playServicesLocation = "21.3.0"
 accompanistPermissions = "0.37.3"
 mapsCompose = "4.3.3"
+stompprotocolandroid = "1.6.6"
+rxjava = "3.1.8"
+rxandroid = "3.0.2"
+rxjava3Bridge = "3.0.2"
+rxjavaVersion = "2.2.21"
+rxandroidVersion = "2.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -74,6 +80,12 @@ firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appc
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanistPermissions" }
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
+stompprotocolandroid = { group = "com.github.NaikSoftware", name = "StompProtocolAndroid", version.ref = "stompprotocolandroid" }
+rxjava = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxjava" }
+rxandroid = { group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = "rxandroid" }
+rxjava3-bridge = { group = "com.github.akarnokd", name = "rxjava3-bridge", version.ref = "rxjava3Bridge" }
+rxjava2-rxjava = { group = "io.reactivex.rxjava2", name = "rxjava", version.ref = "rxjavaVersion" }
+rxjava2-rxandroid = { group = "io.reactivex.rxjava2", name = "rxandroid", version.ref = "rxandroidVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

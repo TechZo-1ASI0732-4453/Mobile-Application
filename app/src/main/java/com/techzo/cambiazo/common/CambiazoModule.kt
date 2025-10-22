@@ -7,6 +7,7 @@ import com.techzo.cambiazo.data.local.FavoriteProductDao
 import com.techzo.cambiazo.data.remote.ai.AiService
 import com.techzo.cambiazo.data.remote.auth.AuthService
 import com.techzo.cambiazo.data.remote.auth.UserService
+import com.techzo.cambiazo.data.remote.chat.ChatService
 import com.techzo.cambiazo.data.remote.donations.DonationsService
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
 import com.techzo.cambiazo.data.remote.invoice.InvoiceService
@@ -20,6 +21,7 @@ import com.techzo.cambiazo.data.remote.reviews.ReviewService
 import com.techzo.cambiazo.data.remote.subscriptions.SubscriptionService
 import com.techzo.cambiazo.data.repository.AiRepository
 import com.techzo.cambiazo.data.repository.AuthRepository
+import com.techzo.cambiazo.data.repository.ChatRepository
 import com.techzo.cambiazo.data.repository.DonationsRepository
 import com.techzo.cambiazo.data.repository.ProductDetailsRepository
 import com.techzo.cambiazo.data.repository.ExchangeRepository
@@ -178,6 +180,10 @@ object CambiazoModule {
         return retrofit.create(AiService::class.java)
     }
 
+
+    @Provides @Singleton
+    fun provideChatService(): ChatService = ChatService()
+
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS REPOSITORIOS
 
     @Provides
@@ -255,4 +261,12 @@ object CambiazoModule {
     fun provideAiRepository(service: AiService): AiRepository {
         return AiRepository(service)
     }
+
+    @Provides
+    @Singleton
+    fun provideChatRepository(service: ChatService): ChatRepository {
+        return ChatRepository(service)
+    }
+
+
 }

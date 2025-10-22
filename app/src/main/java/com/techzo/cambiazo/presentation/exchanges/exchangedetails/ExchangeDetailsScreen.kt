@@ -58,7 +58,7 @@ import com.techzo.cambiazo.presentation.explorer.review.ReviewViewModel
 fun ExchangeDetailsScreen(
     goBack: (Int) -> Unit,
     goToReviewScreen: (Int) -> Unit,
-    openChat: () -> Unit,
+    openChat: (String,String,String) -> Unit,
     viewModel: ExchangeViewModel = hiltViewModel(),
     exchangeId: Int,
     page: Int
@@ -197,6 +197,9 @@ fun ExchangeDetailsScreen(
             val currentUserId = Constants.user!!.id
             val otherUserId = if (exchange.userOwn.id == currentUserId) exchange.userChange.id else exchange.userOwn.id
 
+            val primaryIdToChat = exchange.userOwn.id
+            val secondaryIdToChat = exchange.userChange.id
+
 
             Column {
                 Column(modifier = Modifier.padding(start = 15.dp, end = 15.dp)) {
@@ -236,7 +239,7 @@ fun ExchangeDetailsScreen(
                                 .clip(RoundedCornerShape(50.dp))
                                 .background(textBackgroundColor)
                                 .padding(horizontal = 20.dp, vertical = 3.dp)
-                                .clickable {openChat()}
+                                .clickable {openChat(currentUserId.toString(),otherUserId.toString(),"${primaryIdToChat}-${secondaryIdToChat}")}
                             ,
                             fontWeight = FontWeight.Bold, fontSize = 14.sp,
                         )

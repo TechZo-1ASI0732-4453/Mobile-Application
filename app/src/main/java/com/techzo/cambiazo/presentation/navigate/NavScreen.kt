@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.presentation.navigate
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Person
@@ -152,7 +153,14 @@ sealed class Routes(val route: String) {
         }
     }
 
-    object Chat: Routes("ChatScreen")
+    object Chat: Routes("ChatScreen/{userSenderId}/{userReceiverId}/{conversationId}"){
+        fun createRoute(userSenderId: String,userReceiverId: String,conversationId: String): String{
+            val encodeUserSender = Uri.encode(userSenderId)
+            val encodeUserReceiver = Uri.encode(userReceiverId)
+            val encodeConversationId= Uri.encode(conversationId)
+            return "ChatScreen/$encodeUserSender/$encodeUserReceiver/$encodeConversationId"
+        }
+    }
 }
 
 @Composable
@@ -330,7 +338,9 @@ fun NavScreen(
                     goToReviewScreen = { userId ->
                         navController.navigate(Routes.Reviews.createRoute(userId.toString()))
                     },
-                    openChat = {navController.navigate(Routes.Chat.route)},
+                    openChat = {userSenderId,userReceiverId,conversationId->
+                        navController.navigate(Routes.Chat.createRoute(userSenderId,userReceiverId,conversationId))
+                               },
                     exchangeId = exchange,
                     page = page
                 )
@@ -463,7 +473,19 @@ fun NavScreen(
                 } })
         }
 
-        composable(route = Routes.Chat.route){
+        composable(
+            route = Routes.Chat.route, // "ChatScreen/{userSenderId}/{userReceiverId}/{conversationId}"
+            arguments = listOf(
+                navArgument("userSenderId")    { type = NavType.StringType },
+                navArgument("userReceiverId")  { type = NavType.StringType },
+                navArgument("conversationId")  { type = NavType.StringType }
+
+            )
+        ){ backStackEntry ->
+            val me   = backStackEntry.arguments?.getString("userSenderId")
+            val peer = backStackEntry.arguments?.getString("userReceiverId")
+            val conv = backStackEntry.arguments?.getString("conversationId")
+            Log.d("NavArgs", "me=$me peer=$peer conv=$conv")
             ChatScreen(
                 onExit = {navController.popBackStack()}
             )
