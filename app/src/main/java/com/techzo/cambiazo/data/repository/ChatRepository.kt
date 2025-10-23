@@ -119,29 +119,11 @@ class ChatRepository @Inject constructor(
     }
 
     fun disconnectAll() = service.disconnectAll()
-
     private suspend fun upsertIncoming(dto: ServerChatDto) {
-        val existingByClientId = dto.clientMessageId?.takeIf { it.isNotBlank() }?.let { cid ->
-            messageDao.findByClientMessageId(cid)
-        }
-        if (existingByClientId != null) {
-            messageDao.updateStatus(existingByClientId.localId, SendStatus.SENT)
-            if (dto.id != null && existingByClientId.serverId == null) {
-                messageDao.update(existingByClientId.copy(serverId = dto.id, status = SendStatus.SENT))
-            }
-            return
-        }
-
-        val existingByServerId = dto.id?.takeIf { it.isNotBlank() }?.let { sid ->
-            messageDao.findByServerId(sid)
-        }
-        if (existingByServerId != null) return
-
         val currentUserId = Constants.user?.id?.toString() ?: ""
-        val isMine = dto.senderId == currentUserId
-
         val ts = millisFromIsoSafe(dto.timestamp) ?: System.currentTimeMillis()
-        val entity = ChatMessageEntity(
+
+        val incoming = ChatMessageEntity(
             localId = UUID.randomUUID().toString(),
             serverId = dto.id,
             clientMessageId = dto.clientMessageId,
@@ -152,9 +134,10 @@ class ChatRepository @Inject constructor(
             type = if (dto.content.startsWith("L0C4t10N:")) MessageType.LOCATION else MessageType.TEXT,
             status = SendStatus.SENT,
             createdAt = ts,
-            isMine = isMine
+            isMine = dto.senderId == currentUserId
         )
-        messageDao.insert(entity)
+
+        messageDao.upsertFromServer(incoming, dedupeWindowMs = 60_000L)
     }
 
     private fun ChatMessageEntity.toDomain(): Chat =
