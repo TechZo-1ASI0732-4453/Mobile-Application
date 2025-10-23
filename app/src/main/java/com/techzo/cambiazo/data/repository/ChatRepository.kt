@@ -18,7 +18,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ChatRepository @Inject constructor(
     private val service: ChatService,
     private val messageDao: ChatMessageDao
@@ -29,11 +31,11 @@ class ChatRepository @Inject constructor(
         messageDao.observeByConversation(conversationId)
             .map { list -> list.map { it.toDomain() } }
 
-    fun connect(conversationId: String, currentUserId: String) {
-        service.connect(
-            conversationId = conversationId,
-            onMessageDto = { dto -> io.launch { upsertIncoming(dto, currentUserId) } }
-        )
+    fun subscribe(conversationId: String, currentUserId: String) {
+        service.ensureConnected()
+        service.subscribeConversation(conversationId) { dto ->
+            io.launch { upsertIncoming(dto, currentUserId) }
+        }
     }
 
     fun sendMessage(me: String, peer: String, conversationId: String, content: String) {
@@ -79,8 +81,6 @@ class ChatRepository @Inject constructor(
             }
         }
     }
-
-    fun disconnect() = service.disconnect()
 
     private suspend fun upsertIncoming(dto: ServerChatDto, currentUserId: String) {
         if (dto.senderId == currentUserId) return

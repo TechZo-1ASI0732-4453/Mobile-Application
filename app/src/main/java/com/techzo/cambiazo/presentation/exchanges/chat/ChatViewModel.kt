@@ -40,13 +40,13 @@ class ChatViewModel @Inject constructor(
             MutableStateFlow(emptyList<Chat>())
                 .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    private var isConnected = false
+    private var subscribed = false
 
     fun reconnect() {
-        if (isConnected) return
+        if (subscribed) return
         if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) return
-        isConnected = true
-        chatRepository.connect(conversationId, currentUserId)
+        subscribed = true
+        chatRepository.subscribe(conversationId, currentUserId)
     }
 
     fun send(text: String) {
@@ -57,7 +57,6 @@ class ChatViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        chatRepository.disconnect()
     }
 
     fun sendLocationMessage(activity: Activity) {
@@ -151,8 +150,8 @@ class ChatViewModel @Inject constructor(
             fastestInterval = 0L
             numUpdates = 1
         }
-        val cb = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
+        val cb = object : com.google.android.gms.location.LocationCallback() {
+            override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
                 val loc = result.lastLocation
                 fused.removeLocationUpdates(this)
                 if (loc != null && (!loc.hasAccuracy() || loc.accuracy <= accuracyM)) {
@@ -178,20 +177,19 @@ class ChatViewModel @Inject constructor(
     }
 
     private fun isEmulator(): Boolean {
-        val fingerprint = android.os.Build.FINGERPRINT ?: ""
-        val model = android.os.Build.MODEL ?: ""
-        val manufacturer = android.os.Build.MANUFACTURER ?: ""
-        val brand = android.os.Build.BRAND ?: ""
-        val device = android.os.Build.DEVICE ?: ""
-        val product = android.os.Build.PRODUCT ?: ""
-
-        return fingerprint.startsWith("generic") ||
-                fingerprint.lowercase().contains("vbox") ||
-                fingerprint.lowercase().contains("test-keys") ||
-                model.contains("Emulator", ignoreCase = true) ||
-                model.contains("Android SDK built for x86", ignoreCase = true) ||
-                manufacturer.contains("Genymotion", ignoreCase = true) ||
-                (brand.startsWith("generic") && device.startsWith("generic")) ||
-                product == "google_sdk"
+        val f = android.os.Build.FINGERPRINT ?: ""
+        val m = android.os.Build.MODEL ?: ""
+        val man = android.os.Build.MANUFACTURER ?: ""
+        val b = android.os.Build.BRAND ?: ""
+        val d = android.os.Build.DEVICE ?: ""
+        val p = android.os.Build.PRODUCT ?: ""
+        return f.startsWith("generic") ||
+                f.lowercase().contains("vbox") ||
+                f.lowercase().contains("test-keys") ||
+                m.contains("Emulator", true) ||
+                m.contains("Android SDK built for x86", true) ||
+                man.contains("Genymotion", true) ||
+                (b.startsWith("generic") && d.startsWith("generic")) ||
+                p == "google_sdk"
     }
 }
