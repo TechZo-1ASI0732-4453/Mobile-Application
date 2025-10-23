@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.Flow
 interface ChatMessageDao {
 
     @Query("""
-        SELECT * FROM chat_messages 
-        WHERE conversationId = :cid 
+        SELECT * FROM chat_messages
+        WHERE conversationId = :cid
         ORDER BY createdAt ASC, localId ASC
     """)
     fun observeByConversation(cid: String): Flow<List<ChatMessageEntity>>
@@ -29,32 +29,74 @@ interface ChatMessageDao {
     @Query("UPDATE chat_messages SET status = :status WHERE localId = :localId")
     suspend fun updateStatus(localId: String, status: SendStatus)
 
-    @Query("UPDATE chat_messages SET serverId = :serverId, status = :status, createdAt = :createdAt WHERE localId = :localId")
+    @Query("""
+        UPDATE chat_messages
+        SET serverId = :serverId, status = :status, createdAt = :createdAt
+        WHERE localId = :localId
+    """)
     suspend fun attachServerInfo(localId: String, serverId: String?, status: SendStatus, createdAt: Long)
 
+    @Query("""
+        SELECT * FROM chat_messages
+        WHERE conversationId = :conversationId
+          AND senderId       = :senderId
+          AND content        = :content
+          AND status         = :status
+          AND createdAt     >= :minCreatedAt
+        ORDER BY createdAt DESC
+        LIMIT 1
+    """)
+    suspend fun findRecentLocalSendingMatch(
+        conversationId: String,
+        senderId: String,
+        content: String,
+        status: SendStatus,
+        minCreatedAt: Long
+    ): ChatMessageEntity?
+
     @Transaction
-    suspend fun upsertFromServer(incoming: ChatMessageEntity) {
+    suspend fun upsertFromServer(incoming: ChatMessageEntity, dedupeWindowMs: Long = 30_000L) {
         val byServer = incoming.serverId?.let { findByServerId(it) }
         if (byServer != null) {
-            // ya existe por serverId; opcionalmente refresca contenido/createdAt
-            update(byServer.copy(
-                content = incoming.content,
-                type = incoming.type,
-                status = incoming.status,
-                createdAt = incoming.createdAt
-            ))
+            update(
+                byServer.copy(
+                    content   = incoming.content,
+                    type      = incoming.type,
+                    status    = incoming.status,
+                    createdAt = incoming.createdAt
+                )
+            )
             return
         }
+
         val byClient = incoming.clientMessageId?.let { findByClientMessageId(it) }
         if (byClient != null) {
             attachServerInfo(
-                localId = byClient.localId,
-                serverId = incoming.serverId,
-                status = SendStatus.SENT,
+                localId   = byClient.localId,
+                serverId  = incoming.serverId,
+                status    = SendStatus.SENT,
                 createdAt = incoming.createdAt
             )
             return
         }
+
+        val candidate = findRecentLocalSendingMatch(
+            conversationId = incoming.conversationId,
+            senderId       = incoming.senderId,
+            content        = incoming.content,
+            status         = SendStatus.SENDING,
+            minCreatedAt   = incoming.createdAt - dedupeWindowMs
+        )
+        if (candidate != null) {
+            attachServerInfo(
+                localId   = candidate.localId,
+                serverId  = incoming.serverId,
+                status    = SendStatus.SENT,
+                createdAt = incoming.createdAt
+            )
+            return
+        }
+
         insert(incoming)
     }
 }
