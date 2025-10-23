@@ -1,9 +1,15 @@
 package com.techzo.cambiazo.data.local
 
 import android.content.Context
-import androidx.room.*
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverter
+import androidx.room.TypeConverters
 import com.techzo.cambiazo.data.local.chat.ChatMessageDao
 import com.techzo.cambiazo.data.local.chat.ChatMessageEntity
+import com.techzo.cambiazo.data.local.chat.ConversationDao
+import com.techzo.cambiazo.data.local.chat.ConversationEntity
 import com.techzo.cambiazo.domain.MessageType
 import com.techzo.cambiazo.domain.SendStatus
 
@@ -19,14 +25,16 @@ class EnumConverters {
 @Database(
     entities = [
         FavoriteProductEntity::class,
-        ChatMessageEntity::class
+        ChatMessageEntity::class,
+        ConversationEntity::class
     ],
-    version = 2,
-    exportSchema = true
+    version = 3,
+    exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteProductDao(): FavoriteProductDao
     abstract fun chatMessageDao(): ChatMessageDao
+    abstract fun conversationDao(): ConversationDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -39,7 +47,8 @@ abstract class AppDatabase : RoomDatabase() {
                     "cambiazo_database"
                 )
                     .fallbackToDestructiveMigration()
-                    .build().also { INSTANCE = it }
+                    .build()
+                    .also { INSTANCE = it }
             }
     }
 }

@@ -1,18 +1,16 @@
 package com.techzo.cambiazo.data.remote.chat
 
-import android.util.Log
+import com.google.gson.Gson
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import ua.naiksoftware.stomp.Stomp
 import ua.naiksoftware.stomp.StompClient
 import ua.naiksoftware.stomp.dto.LifecycleEvent
-import com.google.gson.Gson
 import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Singleton
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicBoolean
 
-@Singleton
 class ChatService {
 
     private val SOCKET_URL =
@@ -26,66 +24,105 @@ class ChatService {
 
     private val gson = Gson()
 
-    @Volatile private var connected = false
-    private val lifecycleBag = CompositeDisposable()
+    private val lifecycleSubscribed = AtomicBoolean(false)
+    private val isConnected = AtomicBoolean(false)
+    private val isConnecting = AtomicBoolean(false)
 
-    @Volatile private var onMessageGlobal: ((ServerChatDto) -> Unit)? = null
+    private val lifecycleDisposables = CompositeDisposable()
+    private val topicDisposables = CompositeDisposable()
 
-    private val subscribedTopics = ConcurrentHashMap.newKeySet<String>()
+    private val activeTopics = ConcurrentHashMap.newKeySet<String>()
+    private val pendingTopics = ConcurrentLinkedQueue<() -> Unit>()
 
-    private val topicDispos: MutableMap<String, Disposable> = ConcurrentHashMap()
+    @Volatile private var chatConsumer: ((ServerChatDto) -> Unit)? = null
 
-    fun setConsumer(consumer: (ServerChatDto) -> Unit) {
-        onMessageGlobal = consumer
+    fun setChatConsumer(c: (ServerChatDto) -> Unit) {
+        chatConsumer = c
     }
 
-    fun connectIfNeeded(onStatus: (String) -> Unit = {}) {
-        if (connected) return
+    fun connectIfNeeded() {
+        if (isConnected.get() || isConnecting.get()) return
+        isConnecting.set(true)
 
-        val lifeDisp = stompClient.lifecycle()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ event ->
-                when (event.type) {
-                    LifecycleEvent.Type.OPENED -> {
-                        connected = true
-                        onStatus("OPENED")
-                        resubscribeAll()
+        if (lifecycleSubscribed.compareAndSet(false, true)) {
+            val lifeDisp = stompClient.lifecycle()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ event ->
+                    when (event.type) {
+                        LifecycleEvent.Type.OPENED -> {
+                            isConnecting.set(false)
+                            isConnected.set(true)
+                            flushPending()
+                        }
+                        LifecycleEvent.Type.CLOSED, LifecycleEvent.Type.ERROR -> {
+                            isConnected.set(false)
+                            isConnecting.set(false)
+                            activeTopics.clear()
+                            topicDisposables.clear()
+                        }
+                        else -> Unit
                     }
-                    LifecycleEvent.Type.CLOSED -> {
-                        connected = false
-                        onStatus("CLOSED")
-                        tryReconnect(onStatus)
-                    }
-                    LifecycleEvent.Type.ERROR -> {
-                        connected = false
-                        Log.e("ChatService", "STOMP error", event.exception)
-                        onStatus("ERROR: ${event.exception?.message}")
-                        tryReconnect(onStatus)
-                    }
-                    LifecycleEvent.Type.FAILED_SERVER_HEARTBEAT -> {
-                        onStatus("FAILED_SERVER_HEARTBEAT")
-                        // cerramos y reintentamos
-                        softReconnect(onStatus)
-                    }
-                }
-            }, { e ->
-                Log.e("ChatService", "Lifecycle subscribe error: ${e.message}")
-            })
+                }, {
+                    isConnected.set(false)
+                    isConnecting.set(false)
+                })
+            lifecycleDisposables.add(lifeDisp)
+        }
 
-        lifecycleBag.add(lifeDisp)
         stompClient.connect()
     }
 
-    fun subscribeConversation(conversationId: String) {
-        if (conversationId.isBlank()) return
-        subscribedTopics.add(conversationId)
-        if (connected) subscribeNow(conversationId)
+    fun subscribeInbox(userId: String, onActive: (ActiveConversationDto) -> Unit) {
+        val topic = "/topic/inbox.$userId"
+        enqueueOrRun {
+            if (!activeTopics.add(topic)) return@enqueueOrRun
+            val d = stompClient.topic(topic)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ msg ->
+                    val dto = gson.fromJson(msg.payload, ActiveConversationDto::class.java)
+                    onActive(dto)
+                }, {
+                    activeTopics.remove(topic)
+                })
+            topicDisposables.add(d)
+        }
     }
 
-    fun unsubscribeConversation(conversationId: String) {
-        subscribedTopics.remove(conversationId)
-        topicDispos.remove(conversationId)?.dispose()
+    fun subscribeConversation(conversationId: String) {
+        val topic = "/topic/chat.$conversationId"
+        enqueueOrRun {
+            if (!activeTopics.add(topic)) return@enqueueOrRun
+            val d = stompClient.topic(topic)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ msg ->
+                    chatConsumer?.let {
+                        val dto = gson.fromJson(msg.payload, ServerChatDto::class.java)
+                        it(dto)
+                    }
+                }, {
+                    activeTopics.remove(topic)
+                })
+            topicDisposables.add(d)
+        }
+    }
+
+    private fun enqueueOrRun(block: () -> Unit) {
+        connectIfNeeded()
+        if (isConnected.get()) {
+            block()
+        } else {
+            pendingTopics.add(block)
+        }
+    }
+
+    private fun flushPending() {
+        while (true) {
+            val task = pendingTopics.poll() ?: break
+            task()
+        }
     }
 
     fun sendPayload(
@@ -93,66 +130,27 @@ class ChatService {
         onOk: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
-        if (!connected) {
+        if (!isConnected.get()) {
             onError(IllegalStateException("Socket no conectado"))
             return
         }
-        val dispSend = stompClient.send("/app/chat.send", gson.toJson(payload))
+        val d = stompClient.send("/app/chat.send", Gson().toJson(payload))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ onOk() }, { e -> onError(e) })
+        topicDisposables.add(d)
     }
 
     fun disconnectAll() {
         try {
-            topicDispos.values.forEach { it.dispose() }
-            topicDispos.clear()
-            subscribedTopics.clear()
-            lifecycleBag.clear()
+            pendingTopics.clear()
+            activeTopics.clear()
+            topicDisposables.clear()
+            lifecycleDisposables.clear()
+            lifecycleSubscribed.set(false)
+            isConnected.set(false)
+            isConnecting.set(false)
             stompClient.disconnect()
         } catch (_: Throwable) { }
-        connected = false
-    }
-
-    private fun resubscribeAll() {
-        subscribedTopics.forEach { convId ->
-            subscribeNow(convId)
-        }
-    }
-
-    private fun subscribeNow(conversationId: String) {
-        topicDispos.remove(conversationId)?.dispose()
-
-        val topic = "/topic/chat.$conversationId"
-        val disp = stompClient.topic(topic)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ msg ->
-                try {
-                    val dto = gson.fromJson(msg.payload, ServerChatDto::class.java)
-                    onMessageGlobal?.invoke(dto)
-                } catch (ex: Exception) {
-                    Log.e("ChatService", "Parse error: ${ex.message} - payload=${msg.payload}")
-                }
-            }, { e ->
-                Log.e("ChatService", "Error suscribiendo $topic: ${e.message}")
-            })
-
-        topicDispos[conversationId] = disp
-    }
-
-    private fun tryReconnect(onStatus: (String) -> Unit) {
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            if (!connected) {
-                softReconnect(onStatus)
-            }
-        }, 1500)
-    }
-
-    private fun softReconnect(onStatus: (String) -> Unit) {
-        try {
-            stompClient.disconnect()
-        } catch (_: Throwable) { }
-        connectIfNeeded(onStatus)
     }
 }

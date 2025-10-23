@@ -5,9 +5,11 @@ import androidx.room.Room
 import com.techzo.cambiazo.data.local.AppDatabase
 import com.techzo.cambiazo.data.local.FavoriteProductDao
 import com.techzo.cambiazo.data.local.chat.ChatMessageDao
+import com.techzo.cambiazo.data.local.chat.ConversationDao
 import com.techzo.cambiazo.data.remote.ai.AiService
 import com.techzo.cambiazo.data.remote.auth.AuthService
 import com.techzo.cambiazo.data.remote.auth.UserService
+import com.techzo.cambiazo.data.remote.chat.ChatRestService
 import com.techzo.cambiazo.data.remote.chat.ChatService
 import com.techzo.cambiazo.data.remote.donations.DonationsService
 import com.techzo.cambiazo.data.remote.exchanges.ExchangeService
@@ -74,13 +76,10 @@ object CambiazoModule {
 
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(
-            context.applicationContext,
-            AppDatabase::class.java,
-            "cambiazo_database"
-        ).build()
-    }
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
+        Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, "cambiazo_database")
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     @Singleton
@@ -92,6 +91,11 @@ object CambiazoModule {
     @Singleton
     fun provideChatMessageDao(appDatabase: AppDatabase): ChatMessageDao =
         appDatabase.chatMessageDao()
+
+    @Provides
+    @Singleton
+    fun provideConversationDao(db: AppDatabase): ConversationDao =
+        db.conversationDao()
 
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS SERVICIOS
 
@@ -190,6 +194,11 @@ object CambiazoModule {
     @Provides @Singleton
     fun provideChatService(): ChatService = ChatService()
 
+    @Provides
+    @Singleton
+    fun provideChatRestService(retrofit: Retrofit): ChatRestService =
+        retrofit.create(ChatRestService::class.java)
+
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS REPOSITORIOS
 
     @Provides
@@ -272,6 +281,8 @@ object CambiazoModule {
     @Singleton
     fun provideChatRepository(
         service: ChatService,
-        messageDao: ChatMessageDao
-    ): ChatRepository = ChatRepository(service, messageDao)
+        messageDao: ChatMessageDao,
+        conversationDao: ConversationDao,
+        chatRestService: ChatRestService
+    ): ChatRepository = ChatRepository(service, messageDao, conversationDao, chatRestService)
 }

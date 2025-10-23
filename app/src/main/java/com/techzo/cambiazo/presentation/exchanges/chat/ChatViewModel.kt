@@ -26,9 +26,12 @@ class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val conversationId: String = savedStateHandle.get<String>(ChatNavArgs.CONVERSATION_ID).orEmpty()
-    private val currentUserId: String = savedStateHandle.get<String>(ChatNavArgs.SENDER_ID).orEmpty()
-    private val peerUserId: String = savedStateHandle.get<String>(ChatNavArgs.RECEIVER_ID).orEmpty()
+    private val conversationId: String =
+        savedStateHandle.get<String>(ChatNavArgs.CONVERSATION_ID).orEmpty()
+    private val currentUserId: String =
+        savedStateHandle.get<String>(ChatNavArgs.SENDER_ID).orEmpty()
+    private val peerUserId: String =
+        savedStateHandle.get<String>(ChatNavArgs.RECEIVER_ID).orEmpty()
 
     val messages: StateFlow<List<Chat>> =
         if (conversationId.isNotBlank())
@@ -40,11 +43,15 @@ class ChatViewModel @Inject constructor(
 
     private var subscribed = false
 
+    init {
+        reconnect()
+    }
+
     fun reconnect() {
         if (subscribed) return
         if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) return
         subscribed = true
-        chatRepository.subscribe(conversationId, currentUserId)
+        chatRepository.subscribeConversation(conversationId)
     }
 
     fun send(text: String) {

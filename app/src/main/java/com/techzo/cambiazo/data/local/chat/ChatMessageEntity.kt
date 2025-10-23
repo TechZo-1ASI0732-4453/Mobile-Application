@@ -9,8 +9,9 @@ import com.techzo.cambiazo.domain.SendStatus
 @Entity(
     tableName = "chat_messages",
     indices = [
-        Index("conversationId"), Index("createdAt"),
-        Index("serverId"), Index("clientMessageId")
+        Index(value = ["conversationId", "createdAt", "localId"]),
+        Index(value = ["serverId"], unique = true),
+        Index(value = ["clientMessageId"], unique = true)
     ]
 )
 data class ChatMessageEntity(

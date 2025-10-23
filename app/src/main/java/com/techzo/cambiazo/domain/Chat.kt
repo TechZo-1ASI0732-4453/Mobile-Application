@@ -2,10 +2,10 @@ package com.techzo.cambiazo.domain
 
 import com.techzo.cambiazo.data.remote.chat.ChatPayload
 import com.techzo.cambiazo.data.remote.chat.ServerChatDto
-import com.techzo.cambiazo.domain.MessageType
-import com.techzo.cambiazo.domain.SendStatus
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
+import java.util.TimeZone
+import java.util.UUID
 
 data class Chat(
     val localId: String = UUID.randomUUID().toString(),
@@ -23,39 +23,11 @@ data class Chat(
     val createdAtMillis: Long = System.currentTimeMillis(),
     val isMine: Boolean,
 
-    val timestampIso: String = isoFromMillis(createdAtMillis)
+    val timestampIso: String = isoFromMillisSafe(createdAtMillis)
 ) {
     companion object {
-        private fun isoFromMillis(ms: Long): String {
-            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-            sdf.timeZone = TimeZone.getTimeZone("UTC")
-            return sdf.format(Date(ms))
-        }
-
-        private fun millisFromIso(iso: String?): Long? {
-            if (iso.isNullOrBlank()) return null
-            val tz = TimeZone.getTimeZone("UTC")
-
-            val normalized = if (iso.endsWith("Z") && !iso.contains('.')) {
-                iso.removeSuffix("Z") + ".000Z"
-            } else iso
-
-            val formats = listOf(
-                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US),
-                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-            )
-            for (fmt in formats) {
-                try {
-                    fmt.timeZone = tz
-                    val date = fmt.parse(normalized)
-                    if (date != null) return date.time
-                } catch (_: Throwable) { /* intenta el siguiente formato */ }
-            }
-            return null
-        }
-
         fun fromServer(dto: ServerChatDto, currentUserId: String): Chat {
-            val ts = millisFromIso(dto.timestamp) ?: System.currentTimeMillis()
+            val ts = millisFromIsoSafe(dto.timestamp) ?: System.currentTimeMillis()
             return Chat(
                 localId = UUID.randomUUID().toString(),
                 serverId = dto.id,
@@ -68,7 +40,7 @@ data class Chat(
                 status = SendStatus.SENT,
                 createdAtMillis = ts,
                 isMine = dto.senderId == currentUserId,
-                timestampIso = isoFromMillis(ts)
+                timestampIso = isoFromMillisSafe(ts)
             )
         }
 
@@ -92,7 +64,7 @@ data class Chat(
                 status = SendStatus.SENDING,
                 createdAtMillis = now,
                 isMine = true,
-                timestampIso = isoFromMillis(now)
+                timestampIso = isoFromMillisSafe(now)
             )
         }
     }
@@ -109,21 +81,22 @@ data class Chat(
     val isSending get() = status == SendStatus.SENDING
 }
 
+// Helpers compartidos (puedes moverlos a un archivo util común si prefieres)
 internal fun isoFromMillisSafe(ms: Long): String {
-    val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US)
-    sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
+    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+    sdf.timeZone = TimeZone.getTimeZone("UTC")
     return sdf.format(java.util.Date(ms))
 }
 
 internal fun millisFromIsoSafe(iso: String?): Long? {
     if (iso.isNullOrBlank()) return null
-    val tz = java.util.TimeZone.getTimeZone("UTC")
+    val tz = TimeZone.getTimeZone("UTC")
     val normalized = if (iso.endsWith("Z") && !iso.contains('.')) {
         iso.removeSuffix("Z") + ".000Z"
     } else iso
     val formats = listOf(
-        java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US),
-        java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US)
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US),
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
     )
     for (fmt in formats) {
         try {

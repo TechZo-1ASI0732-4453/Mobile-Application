@@ -7,7 +7,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ChatMessageDao {
 
-    @Query("SELECT * FROM chat_messages WHERE conversationId = :cid ORDER BY createdAt ASC")
+    @Query("""
+        SELECT * FROM chat_messages 
+        WHERE conversationId = :cid 
+        ORDER BY createdAt ASC, localId ASC
+    """)
     fun observeByConversation(cid: String): Flow<List<ChatMessageEntity>>
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
@@ -25,16 +29,30 @@ interface ChatMessageDao {
     @Query("UPDATE chat_messages SET status = :status WHERE localId = :localId")
     suspend fun updateStatus(localId: String, status: SendStatus)
 
+    @Query("UPDATE chat_messages SET serverId = :serverId, status = :status, createdAt = :createdAt WHERE localId = :localId")
+    suspend fun attachServerInfo(localId: String, serverId: String?, status: SendStatus, createdAt: Long)
+
     @Transaction
     suspend fun upsertFromServer(incoming: ChatMessageEntity) {
         val byServer = incoming.serverId?.let { findByServerId(it) }
         if (byServer != null) {
-            update(incoming.copy(localId = byServer.localId))
+            // ya existe por serverId; opcionalmente refresca contenido/createdAt
+            update(byServer.copy(
+                content = incoming.content,
+                type = incoming.type,
+                status = incoming.status,
+                createdAt = incoming.createdAt
+            ))
             return
         }
         val byClient = incoming.clientMessageId?.let { findByClientMessageId(it) }
         if (byClient != null) {
-            update(incoming.copy(localId = byClient.localId))
+            attachServerInfo(
+                localId = byClient.localId,
+                serverId = incoming.serverId,
+                status = SendStatus.SENT,
+                createdAt = incoming.createdAt
+            )
             return
         }
         insert(incoming)

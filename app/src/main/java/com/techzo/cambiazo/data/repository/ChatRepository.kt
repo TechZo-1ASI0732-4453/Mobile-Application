@@ -1,10 +1,11 @@
 package com.techzo.cambiazo.data.repository
 
+import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.data.local.chat.ChatMessageDao
 import com.techzo.cambiazo.data.local.chat.ChatMessageEntity
-import com.techzo.cambiazo.data.remote.chat.ChatPayload
-import com.techzo.cambiazo.data.remote.chat.ChatService
-import com.techzo.cambiazo.data.remote.chat.ServerChatDto
+import com.techzo.cambiazo.data.local.chat.ConversationDao
+import com.techzo.cambiazo.data.local.chat.ConversationEntity
+import com.techzo.cambiazo.data.remote.chat.*
 import com.techzo.cambiazo.domain.Chat
 import com.techzo.cambiazo.domain.MessageType
 import com.techzo.cambiazo.domain.SendStatus
@@ -23,22 +24,55 @@ import javax.inject.Singleton
 @Singleton
 class ChatRepository @Inject constructor(
     private val service: ChatService,
-    private val messageDao: ChatMessageDao
+    private val messageDao: ChatMessageDao,
+    private val conversationDao: ConversationDao,
+    private val chatRest: ChatRestService
 ) {
     private val io = CoroutineScope(Dispatchers.IO)
 
     init {
-        service.setConsumer { dto ->
+        service.setChatConsumer { dto ->
             io.launch { upsertIncoming(dto) }
         }
         service.connectIfNeeded()
+    }
+
+    fun startUserInbox(userId: String) {
+        service.subscribeInbox(userId) { active ->
+            io.launch {
+                upsertConversation(active)
+                service.subscribeConversation(active.conversationId)
+            }
+        }
+        io.launch { refreshActiveConversations(userId) }
+    }
+
+    private suspend fun refreshActiveConversations(userId: String) {
+        val resp = chatRest.getActiveConversations(userId)
+        val list = resp.body().orEmpty()
+        list.forEach {
+            upsertConversation(it)
+            service.subscribeConversation(it.conversationId)
+        }
+    }
+
+    private suspend fun upsertConversation(ac: ActiveConversationDto) {
+        val ts = millisFromIsoSafe(ac.updatedAt) ?: System.currentTimeMillis()
+        val entity = ConversationEntity(
+            conversationId = ac.conversationId,
+            peerUserId = ac.peerId ?: "",
+            lastMessagePreview = ac.lastMessage ?: "",
+            lastUpdatedAt = ts,
+            unreadCount = ac.unreadCount
+        )
+        conversationDao.upsert(entity)
     }
 
     fun observeConversation(conversationId: String, currentUserId: String): Flow<List<Chat>> =
         messageDao.observeByConversation(conversationId)
             .map { list -> list.map { it.toDomain() } }
 
-    fun connect(conversationId: String, currentUserId: String) {
+    fun subscribeConversation(conversationId: String) {
         service.subscribeConversation(conversationId)
     }
 
@@ -60,7 +94,6 @@ class ChatRepository @Inject constructor(
             createdAt = now,
             isMine = true
         )
-
         io.launch { messageDao.insert(local) }
 
         val payload = ChatPayload(
@@ -70,10 +103,9 @@ class ChatRepository @Inject constructor(
             content = content,
             clientMessageId = clientId
         )
-
         service.sendPayload(
             payload,
-            onOk = { io.launch { messageDao.updateStatus(local.localId, SendStatus.SENT) } },
+            onOk = { /* esperamos eco */ },
             onError = { io.launch { messageDao.updateStatus(local.localId, SendStatus.FAILED) } }
         )
 
@@ -89,6 +121,25 @@ class ChatRepository @Inject constructor(
     fun disconnectAll() = service.disconnectAll()
 
     private suspend fun upsertIncoming(dto: ServerChatDto) {
+        val existingByClientId = dto.clientMessageId?.takeIf { it.isNotBlank() }?.let { cid ->
+            messageDao.findByClientMessageId(cid)
+        }
+        if (existingByClientId != null) {
+            messageDao.updateStatus(existingByClientId.localId, SendStatus.SENT)
+            if (dto.id != null && existingByClientId.serverId == null) {
+                messageDao.update(existingByClientId.copy(serverId = dto.id, status = SendStatus.SENT))
+            }
+            return
+        }
+
+        val existingByServerId = dto.id?.takeIf { it.isNotBlank() }?.let { sid ->
+            messageDao.findByServerId(sid)
+        }
+        if (existingByServerId != null) return
+
+        val currentUserId = Constants.user?.id?.toString() ?: ""
+        val isMine = dto.senderId == currentUserId
+
         val ts = millisFromIsoSafe(dto.timestamp) ?: System.currentTimeMillis()
         val entity = ChatMessageEntity(
             localId = UUID.randomUUID().toString(),
@@ -101,9 +152,9 @@ class ChatRepository @Inject constructor(
             type = if (dto.content.startsWith("L0C4t10N:")) MessageType.LOCATION else MessageType.TEXT,
             status = SendStatus.SENT,
             createdAt = ts,
-            isMine = false
+            isMine = isMine
         )
-        messageDao.upsertFromServer(entity)
+        messageDao.insert(entity)
     }
 
     private fun ChatMessageEntity.toDomain(): Chat =
@@ -121,7 +172,4 @@ class ChatRepository @Inject constructor(
             isMine = isMine,
             timestampIso = isoFromMillisSafe(createdAt)
         )
-    fun subscribe(conversationId: String, currentUserId: String) {
-        connect(conversationId, currentUserId)
-    }
 }
