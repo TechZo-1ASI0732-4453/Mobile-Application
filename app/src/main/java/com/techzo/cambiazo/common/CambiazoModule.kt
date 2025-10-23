@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.techzo.cambiazo.data.local.AppDatabase
 import com.techzo.cambiazo.data.local.FavoriteProductDao
+import com.techzo.cambiazo.data.local.chat.ChatMessageDao
 import com.techzo.cambiazo.data.remote.ai.AiService
 import com.techzo.cambiazo.data.remote.auth.AuthService
 import com.techzo.cambiazo.data.remote.auth.UserService
@@ -86,6 +87,11 @@ object CambiazoModule {
     fun provideFavoriteProductDao(appDatabase: AppDatabase): FavoriteProductDao {
         return appDatabase.favoriteProductDao()
     }
+
+    @Provides
+    @Singleton
+    fun provideChatMessageDao(appDatabase: AppDatabase): ChatMessageDao =
+        appDatabase.chatMessageDao()
 
     // AQUI SOLO AGREGAR LOS PROVIDES DE LOS SERVICIOS
 
@@ -264,9 +270,8 @@ object CambiazoModule {
 
     @Provides
     @Singleton
-    fun provideChatRepository(service: ChatService): ChatRepository {
-        return ChatRepository(service)
-    }
-
-
+    fun provideChatRepository(
+        service: ChatService,
+        messageDao: ChatMessageDao
+    ): ChatRepository = ChatRepository(service, messageDao)
 }

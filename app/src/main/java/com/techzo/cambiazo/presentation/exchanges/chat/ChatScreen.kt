@@ -1,11 +1,6 @@
 package com.techzo.cambiazo.presentation.exchanges.chat
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,7 +9,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,16 +24,15 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.permissions.Permission
 import com.techzo.cambiazo.common.permissions.PermissionViewModel
 import com.techzo.cambiazo.common.permissions.rememberPermissionLauncher
+import com.techzo.cambiazo.domain.SendStatus
 import com.techzo.cambiazo.presentation.exchanges.chat.components.ChatInput
 import com.techzo.cambiazo.presentation.exchanges.chat.components.LocationMessageItem
 import com.techzo.cambiazo.presentation.exchanges.chat.components.TextMessage
 import com.techzo.cambiazo.presentation.exchanges.chat.components.parseLocationMessage
-
 
 @Composable
 fun ChatScreen(
@@ -42,12 +40,10 @@ fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel(),
     permissionViewModel: PermissionViewModel = hiltViewModel()
 ) {
-
     val context = LocalContext.current
     val activity = context as Activity
     val locationLauncher = rememberPermissionLauncher(Permission.LOCATION, permissionViewModel, activity)
     val myUserId = remember { Constants.user?.id?.toString().orEmpty() }
-
     val messages by viewModel.messages.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
     var inputText by remember { mutableStateOf(TextFieldValue("")) }
@@ -60,18 +56,13 @@ fun ChatScreen(
         }
     }
 
-
-
     LaunchedEffect(messages.size) {
-        if (isAtBottom  && messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
+        if (isAtBottom && messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
     }
-    LaunchedEffect(Unit) {
-        viewModel.reconnect()
-    }
-
+    LaunchedEffect(Unit) { viewModel.reconnect() }
 
     Scaffold(
-        containerColor =  Color(0xFFF6F7FB),
+        containerColor = Color(0xFFF6F7FB),
         topBar = {
             Row(
                 modifier = Modifier
@@ -101,19 +92,15 @@ fun ChatScreen(
             ChatInput(
                 inputText = inputText,
                 onInputChange = { inputText = it },
-                context,
-                onSend = {
-                    viewModel.send(inputText.text)
-                },
-                permissionViewModel,
+                context = context,
+                onSend = { viewModel.send(inputText.text) },
+                stateViewModel = permissionViewModel,
                 permissionLauncher = locationLauncher,
-                sendLocation = {
-                    viewModel.sendLocationMessage(activity)
-                }
+                sendLocation = { viewModel.sendLocationMessage(activity) }
             )
         }
     ) { innerPadding ->
-         LazyColumn(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
@@ -123,38 +110,25 @@ fun ChatScreen(
                     bottom = innerPadding.calculateBottomPadding()
                 ),
             verticalArrangement = Arrangement.Top,
-            state = listState,
-            ) {
-            items(messages,key = {it.data!!.id}) { message ->
-
-                val messageI = message.data
-
-                if(messageI != null) {
-
-                    val parsedLocation = parseLocationMessage(messageI.content)
-
-                    if (parsedLocation == null) {
-
-                        TextMessage(
-                            message = messageI,
-                            currentUserId = myUserId
-                        )
-
-                    } else {
-                        val (lat, lng) = parsedLocation
-
-                        LocationMessageItem(
-                            latitude = lat,
-                            longitude = lng,
-                            isMine = messageI.senderId == myUserId,
-                            isLoading = message.isLoading
-                        )
-
-
-                    }
+            state = listState
+        ) {
+            items(messages, key = { it.localId }) { message ->
+                val parsedLocation = parseLocationMessage(message.content)
+                if (parsedLocation == null) {
+                    TextMessage(
+                        message = message,
+                        currentUserId = myUserId
+                    )
+                } else {
+                    val (lat, lng) = parsedLocation
+                    LocationMessageItem(
+                        latitude = lat,
+                        longitude = lng,
+                        isMine = message.isMine,
+                        isLoading = message.status == SendStatus.SENDING
+                    )
                 }
             }
         }
     }
 }
-

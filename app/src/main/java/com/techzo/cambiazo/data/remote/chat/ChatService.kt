@@ -1,15 +1,18 @@
 package com.techzo.cambiazo.data.remote.chat
 
 import android.util.Log
-import com.techzo.cambiazo.domain.Chat
+import com.google.gson.Gson
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import ua.naiksoftware.stomp.Stomp
 import ua.naiksoftware.stomp.StompClient
 import ua.naiksoftware.stomp.dto.LifecycleEvent
+
 class ChatService {
-    private val SOCKET_URL = "wss://cambiazo-techzo-gzdtcfcca4fxeaec.westus-01.azurewebsites.net/ws/websocket"
+
+    private val SOCKET_URL =
+        "wss://cambiazo-techzo-gzdtcfcca4fxeaec.westus-01.azurewebsites.net/ws/websocket"
 
     private val stompClient: StompClient =
         Stomp.over(Stomp.ConnectionProvider.OKHTTP, SOCKET_URL).apply {
@@ -19,20 +22,15 @@ class ChatService {
 
     private val composite = CompositeDisposable()
     @Volatile private var connected = false
+    private val gson = Gson()
 
     fun connect(
         conversationId: String,
-        onMessage: (Chat) -> Unit,
+        onMessageDto: (ServerChatDto) -> Unit,
         onStatus: (String) -> Unit = {}
     ) {
-        if (conversationId.isBlank()) {
-            Log.w("ChatService", "conversationId vacío: no conecto")
-            return
-        }
-        if (connected) {
-            Log.d("ChatService", "Ya conectado, ignoro connect()")
-            return
-        }
+        if (conversationId.isBlank()) return
+        if (connected) return
 
         val lifeDisp = stompClient.lifecycle()
             .subscribeOn(Schedulers.io())
@@ -42,7 +40,7 @@ class ChatService {
                     LifecycleEvent.Type.OPENED -> {
                         connected = true
                         onStatus("OPENED")
-                        subscribeToChat(conversationId, onMessage)
+                        subscribeToChat(conversationId, onMessageDto)
                     }
                     LifecycleEvent.Type.CLOSED -> {
                         connected = false
@@ -65,15 +63,18 @@ class ChatService {
         stompClient.connect()
     }
 
-    private fun subscribeToChat(conversationId: String, onMessage: (Chat) -> Unit) {
+    private fun subscribeToChat(
+        conversationId: String,
+        onMessageDto: (ServerChatDto) -> Unit
+    ) {
         val topic = "/topic/chat.$conversationId"
         val dispTopic = stompClient.topic(topic)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ msg ->
                 try {
-                    val chat = Chat.fromJson(msg.payload) // o msg.getPayload()
-                    onMessage(chat)
+                    val dto = gson.fromJson(msg.payload, ServerChatDto::class.java)
+                    onMessageDto(dto)
                 } catch (ex: Exception) {
                     Log.e("ChatService", "Parse payload error: ${ex.message} - payload=${msg.payload}")
                 }
@@ -84,23 +85,25 @@ class ChatService {
         composite.add(dispTopic)
     }
 
-    fun sendMessage(message: Chat) {
+    fun sendPayload(
+        payload: ChatPayload,
+        onOk: () -> Unit,
+        onError: (Throwable) -> Unit
+    ) {
         if (!connected) {
-            Log.w("ChatService", "Intento de envío sin conexión. Ignorado.")
+            onError(IllegalStateException("Socket no conectado"))
             return
         }
-        val dispSend = stompClient.send("/app/chat.send", message.toJson())
+        val dispSend = stompClient.send("/app/chat.send", gson.toJson(payload))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({}, { e ->
-                Log.e("ChatService", "Error al enviar: ${e.message}")
-            })
+            .subscribe({ onOk() }, { e -> onError(e) })
         composite.add(dispSend)
     }
 
     fun disconnect() {
         try {
-            composite.clear() // cancela lifecycle + topic + send
+            composite.clear()
             stompClient.disconnect()
         } catch (_: Throwable) { }
         connected = false
