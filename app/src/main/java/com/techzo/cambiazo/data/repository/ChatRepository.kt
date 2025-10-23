@@ -27,15 +27,19 @@ class ChatRepository @Inject constructor(
 ) {
     private val io = CoroutineScope(Dispatchers.IO)
 
+    init {
+        service.setConsumer { dto ->
+            io.launch { upsertIncoming(dto) }
+        }
+        service.connectIfNeeded()
+    }
+
     fun observeConversation(conversationId: String, currentUserId: String): Flow<List<Chat>> =
         messageDao.observeByConversation(conversationId)
             .map { list -> list.map { it.toDomain() } }
 
-    fun subscribe(conversationId: String, currentUserId: String) {
-        service.ensureConnected()
-        service.subscribeConversation(conversationId) { dto ->
-            io.launch { upsertIncoming(dto, currentUserId) }
-        }
+    fun connect(conversationId: String, currentUserId: String) {
+        service.subscribeConversation(conversationId)
     }
 
     fun sendMessage(me: String, peer: String, conversationId: String, content: String) {
@@ -82,9 +86,9 @@ class ChatRepository @Inject constructor(
         }
     }
 
-    private suspend fun upsertIncoming(dto: ServerChatDto, currentUserId: String) {
-        if (dto.senderId == currentUserId) return
+    fun disconnectAll() = service.disconnectAll()
 
+    private suspend fun upsertIncoming(dto: ServerChatDto) {
         val ts = millisFromIsoSafe(dto.timestamp) ?: System.currentTimeMillis()
         val entity = ChatMessageEntity(
             localId = UUID.randomUUID().toString(),
@@ -117,4 +121,7 @@ class ChatRepository @Inject constructor(
             isMine = isMine,
             timestampIso = isoFromMillisSafe(createdAt)
         )
+    fun subscribe(conversationId: String, currentUserId: String) {
+        connect(conversationId, currentUserId)
+    }
 }
