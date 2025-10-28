@@ -32,7 +32,10 @@ class ChatViewModel @Inject constructor(
         savedStateHandle.get<String>(ChatNavArgs.SENDER_ID).orEmpty()
     private val peerUserId: String =
         savedStateHandle.get<String>(ChatNavArgs.RECEIVER_ID).orEmpty()
-
+    private val peerUserName: String =
+        savedStateHandle.get<String>(ChatNavArgs.RECEIVER_NAME).orEmpty()
+    private val peerUserPhoto: String =
+        savedStateHandle.get<String>(ChatNavArgs.RECEIVER_PHOTO).orEmpty()
     val messages: StateFlow<List<Chat>> =
         if (conversationId.isNotBlank())
             chatRepository.observeConversation(conversationId, currentUserId)
@@ -45,6 +48,13 @@ class ChatViewModel @Inject constructor(
 
     init {
         reconnect()
+    }
+
+    fun getPeerName(): String{
+        return peerUserName
+    }
+    fun getPeerPhoto(): String{
+        return peerUserPhoto
     }
 
     fun reconnect() {

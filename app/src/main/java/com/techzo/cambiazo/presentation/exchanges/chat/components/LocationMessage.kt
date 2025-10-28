@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -61,12 +62,11 @@ fun LocationMessageItem(
         horizontalArrangement = alignment){
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.7f) // similar a burbuja de WhatsApp
-                .aspectRatio(1.6f)  // rectangular
+                .fillMaxWidth(0.7f)
+                .aspectRatio(1.6f)
                 .clip(RoundedCornerShape(16.dp))
                 .border(2.dp, color, RoundedCornerShape(16.dp)) // borde
                 .clickable() {
-                    // Abrir Google Maps externo
                     val uri = Uri.parse("geo:$lat,$lng?q=$lat,$lng")
                     val intent = Intent(Intent.ACTION_VIEW, uri).apply {
                         setPackage("com.google.android.apps.maps")

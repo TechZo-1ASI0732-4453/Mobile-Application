@@ -165,7 +165,7 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
     val statusText = {
         if (page == 0 && exchange.status == "Pendiente") "Enviado"
         else if (page == 1) exchange.status
-        else "WhatsApp"
+        else null
     }
 
     val statusColor= {
@@ -248,30 +248,19 @@ fun ExchangeBox(exchange: Exchange, page: Int, goToDetailsScreen: (String, Strin
                 )
             }
 
-            val context = LocalContext.current
-
-            Text(
-                text = statusText(),
-                color = statusColor(),
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(statusBackgroundColor())
-                    .padding(horizontal = 20.dp, vertical = 3.dp)
-                    .clickable {
-                        if (page == 2) {
-                            val formattedNumber = phoneNumber
-                                .replace("+", "")
-                                .replace(" ", "")
-                            val url = "https://wa.me/$formattedNumber"
-                            val intent = Intent(Intent.ACTION_VIEW).apply {
-                                data = Uri.parse(url)
-                            }
-                            context.startActivity(intent)
-                        }
-                    },
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 14.sp
-            )
+            statusText()
+                ?.let { status ->
+                    Text(
+                        text = status,
+                        color = statusColor(),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50.dp))
+                            .background(statusBackgroundColor())
+                            .padding(horizontal = 20.dp, vertical = 3.dp),
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
+                }
         }
 
         Spacer(modifier = Modifier.height(15.dp))

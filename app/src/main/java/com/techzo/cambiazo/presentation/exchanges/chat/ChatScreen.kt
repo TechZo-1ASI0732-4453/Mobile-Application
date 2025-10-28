@@ -2,6 +2,7 @@ package com.techzo.cambiazo.presentation.exchanges.chat
 
 import android.app.Activity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,10 +14,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +30,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.skydoves.landscapist.glide.GlideImage
 import com.techzo.cambiazo.common.Constants
 import com.techzo.cambiazo.common.permissions.Permission
 import com.techzo.cambiazo.common.permissions.PermissionViewModel
@@ -64,52 +71,123 @@ fun ChatScreen(
     Scaffold(
         containerColor = Color(0xFFF6F7FB),
         topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFFFD146))
-                    .statusBarsPadding()
-                    .padding(vertical = 14.dp, horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+
+            Surface(
+                color = Color(0xFFFFD146),
+                tonalElevation = 0.dp,
+                shadowElevation = 6.dp
             ) {
-                IconButton(
-                    onClick = onExit,
+                Box(
                     modifier = Modifier
-                        .padding(horizontal = 5.dp)
-                        .size(36.dp)
-                        .background(Color.Transparent, CircleShape)
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .drawBehind() {
+                            val y = size.height - 0.5.dp.toPx()
+                            drawLine(
+                                color = Color(0x33000000),
+                                start = Offset(0f, y),
+                                end = Offset(size.width, y),
+                                strokeWidth = 0.5.dp.toPx()
+                            )
+                        }
                 ) {
-                    Icon(Icons.Default.ArrowBack, "Salir", tint = Color(0xFF222222))
+                    Box(
+                        Modifier
+                            .matchParentSize()
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.10f),
+                                        Color.Transparent,
+                                        Color.Transparent
+                                    ),
+                                    startY = 0f,
+                                    endY = Float.POSITIVE_INFINITY
+                                )
+                            )
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        Surface(
+                            color = Color.Black.copy(alpha = 0.04f),
+                            shape = CircleShape,
+                            tonalElevation = 0.dp,
+                            shadowElevation = 0.dp
+                        ) {
+                            IconButton(
+                                onClick = onExit,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = "Salir",
+                                    tint = Color(0xFF222222)
+                                )
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 10.dp)
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .border(
+                                    width = 1.5.dp,
+                                    color = Color(0xFF222222).copy(alpha = 0.10f),
+                                    shape = CircleShape
+                                )
+                        ) {
+                            GlideImage(
+                                imageModel = { viewModel.getPeerPhoto() },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+
+                        Text(
+                            text = viewModel.getPeerName(),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color(0xFF222222),
+                            modifier = Modifier.padding(start = 10.dp)
+                        )
+                    }
                 }
-                Text(
-                    text = "Chat",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(start = 6.dp)
-                )
             }
         },
         bottomBar = {
-            ChatInput(
-                inputText = inputText,
-                onInputChange = { inputText = it },
-                context = context,
-                onSend = { viewModel.send(inputText.text) },
-                stateViewModel = permissionViewModel,
-                permissionLauncher = locationLauncher,
-                sendLocation = { viewModel.sendLocationMessage(activity) }
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .imePadding()
+            ) {
+                ChatInput(
+                    inputText = inputText,
+                    onInputChange = { inputText = it },
+                    context = context,
+                    onSend = { viewModel.send(inputText.text.trim()) },
+                    stateViewModel = permissionViewModel,
+                    permissionLauncher = locationLauncher,
+                    sendLocation = { viewModel.sendLocationMessage(activity) }
+                )
+            }
+
         }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    start = 10.dp,
-                    end = 10.dp,
-                    top = innerPadding.calculateTopPadding() + 10.dp,
-                    bottom = innerPadding.calculateBottomPadding()
+                    start = 20.dp,
+                    end = 20.dp,
+                    bottom = innerPadding.calculateBottomPadding() + 15.dp
                 ),
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             state = listState
         ) {
             items(messages, key = { it.localId }) { message ->

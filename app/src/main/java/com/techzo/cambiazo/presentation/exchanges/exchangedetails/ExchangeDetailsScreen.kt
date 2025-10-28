@@ -58,7 +58,7 @@ import com.techzo.cambiazo.presentation.explorer.review.ReviewViewModel
 fun ExchangeDetailsScreen(
     goBack: (Int) -> Unit,
     goToReviewScreen: (Int) -> Unit,
-    openChat: (String,String,String) -> Unit,
+    openChat: (String,String,String,String,String) -> Unit,
     viewModel: ExchangeViewModel = hiltViewModel(),
     exchangeId: Int,
     page: Int
@@ -183,13 +183,13 @@ fun ExchangeDetailsScreen(
             val textColorStatus= when (page) {
                 0 -> if (exchange.status == "Pendiente") Color.Gray else Color(0xFF38B000)
                 1 -> Color(0xFFFFD146)
-                else -> Color.White
+                else -> Color.Black
             }
 
             val textBackgroundColor= when (page) {
                 0 -> if (exchange.status == "Pendiente") Color(0xFFE8E8E8) else Color(0xFF38B000)
                 1 -> Color.Black
-                else -> Color(0xFF38B000)
+                else -> Color(0xFFFFD146)
             }
 
             val context = LocalContext.current
@@ -239,7 +239,7 @@ fun ExchangeDetailsScreen(
                                 .clip(RoundedCornerShape(50.dp))
                                 .background(textBackgroundColor)
                                 .padding(horizontal = 20.dp, vertical = 3.dp)
-                                .clickable {openChat(currentUserId.toString(),otherUserId.toString(),"${primaryIdToChat}-${secondaryIdToChat}")}
+                                .clickable {openChat(currentUserId.toString(),otherUserId.toString(),"${primaryIdToChat}-${secondaryIdToChat}",userName,profilePicture)}
                             ,
                             fontWeight = FontWeight.Bold, fontSize = 14.sp,
                         )

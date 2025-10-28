@@ -153,12 +153,14 @@ sealed class Routes(val route: String) {
         }
     }
 
-    object Chat: Routes("ChatScreen/{userSenderId}/{userReceiverId}/{conversationId}"){
-        fun createRoute(userSenderId: String,userReceiverId: String,conversationId: String): String{
+    object Chat: Routes("ChatScreen/{userSenderId}/{userReceiverId}/{conversationId}/{userReceiverName}/{userReceiverPhoto}"){
+        fun createRoute(userSenderId: String,userReceiverId: String,conversationId: String,userReceiverName: String,userReceiverPhoto: String): String{
             val encodeUserSender = Uri.encode(userSenderId)
             val encodeUserReceiver = Uri.encode(userReceiverId)
             val encodeConversationId= Uri.encode(conversationId)
-            return "ChatScreen/$encodeUserSender/$encodeUserReceiver/$encodeConversationId"
+            val encodeUserReceiverName = Uri.encode(userReceiverName)
+            val encodeUserReceiverPhoto = Uri.encode(userReceiverPhoto)
+            return "ChatScreen/$encodeUserSender/$encodeUserReceiver/$encodeConversationId/$encodeUserReceiverName/$encodeUserReceiverPhoto"
         }
     }
 }
@@ -338,8 +340,8 @@ fun NavScreen(
                     goToReviewScreen = { userId ->
                         navController.navigate(Routes.Reviews.createRoute(userId.toString()))
                     },
-                    openChat = {userSenderId,userReceiverId,conversationId->
-                        navController.navigate(Routes.Chat.createRoute(userSenderId,userReceiverId,conversationId))
+                    openChat = {userSenderId,userReceiverId,conversationId,userReceiverName,userReceiverPhoto->
+                        navController.navigate(Routes.Chat.createRoute(userSenderId,userReceiverId,conversationId,userReceiverName,userReceiverPhoto))
                                },
                     exchangeId = exchange,
                     page = page
@@ -478,14 +480,12 @@ fun NavScreen(
             arguments = listOf(
                 navArgument("userSenderId")    { type = NavType.StringType },
                 navArgument("userReceiverId")  { type = NavType.StringType },
-                navArgument("conversationId")  { type = NavType.StringType }
+                navArgument("conversationId")  { type = NavType.StringType },
+                navArgument("userReceiverName") {type = NavType.StringType},
+                navArgument("userReceiverPhoto") {type = NavType.StringType},
 
             )
         ){ backStackEntry ->
-            val me   = backStackEntry.arguments?.getString("userSenderId")
-            val peer = backStackEntry.arguments?.getString("userReceiverId")
-            val conv = backStackEntry.arguments?.getString("conversationId")
-            Log.d("NavArgs", "me=$me peer=$peer conv=$conv")
             ChatScreen(
                 onExit = {navController.popBackStack()}
             )

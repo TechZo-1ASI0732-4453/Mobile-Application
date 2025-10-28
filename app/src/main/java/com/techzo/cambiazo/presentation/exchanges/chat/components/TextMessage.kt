@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -30,36 +30,41 @@ fun TextMessage(
     val bubbleColor = Color(if (isMine) 0xFFFFD146 else 0xFFEDEDED)
     val borderColor = Color(if (isMine) 0xFFFFD146 else 0xFFDCDCDC)
 
+    val shape = RoundedCornerShape(
+        topStart = 16.dp,
+        topEnd = 16.dp,
+        bottomStart = if (isMine) 16.dp else 4.dp,
+        bottomEnd  = if (isMine) 4.dp  else 16.dp
+    )
+
+
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = alignment
     ) {
-        if (!isMine) Spacer(modifier = Modifier.width(2.dp))
+        if (!isMine) Spacer(Modifier.width(2.dp))
+
         Box(
             modifier = Modifier
-                .padding(vertical = 4.dp)
+                .padding(vertical = 4.dp, horizontal = 0.dp)
                 .shadow(
-                    elevation = 2.dp,
-                    shape = RoundedCornerShape(16.dp),
-                    spotColor = Color(0x14000000)
+                    elevation = 3.dp,
+                    shape = shape,
+                    spotColor = Color(0x22000000)
                 )
-                .border(1.5.dp, borderColor, RoundedCornerShape(16.dp))
-                .background(bubbleColor, RoundedCornerShape(16.dp))
+                .border(1.dp, borderColor.copy(alpha = 0.9f), shape)
+                .clip(shape)
+                .background(bubbleColor)
                 .padding(horizontal = 14.dp, vertical = 10.dp)
-                .widthIn(max = 270.dp)
         ) {
-//            if (message.latitude != null && message.longitude != null) {
-//
-//
-//            } else {
             Text(
                 text = message.content,
                 color = Color(0xFF222222),
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                lineHeight = 20.sp
             )
-//            }
         }
-        if (isMine) Spacer(modifier = Modifier.width(2.dp))
+
+        if (isMine) Spacer(Modifier.width(2.dp))
     }
 }
