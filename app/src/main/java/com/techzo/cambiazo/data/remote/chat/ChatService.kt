@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.data.remote.chat
 
 import com.google.gson.Gson
+import com.techzo.cambiazo.common.Constants.WS_URL
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -13,11 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class ChatService {
 
-    private val SOCKET_URL =
-        "wss://cambiazo-techzo-gzdtcfcca4fxeaec.westus-01.azurewebsites.net/ws/websocket"
-
     private val stompClient: StompClient =
-        Stomp.over(Stomp.ConnectionProvider.OKHTTP, SOCKET_URL).apply {
+        Stomp.over(Stomp.ConnectionProvider.OKHTTP, WS_URL).apply {
             withClientHeartbeat(10_000)
             withServerHeartbeat(10_000)
         }

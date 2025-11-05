@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.IntentSender
 import android.os.Looper
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -50,6 +53,12 @@ class ChatViewModel @Inject constructor(
         reconnect()
     }
 
+    private val _inputText = mutableStateOf(TextFieldValue(""))
+    val inputText: State<TextFieldValue> get() = _inputText
+
+    fun onInputChange(newValue: TextFieldValue) {
+        _inputText.value = newValue
+    }
     fun getPeerName(): String{
         return peerUserName
     }
@@ -67,6 +76,7 @@ class ChatViewModel @Inject constructor(
     fun send(text: String) {
         if (text.isBlank()) return
         if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) return
+        _inputText.value = TextFieldValue("")
         chatRepository.sendMessage(currentUserId, peerUserId, conversationId, text)
     }
 

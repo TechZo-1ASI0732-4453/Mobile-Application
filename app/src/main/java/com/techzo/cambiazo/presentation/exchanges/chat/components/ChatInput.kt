@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -46,7 +47,7 @@ fun ChatInput(
     onSend: () -> Unit,
             stateViewModel: PermissionViewModel,
     permissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
-    sendLocation: () -> Unit
+    sendLocation: () -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -83,7 +84,9 @@ fun ChatInput(
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White,
                 focusedBorderColor = Color(0xFFDCDCDC),
-                unfocusedBorderColor = Color(0xFFDCDCDC)
+                unfocusedBorderColor = Color(0xFFDCDCDC),
+                focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             ),
             maxLines = 3
         )

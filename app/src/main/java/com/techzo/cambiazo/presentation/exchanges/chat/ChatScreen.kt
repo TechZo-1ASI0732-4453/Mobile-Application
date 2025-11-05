@@ -3,6 +3,7 @@ package com.techzo.cambiazo.presentation.exchanges.chat
 import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,6 +25,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -40,6 +42,7 @@ import com.techzo.cambiazo.presentation.exchanges.chat.components.ChatInput
 import com.techzo.cambiazo.presentation.exchanges.chat.components.LocationMessageItem
 import com.techzo.cambiazo.presentation.exchanges.chat.components.TextMessage
 import com.techzo.cambiazo.presentation.exchanges.chat.components.parseLocationMessage
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatScreen(
@@ -53,7 +56,7 @@ fun ChatScreen(
     val myUserId = remember { Constants.user?.id?.toString().orEmpty() }
     val messages by viewModel.messages.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
-    var inputText by remember { mutableStateOf(TextFieldValue("")) }
+    var inputText = viewModel.inputText.value
 
     val isAtBottom by remember {
         derivedStateOf {
@@ -68,6 +71,8 @@ fun ChatScreen(
     }
     LaunchedEffect(Unit) { viewModel.reconnect() }
 
+    var prevHeightPx by remember { mutableStateOf<Int?>(null) }
+    val scope = rememberCoroutineScope()
     Scaffold(
         containerColor = Color(0xFFF6F7FB),
         topBar = {
@@ -168,12 +173,12 @@ fun ChatScreen(
             ) {
                 ChatInput(
                     inputText = inputText,
-                    onInputChange = { inputText = it },
+                    onInputChange = { viewModel.onInputChange(it) },
                     context = context,
                     onSend = { viewModel.send(inputText.text.trim()) },
                     stateViewModel = permissionViewModel,
                     permissionLauncher = locationLauncher,
-                    sendLocation = { viewModel.sendLocationMessage(activity) }
+                    sendLocation = { viewModel.sendLocationMessage(activity) },
                 )
             }
 
@@ -185,9 +190,31 @@ fun ChatScreen(
                 .padding(
                     start = 20.dp,
                     end = 20.dp,
-                    bottom = innerPadding.calculateBottomPadding() + 15.dp
-                ),
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = innerPadding.calculateBottomPadding()
+                ).onSizeChanged() { size ->
+                val newH = size.height
+                val oldH = prevHeightPx
+                if (oldH != null) {
+                    val delta = oldH - newH
+                    if (delta != 0) {
+                        scope.launch {
+                            when {
+                                delta > 0-> {
+                                    listState.scrollBy(delta.toFloat())
+                                }
+                                else  -> {
+                                    listState.scrollToItem(listState.layoutInfo.totalItemsCount - 1)
+                                }
+                            }
+                        }
+
+                    }
+                }
+                prevHeightPx = newH
+            },
             verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(vertical = 15.dp),
             state = listState
         ) {
             items(messages, key = { it.localId }) { message ->
