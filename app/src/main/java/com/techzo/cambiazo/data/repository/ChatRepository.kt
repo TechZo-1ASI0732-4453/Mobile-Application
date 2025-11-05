@@ -96,6 +96,8 @@ class ChatRepository @Inject constructor(
         )
         io.launch { messageDao.insert(local) }
 
+        service.subscribeConversation(conversationId)
+
         val payload = ChatPayload(
             senderId = me,
             receiverId = peer,
@@ -103,16 +105,17 @@ class ChatRepository @Inject constructor(
             content = content,
             clientMessageId = clientId
         )
+
         service.sendPayload(
             payload,
-            onOk = { /* esperamos eco */ },
+            onOk = { /* el eco por WS marcará SENT */ },
             onError = { io.launch { messageDao.updateStatus(local.localId, SendStatus.FAILED) } }
         )
 
         io.launch {
             delay(15_000)
-            val stillSending = messageDao.findByClientMessageId(clientId)
-            if (stillSending?.status == SendStatus.SENDING) {
+            val still = messageDao.findByClientMessageId(clientId)
+            if (still?.status == SendStatus.SENDING) {
                 messageDao.updateStatus(local.localId, SendStatus.FAILED)
             }
         }

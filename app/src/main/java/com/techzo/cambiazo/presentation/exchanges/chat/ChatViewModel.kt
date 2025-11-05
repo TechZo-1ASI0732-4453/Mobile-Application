@@ -76,6 +76,9 @@ class ChatViewModel @Inject constructor(
     fun send(text: String) {
         if (text.isBlank()) return
         if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) return
+
+        chatRepository.subscribeConversation(conversationId)
+
         _inputText.value = TextFieldValue("")
         chatRepository.sendMessage(currentUserId, peerUserId, conversationId, text)
     }

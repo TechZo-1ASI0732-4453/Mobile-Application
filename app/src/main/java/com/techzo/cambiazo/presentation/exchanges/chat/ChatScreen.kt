@@ -7,6 +7,10 @@ import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -43,6 +47,29 @@ import com.techzo.cambiazo.presentation.exchanges.chat.components.LocationMessag
 import com.techzo.cambiazo.presentation.exchanges.chat.components.TextMessage
 import com.techzo.cambiazo.presentation.exchanges.chat.components.parseLocationMessage
 import kotlinx.coroutines.launch
+
+
+@Composable
+private fun SystemNotice(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 6.dp, bottom = 2.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = Color(0xFF6B7280),
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier
+                .background(Color(0xFFF0F2F5), RoundedCornerShape(12.dp))
+                .padding(horizontal = 12.dp, vertical = 6.dp)
+        )
+    }
+}
 
 @Composable
 fun ChatScreen(
@@ -193,30 +220,41 @@ fun ChatScreen(
                     top = innerPadding.calculateTopPadding(),
                     bottom = innerPadding.calculateBottomPadding()
                 ).onSizeChanged() { size ->
-                val newH = size.height
-                val oldH = prevHeightPx
-                if (oldH != null) {
-                    val delta = oldH - newH
-                    if (delta != 0) {
-                        scope.launch {
-                            when {
-                                delta > 0-> {
-                                    listState.scrollBy(delta.toFloat())
-                                }
-                                else  -> {
-                                    listState.scrollToItem(listState.layoutInfo.totalItemsCount - 1)
+                    val newH = size.height
+                    val oldH = prevHeightPx
+                    if (oldH != null) {
+                        val delta = oldH - newH
+                        if (delta != 0) {
+                            scope.launch {
+                                when {
+                                    delta > 0-> {
+                                        listState.scrollBy(delta.toFloat())
+                                    }
+                                    else  -> {
+                                        listState.scrollToItem(listState.layoutInfo.totalItemsCount - 1)
+                                    }
                                 }
                             }
-                        }
 
+                        }
                     }
-                }
-                prevHeightPx = newH
-            },
+                    prevHeightPx = newH
+                },
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 15.dp),
             state = listState
         ) {
+            // >>> Aviso gris de sistema: "Conversación iniciada"
+            item(key = "system_notice_started") {
+                AnimatedVisibility(
+                    visible = messages.isEmpty(),
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    SystemNotice("Conversación iniciada")
+                }
+            }
+
             items(messages, key = { it.localId }) { message ->
                 val parsedLocation = parseLocationMessage(message.content)
                 if (parsedLocation == null) {

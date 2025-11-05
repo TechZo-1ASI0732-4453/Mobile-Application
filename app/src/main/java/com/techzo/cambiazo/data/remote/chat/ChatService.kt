@@ -128,15 +128,14 @@ class ChatService {
         onOk: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
-        if (!isConnected.get()) {
-            onError(IllegalStateException("Socket no conectado"))
-            return
+        enqueueOrRun {
+            val d = stompClient
+                .send("/app/chat.send", Gson().toJson(payload))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ onOk() }, { e -> onError(e) })
+            topicDisposables.add(d)
         }
-        val d = stompClient.send("/app/chat.send", Gson().toJson(payload))
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ onOk() }, { e -> onError(e) })
-        topicDisposables.add(d)
     }
 
     fun disconnectAll() {
