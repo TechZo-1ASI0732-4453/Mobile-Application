@@ -496,11 +496,11 @@ fun NavScreen(
         composable(
             route = Routes.Chat.route,
             arguments = listOf(
-                navArgument(ChatNavArgs.SENDER_ID)        { type = NavType.StringType },
-                navArgument(ChatNavArgs.RECEIVER_ID)      { type = NavType.StringType },
-                navArgument(ChatNavArgs.CONVERSATION_ID)  { type = NavType.StringType },
-                navArgument(ChatNavArgs.RECEIVER_NAME)    { type = NavType.StringType },
-                navArgument(ChatNavArgs.RECEIVER_PHOTO)   { type = NavType.StringType }
+                navArgument("userSenderId")       { type = NavType.StringType },
+                navArgument("userReceiverId")     { type = NavType.StringType },
+                navArgument("conversationId")     { type = NavType.StringType },
+                navArgument("userReceiverName")   { type = NavType.StringType },
+                navArgument("userReceiverPhoto")  { type = NavType.StringType }
             )
         ) {
             ChatScreen(onExit = { navController.popBackStack() })

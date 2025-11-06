@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.IntentSender
 import android.os.Looper
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
@@ -29,16 +30,21 @@ class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val conversationId: String =
-        savedStateHandle.get<String>(ChatNavArgs.CONVERSATION_ID).orEmpty()
-    private val currentUserId: String =
-        savedStateHandle.get<String>(ChatNavArgs.SENDER_ID).orEmpty()
-    private val peerUserId: String =
-        savedStateHandle.get<String>(ChatNavArgs.RECEIVER_ID).orEmpty()
-    private val peerUserName: String =
-        savedStateHandle.get<String>(ChatNavArgs.RECEIVER_NAME).orEmpty()
-    private val peerUserPhoto: String =
-        savedStateHandle.get<String>(ChatNavArgs.RECEIVER_PHOTO).orEmpty()
+    companion object {
+        private const val TAG = "ChatViewModel"
+        private const val ARG_SENDER_ID = "userSenderId"
+        private const val ARG_RECEIVER_ID = "userReceiverId"
+        private const val ARG_CONVERSATION_ID = "conversationId"
+        private const val ARG_RECEIVER_NAME = "userReceiverName"
+        private const val ARG_RECEIVER_PHOTO = "userReceiverPhoto"
+    }
+
+    private val conversationId: String = savedStateHandle.get<String>(ARG_CONVERSATION_ID).orEmpty()
+    private val currentUserId: String  = savedStateHandle.get<String>(ARG_SENDER_ID).orEmpty()
+    private val peerUserId: String     = savedStateHandle.get<String>(ARG_RECEIVER_ID).orEmpty()
+    private val peerUserName: String   = savedStateHandle.get<String>(ARG_RECEIVER_NAME).orEmpty()
+    private val peerUserPhoto: String  = savedStateHandle.get<String>(ARG_RECEIVER_PHOTO).orEmpty()
+
     val messages: StateFlow<List<Chat>> =
         if (conversationId.isNotBlank())
             chatRepository.observeConversation(conversationId, currentUserId)
@@ -49,38 +55,51 @@ class ChatViewModel @Inject constructor(
 
     private var subscribed = false
 
+    private val _inputText = mutableStateOf(TextFieldValue(""))
+    val inputText: State<TextFieldValue> get() = _inputText
+
     init {
+        logArgs()
         reconnect()
     }
 
-    private val _inputText = mutableStateOf(TextFieldValue(""))
-    val inputText: State<TextFieldValue> get() = _inputText
+    private fun logArgs() {
+        Log.d(TAG, "Args -> conversationId=$conversationId, currentUserId=$currentUserId, " +
+                "peerUserId=$peerUserId, peerUserName=$peerUserName, peerUserPhoto=$peerUserPhoto")
+        if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) {
+            Log.w(TAG, "Argumentos incompletos: no se puede suscribir ni enviar mensajes.")
+        }
+    }
 
     fun onInputChange(newValue: TextFieldValue) {
         _inputText.value = newValue
     }
-    fun getPeerName(): String{
-        return peerUserName
-    }
-    fun getPeerPhoto(): String{
-        return peerUserPhoto
-    }
+
+    fun getPeerName(): String = peerUserName
+    fun getPeerPhoto(): String = peerUserPhoto
 
     fun reconnect() {
         if (subscribed) return
         if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) return
         subscribed = true
         chatRepository.subscribeConversation(conversationId)
+        Log.d(TAG, "Suscrito a /topic/chat.$conversationId")
     }
 
     fun send(text: String) {
-        if (text.isBlank()) return
-        if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) return
+        val trimmed = text.trim()
+        if (trimmed.isBlank()) return
+        if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) {
+            Log.w(TAG, "No se envía: args incompletos.")
+            return
+        }
 
+        // Garantiza suscripción antes de enviar (por si reconectó el WS)
         chatRepository.subscribeConversation(conversationId)
 
         _inputText.value = TextFieldValue("")
-        chatRepository.sendMessage(currentUserId, peerUserId, conversationId, text)
+        chatRepository.sendMessage(currentUserId, peerUserId, conversationId, trimmed)
+        Log.d(TAG, "Mensaje enviado (cliente) -> cid=$conversationId")
     }
 
     override fun onCleared() {
@@ -89,26 +108,22 @@ class ChatViewModel @Inject constructor(
 
     fun sendLocationMessage(activity: Activity) {
         if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) return
-        if (isEmulator()) {
-            getCurrentLocationOnce(activity) { lat, lng ->
-                if (lat != null && lng != null) {
-                    val content = "L0C4t10N: {latitud:$lat, longitud:$lng}"
-                    viewModelScope.launch {
-                        chatRepository.sendMessage(currentUserId, peerUserId, conversationId, content)
-                    }
+
+        val sendWith = { lat: Double?, lng: Double? ->
+            if (lat != null && lng != null) {
+                val content = "L0C4t10N: {latitud:$lat, longitud:$lng}"
+                viewModelScope.launch {
+                    chatRepository.sendMessage(currentUserId, peerUserId, conversationId, content)
                 }
             }
+        }
+
+        if (isEmulator()) {
+            getCurrentLocationOnce(activity, sendWith)
             return
         }
         checkLocationSettings(activity) {
-            getCurrentLocationOnce(activity) { lat, lng ->
-                if (lat != null && lng != null) {
-                    val content = "L0C4t10N: {latitud:$lat, longitud:$lng}"
-                    viewModelScope.launch {
-                        chatRepository.sendMessage(currentUserId, peerUserId, conversationId, content)
-                    }
-                }
-            }
+            getCurrentLocationOnce(activity, sendWith)
         }
     }
 
@@ -135,6 +150,7 @@ class ChatViewModel @Inject constructor(
         val isEmu = isEmulator()
         val accuracyThreshold = if (isEmu) 5000f else 50f
         val timeoutMs = if (isEmu) 3000L else 10000L
+
         fused.lastLocation
             .addOnSuccessListener { last ->
                 if (last != null && (!last.hasAccuracy() || last.accuracy <= accuracyThreshold)) {
