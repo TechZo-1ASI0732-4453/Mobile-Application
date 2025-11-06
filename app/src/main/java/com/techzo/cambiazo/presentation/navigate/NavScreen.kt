@@ -162,7 +162,13 @@ sealed class Routes(val route: String) {
             val encodeUserReceiverPhoto = Uri.encode(userReceiverPhoto)
             return "ChatScreen/$encodeUserSender/$encodeUserReceiver/$encodeConversationId/$encodeUserReceiverName/$encodeUserReceiverPhoto"
         }
+
+        fun createNewRoute(userSenderId: String, userReceiverId: String, userReceiverName: String, userReceiverPhoto: String): String {
+            val newCid = java.util.UUID.randomUUID().toString()
+            return createRoute(userSenderId, userReceiverId, newCid, userReceiverName, userReceiverPhoto)
+        }
     }
+
 }
 
 @Composable
@@ -333,16 +339,23 @@ fun NavScreen(
             val page = backStackEntry.arguments?.getString("page")?.toIntOrNull()
             if (exchange != null && page != null) {
                 ExchangeDetailsScreen(
-                    goBack = {page->
-                        navController.currentBackStackEntry?.savedStateHandle?.set("page", page)
+                    goBack = { pageBack ->
+                        navController.currentBackStackEntry?.savedStateHandle?.set("page", pageBack)
                         navController.navigate(Routes.Exchange.route)
-                             },
+                    },
                     goToReviewScreen = { userId ->
                         navController.navigate(Routes.Reviews.createRoute(userId.toString()))
                     },
-                    openChat = {userSenderId,userReceiverId,conversationId,userReceiverName,userReceiverPhoto->
-                        navController.navigate(Routes.Chat.createRoute(userSenderId,userReceiverId,conversationId,userReceiverName,userReceiverPhoto))
-                               },
+                    openChat = { userSenderId, userReceiverId, _, userReceiverName, userReceiverPhoto ->
+                        navController.navigate(
+                            Routes.Chat.createNewRoute(
+                                userSenderId = userSenderId,
+                                userReceiverId = userReceiverId,
+                                userReceiverName = userReceiverName,
+                                userReceiverPhoto = userReceiverPhoto
+                            )
+                        )
+                    },
                     exchangeId = exchange,
                     page = page
                 )
