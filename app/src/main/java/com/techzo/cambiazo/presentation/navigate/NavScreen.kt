@@ -46,6 +46,7 @@ import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.auth.register.SignUpScreen
 import com.techzo.cambiazo.presentation.auth.register.TyC.TermsAndConditionsScreen
 import com.techzo.cambiazo.presentation.donations.DonationScreen
+import com.techzo.cambiazo.presentation.exchanges.chat.ChatNavArgs
 import com.techzo.cambiazo.presentation.exchanges.chat.ChatScreen
 import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
 import com.techzo.cambiazo.presentation.profile.settings.SettingsScreen
@@ -153,22 +154,31 @@ sealed class Routes(val route: String) {
         }
     }
 
-    object Chat: Routes("ChatScreen/{userSenderId}/{userReceiverId}/{conversationId}/{userReceiverName}/{userReceiverPhoto}"){
-        fun createRoute(userSenderId: String,userReceiverId: String,conversationId: String,userReceiverName: String,userReceiverPhoto: String): String{
-            val encodeUserSender = Uri.encode(userSenderId)
-            val encodeUserReceiver = Uri.encode(userReceiverId)
-            val encodeConversationId= Uri.encode(conversationId)
-            val encodeUserReceiverName = Uri.encode(userReceiverName)
-            val encodeUserReceiverPhoto = Uri.encode(userReceiverPhoto)
-            return "ChatScreen/$encodeUserSender/$encodeUserReceiver/$encodeConversationId/$encodeUserReceiverName/$encodeUserReceiverPhoto"
+    object Chat: Routes("ChatScreen/{userSenderId}/{userReceiverId}/{conversationId}/{userReceiverName}/{userReceiverPhoto}") {
+        fun createRoute(
+            userSenderId: String,
+            userReceiverId: String,
+            conversationId: String,
+            userReceiverName: String,
+            userReceiverPhoto: String
+        ): String {
+            val s  = Uri.encode(userSenderId)
+            val r  = Uri.encode(userReceiverId)
+            val cid= Uri.encode(conversationId)
+            val n  = Uri.encode(userReceiverName)
+            val p  = Uri.encode(userReceiverPhoto)
+            return "ChatScreen/$s/$r/$cid/$n/$p"
         }
 
-        fun createNewRoute(userSenderId: String, userReceiverId: String, userReceiverName: String, userReceiverPhoto: String): String {
-            val newCid = java.util.UUID.randomUUID().toString()
-            return createRoute(userSenderId, userReceiverId, newCid, userReceiverName, userReceiverPhoto)
-        }
+        fun createNewRoute(
+            userSenderId: String,
+            userReceiverId: String,
+            userReceiverName: String,
+            userReceiverPhoto: String
+        ): String = createRoute(
+            userSenderId, userReceiverId, java.util.UUID.randomUUID().toString(), userReceiverName, userReceiverPhoto
+        )
     }
-
 }
 
 @Composable
@@ -348,12 +358,7 @@ fun NavScreen(
                     },
                     openChat = { userSenderId, userReceiverId, _, userReceiverName, userReceiverPhoto ->
                         navController.navigate(
-                            Routes.Chat.createNewRoute(
-                                userSenderId = userSenderId,
-                                userReceiverId = userReceiverId,
-                                userReceiverName = userReceiverName,
-                                userReceiverPhoto = userReceiverPhoto
-                            )
+                            Routes.Chat.createNewRoute(userSenderId, userReceiverId, userReceiverName, userReceiverPhoto)
                         )
                     },
                     exchangeId = exchange,
@@ -489,19 +494,16 @@ fun NavScreen(
         }
 
         composable(
-            route = Routes.Chat.route, // "ChatScreen/{userSenderId}/{userReceiverId}/{conversationId}"
+            route = Routes.Chat.route,
             arguments = listOf(
-                navArgument("userSenderId")    { type = NavType.StringType },
-                navArgument("userReceiverId")  { type = NavType.StringType },
-                navArgument("conversationId")  { type = NavType.StringType },
-                navArgument("userReceiverName") {type = NavType.StringType},
-                navArgument("userReceiverPhoto") {type = NavType.StringType},
-
+                navArgument(ChatNavArgs.SENDER_ID)        { type = NavType.StringType },
+                navArgument(ChatNavArgs.RECEIVER_ID)      { type = NavType.StringType },
+                navArgument(ChatNavArgs.CONVERSATION_ID)  { type = NavType.StringType },
+                navArgument(ChatNavArgs.RECEIVER_NAME)    { type = NavType.StringType },
+                navArgument(ChatNavArgs.RECEIVER_PHOTO)   { type = NavType.StringType }
             )
-        ){ backStackEntry ->
-            ChatScreen(
-                onExit = {navController.popBackStack()}
-            )
+        ) {
+            ChatScreen(onExit = { navController.popBackStack() })
         }
     }
 }
