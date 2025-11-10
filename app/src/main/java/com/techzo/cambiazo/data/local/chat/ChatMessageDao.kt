@@ -38,7 +38,6 @@ interface ChatMessageDao {
         WHERE conversationId = :conversationId
           AND senderId       = :senderId
           AND content        = :content
-          AND status         = :status
           AND createdAt     >= :minCreatedAt
           AND (
                 (exchangeId IS NULL AND :exchangeId IS NULL)
@@ -51,7 +50,6 @@ interface ChatMessageDao {
         conversationId: String,
         senderId: String,
         content: String,
-        status: SendStatus,
         minCreatedAt: Long,
         exchangeId: String?
     ): ChatMessageEntity?
@@ -67,8 +65,8 @@ interface ChatMessageDao {
                     status     = incoming.status,
                     createdAt  = incoming.createdAt,
                     exchangeId = incoming.exchangeId,
-                    latitude      = incoming.latitude,
-                    longitude     = incoming.longitude,
+                    latitude   = incoming.latitude,
+                    longitude  = incoming.longitude,
                 )
             )
             return
@@ -78,7 +76,6 @@ interface ChatMessageDao {
             conversationId = incoming.conversationId,
             senderId       = incoming.senderId,
             content        = incoming.content,
-            status         = SendStatus.SENDING,
             minCreatedAt   = incoming.createdAt - dedupeWindowMs,
             exchangeId     = incoming.exchangeId
         )
