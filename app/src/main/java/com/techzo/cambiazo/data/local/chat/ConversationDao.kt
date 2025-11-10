@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ConversationDao {
+
     @Query("SELECT * FROM conversations ORDER BY lastUpdatedAt DESC")
     fun observeAll(): Flow<List<ConversationEntity>>
 
@@ -13,8 +14,17 @@ interface ConversationDao {
 
     @Query("""
         UPDATE conversations
-        SET lastMessagePreview = :preview, lastUpdatedAt = :updatedAt, unreadCount = unreadCount + :unreadInc
-        WHERE conversationId = :cid
+        SET lastMessagePreview = :preview,
+            lastUpdatedAt      = :updatedAt,
+            unreadCount        = unreadCount + :unreadInc,
+            exchangeId         = COALESCE(:exchangeId, exchangeId)
+        WHERE conversationId   = :cid
     """)
-    suspend fun bumpConversation(cid: String, preview: String, updatedAt: Long, unreadInc: Int)
+    suspend fun bumpConversation(
+        cid: String,
+        preview: String,
+        updatedAt: Long,
+        unreadInc: Int,
+        exchangeId: String? // ← NUEVO
+    )
 }

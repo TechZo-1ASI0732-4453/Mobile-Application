@@ -5,5 +5,6 @@ data class ActiveConversationDto(
     val peerId: String?,
     val lastMessage: String?,
     val updatedAt: String?,
-    val unreadCount: Int
+    val unreadCount: Int,
+    val exchangeId: String? = null
 )

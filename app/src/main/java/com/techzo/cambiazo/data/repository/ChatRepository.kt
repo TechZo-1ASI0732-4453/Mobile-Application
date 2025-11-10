@@ -9,11 +9,8 @@ import com.techzo.cambiazo.data.remote.chat.*
 import com.techzo.cambiazo.domain.Chat
 import com.techzo.cambiazo.domain.MessageType
 import com.techzo.cambiazo.domain.SendStatus
-import com.techzo.cambiazo.domain.isoFromMillisSafe
-import com.techzo.cambiazo.domain.millisFromIsoSafe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -31,9 +28,7 @@ class ChatRepository @Inject constructor(
     private val io = CoroutineScope(Dispatchers.IO)
 
     init {
-        service.setChatConsumer { dto ->
-            io.launch { upsertIncoming(dto) }
-        }
+        service.setChatConsumer { dto -> io.launch { upsertIncoming(dto) } }
         service.connectIfNeeded()
     }
 
@@ -57,87 +52,123 @@ class ChatRepository @Inject constructor(
     }
 
     private suspend fun upsertConversation(ac: ActiveConversationDto) {
-        val ts = millisFromIsoSafe(ac.updatedAt) ?: System.currentTimeMillis()
+        val ts = DateTimeUtils.parseIsoToEpochMillis(ac.updatedAt) ?: System.currentTimeMillis()
         val entity = ConversationEntity(
             conversationId = ac.conversationId,
             peerUserId = ac.peerId ?: "",
             lastMessagePreview = ac.lastMessage ?: "",
             lastUpdatedAt = ts,
-            unreadCount = ac.unreadCount
+            unreadCount = ac.unreadCount,
+            exchangeId = ac.exchangeId
         )
         conversationDao.upsert(entity)
     }
 
     fun observeConversation(conversationId: String, currentUserId: String): Flow<List<Chat>> =
-        messageDao.observeByConversation(conversationId)
-            .map { list -> list.map { it.toDomain() } }
+        messageDao.observeByConversation(conversationId).map { it.map { e -> e.toDomain() } }
 
-    fun subscribeConversation(conversationId: String) {
-        service.subscribeConversation(conversationId)
+    fun subscribeConversation(conversationId: String) = service.subscribeConversation(conversationId)
+
+    /** Abre/asegura la conversación con exchangeId y retorna el cid */
+    suspend fun openConversation(conversationId: String? = null, exchangeId: String? = null): String? {
+        return try {
+            val resp = chatRest.openConversation(conversationId, exchangeId)
+            if (resp.isSuccessful) resp.body() else null
+        } catch (_: Throwable) { null }
     }
 
-    fun sendMessage(me: String, peer: String, conversationId: String, content: String) {
-        val now = System.currentTimeMillis()
-        val clientId = UUID.randomUUID().toString()
-        val type = if (content.startsWith("L0C4t10N:")) MessageType.LOCATION else MessageType.TEXT
-
-        val local = ChatMessageEntity(
-            localId = clientId,
-            serverId = null,
-            clientMessageId = clientId,
-            conversationId = conversationId,
-            senderId = me,
-            receiverId = peer,
-            content = content,
-            type = type,
-            status = SendStatus.SENDING,
-            createdAt = now,
-            isMine = true
-        )
-        io.launch { messageDao.insert(local) }
-
-        service.subscribeConversation(conversationId)
-
-        val payload = ChatPayload(
-            senderId = me,
-            receiverId = peer,
-            conversationId = conversationId,
-            content = content,
-            clientMessageId = clientId
-        )
-
-        service.sendPayload(
-            payload,
-            onOk = { /* el eco por WS marcará SENT */ },
-            onError = { io.launch { messageDao.updateStatus(local.localId, SendStatus.FAILED) } }
-        )
-
+    /** Envío con tipo explícito; si no hay cid, lo crea en backend con exchangeId. */
+    fun sendMessage(
+        me: String,
+        peer: String,
+        conversationId: String,
+        content: String? = null,
+        exchangeId: String? = null,
+        type: MessageType = MessageType.TEXT,
+        latitude: Double? = null,
+        longitude: Double? = null,
+        locationLabel: String? = null
+    ) {
         io.launch {
-            delay(15_000)
-            val still = messageDao.findByClientMessageId(clientId)
-            if (still?.status == SendStatus.SENDING) {
-                messageDao.updateStatus(local.localId, SendStatus.FAILED)
-            }
+            val cid = if (conversationId.isBlank()) {
+                openConversation(null, exchangeId) ?: return@launch
+            } else conversationId
+
+            val now = System.currentTimeMillis()
+            val clientId = UUID.randomUUID().toString()
+
+            val local = ChatMessageEntity(
+                localId = clientId,
+                serverId = null,
+                conversationId = cid,
+                senderId = me,
+                receiverId = peer,
+                content = content.orEmpty(),
+                type = type,
+                status = SendStatus.SENDING,
+                createdAt = now,
+                isMine = true,
+                exchangeId = exchangeId
+            )
+            messageDao.insert(local)
+
+            subscribeConversation(cid)
+
+            val payload = ChatMessagePayload(
+                id = clientId,
+                senderId = me,
+                receiverId = peer,
+                conversationId = cid,
+                exchangeId = exchangeId,
+                content = content,
+                type = when (type) {
+                    MessageType.TEXT -> ChatMessagePayload.MessageType.TEXT
+                    MessageType.LOCATION -> ChatMessagePayload.MessageType.LOCATION
+                },
+                latitude = latitude,
+                longitude = longitude,
+                locationLabel = locationLabel,
+                timestamp = DateTimeUtils.nowIsoUtcMillis()
+            )
+
+            service.sendPayload(
+                payload,
+                onOk   = { /* el eco por WS (ServerChatDto) marcará SENT */ },
+                onError= { io.launch { messageDao.updateStatus(local.localId, SendStatus.FAILED) } }
+            )
         }
     }
 
     fun disconnectAll() = service.disconnectAll()
+
     private suspend fun upsertIncoming(dto: ServerChatDto) {
         val currentUserId = Constants.user?.id?.toString() ?: ""
-        val ts = millisFromIsoSafe(dto.timestamp) ?: System.currentTimeMillis()
+        val ts = DateTimeUtils.parseIsoToEpochMillis(dto.timestamp) ?: System.currentTimeMillis()
+
+        // ACK por id local
+        val ackId = dto.id
+        if (!ackId.isNullOrBlank()) {
+            try { messageDao.updateStatus(ackId, SendStatus.SENT) } catch (_: Throwable) { }
+            if (dto.senderId == currentUserId) return
+        }
+
+        val domainType = when (dto.type) {
+            ChatMessagePayload.MessageType.LOCATION -> MessageType.LOCATION
+            else -> MessageType.TEXT
+        }
 
         val incoming = ChatMessageEntity(
             localId = UUID.randomUUID().toString(),
             serverId = dto.id,
-            clientMessageId = dto.clientMessageId,
             conversationId = dto.conversationId,
             senderId = dto.senderId,
             receiverId = dto.receiverId,
-            content = dto.content,
-            type = if (dto.content.startsWith("L0C4t10N:")) MessageType.LOCATION else MessageType.TEXT,
+            content = dto.content.orEmpty(),
+            type = domainType,
             status = SendStatus.SENT,
             createdAt = ts,
-            isMine = dto.senderId == currentUserId
+            isMine = dto.senderId == currentUserId,
+            exchangeId = dto.exchangeId
         )
 
         messageDao.upsertFromServer(incoming, dedupeWindowMs = 60_000L)
@@ -147,7 +178,6 @@ class ChatRepository @Inject constructor(
         Chat(
             localId = localId,
             serverId = serverId,
-            clientMessageId = clientMessageId,
             conversationId = conversationId,
             senderId = senderId,
             receiverId = receiverId,
@@ -156,6 +186,6 @@ class ChatRepository @Inject constructor(
             status = status,
             createdAtMillis = createdAt,
             isMine = isMine,
-            timestampIso = isoFromMillisSafe(createdAt)
+            timestampIso = DateTimeUtils.toIsoUtcMillis(java.util.Date(createdAt))
         )
 }

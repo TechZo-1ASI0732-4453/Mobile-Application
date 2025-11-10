@@ -5,5 +5,4 @@ data class ChatPayload(
     val receiverId: String,
     val conversationId: String,
     val content: String,
-    val clientMessageId: String? = null
 )

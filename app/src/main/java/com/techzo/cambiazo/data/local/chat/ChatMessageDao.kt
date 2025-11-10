@@ -23,9 +23,6 @@ interface ChatMessageDao {
     @Query("SELECT * FROM chat_messages WHERE serverId = :sid LIMIT 1")
     suspend fun findByServerId(sid: String): ChatMessageEntity?
 
-    @Query("SELECT * FROM chat_messages WHERE clientMessageId = :cid LIMIT 1")
-    suspend fun findByClientMessageId(cid: String): ChatMessageEntity?
-
     @Query("UPDATE chat_messages SET status = :status WHERE localId = :localId")
     suspend fun updateStatus(localId: String, status: SendStatus)
 
@@ -43,6 +40,10 @@ interface ChatMessageDao {
           AND content        = :content
           AND status         = :status
           AND createdAt     >= :minCreatedAt
+          AND (
+                (exchangeId IS NULL AND :exchangeId IS NULL)
+             OR (exchangeId = :exchangeId)
+          )
         ORDER BY createdAt DESC
         LIMIT 1
     """)
@@ -51,7 +52,8 @@ interface ChatMessageDao {
         senderId: String,
         content: String,
         status: SendStatus,
-        minCreatedAt: Long
+        minCreatedAt: Long,
+        exchangeId: String?
     ): ChatMessageEntity?
 
     @Transaction
@@ -60,22 +62,12 @@ interface ChatMessageDao {
         if (byServer != null) {
             update(
                 byServer.copy(
-                    content   = incoming.content,
-                    type      = incoming.type,
-                    status    = incoming.status,
-                    createdAt = incoming.createdAt
+                    content    = incoming.content,
+                    type       = incoming.type,
+                    status     = incoming.status,
+                    createdAt  = incoming.createdAt,
+                    exchangeId = incoming.exchangeId
                 )
-            )
-            return
-        }
-
-        val byClient = incoming.clientMessageId?.let { findByClientMessageId(it) }
-        if (byClient != null) {
-            attachServerInfo(
-                localId   = byClient.localId,
-                serverId  = incoming.serverId,
-                status    = SendStatus.SENT,
-                createdAt = incoming.createdAt
             )
             return
         }
@@ -85,7 +77,8 @@ interface ChatMessageDao {
             senderId       = incoming.senderId,
             content        = incoming.content,
             status         = SendStatus.SENDING,
-            minCreatedAt   = incoming.createdAt - dedupeWindowMs
+            minCreatedAt   = incoming.createdAt - dedupeWindowMs,
+            exchangeId     = incoming.exchangeId
         )
         if (candidate != null) {
             attachServerInfo(

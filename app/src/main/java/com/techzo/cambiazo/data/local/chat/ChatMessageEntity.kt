@@ -10,14 +10,13 @@ import com.techzo.cambiazo.domain.SendStatus
     tableName = "chat_messages",
     indices = [
         Index(value = ["conversationId", "createdAt", "localId"]),
-        Index(value = ["serverId"], unique = true),
-        Index(value = ["clientMessageId"], unique = true)
+        Index(value = ["serverId"], unique = false),
+        Index(value = ["exchangeId"])
     ]
 )
 data class ChatMessageEntity(
     @PrimaryKey val localId: String,
     val serverId: String?,
-    val clientMessageId: String?,
     val conversationId: String,
     val senderId: String,
     val receiverId: String,
@@ -25,5 +24,6 @@ data class ChatMessageEntity(
     val type: MessageType = MessageType.TEXT,
     val status: SendStatus = SendStatus.SENT,
     val createdAt: Long,
-    val isMine: Boolean
+    val isMine: Boolean,
+    val exchangeId: String? = null
 )

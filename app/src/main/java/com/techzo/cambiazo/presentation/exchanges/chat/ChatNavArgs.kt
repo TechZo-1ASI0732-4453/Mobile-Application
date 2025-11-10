@@ -6,4 +6,5 @@ object ChatNavArgs {
     const val RECEIVER_ID = "userReceiverId"
     const val RECEIVER_NAME = "userReceiverName"
     const val RECEIVER_PHOTO = "userReceiverPhoto"
+    const val EXCHANGE_ID = "exchangeId"
 }

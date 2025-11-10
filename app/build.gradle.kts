@@ -141,5 +141,4 @@ dependencies {
     //Paypal
     implementation ("com.paypal.android:paypal-web-payments:1.5.0")
     implementation("com.google.firebase:firebase-appcheck-debug:17.1.1")
-
 }

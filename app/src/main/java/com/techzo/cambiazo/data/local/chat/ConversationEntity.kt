@@ -4,11 +4,18 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "conversations", indices = [Index("lastUpdatedAt")])
+@Entity(
+    tableName = "conversations",
+    indices = [
+        Index("lastUpdatedAt"),
+        Index("exchangeId")
+    ]
+)
 data class ConversationEntity(
     @PrimaryKey val conversationId: String,
     val peerUserId: String,
     val lastMessagePreview: String,
     val lastUpdatedAt: Long,
-    val unreadCount: Int
+    val unreadCount: Int,
+    val exchangeId: String? = null
 )

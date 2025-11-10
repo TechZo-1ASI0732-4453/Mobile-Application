@@ -16,11 +16,12 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.techzo.cambiazo.data.repository.ChatRepository
 import com.techzo.cambiazo.domain.Chat
+import com.techzo.cambiazo.domain.MessageType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,122 +31,141 @@ class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    companion object {
-        private const val TAG = "ChatViewModel"
-        private const val ARG_SENDER_ID = "userSenderId"
-        private const val ARG_RECEIVER_ID = "userReceiverId"
-        private const val ARG_CONVERSATION_ID = "conversationId"
-        private const val ARG_RECEIVER_NAME = "userReceiverName"
-        private const val ARG_RECEIVER_PHOTO = "userReceiverPhoto"
+    companion object { private const val TAG = "ChatViewModel" }
+
+    private var currentCid: String = savedStateHandle.get<String>(ChatNavArgs.CONVERSATION_ID).orEmpty()
+    private val currentUserId: String = savedStateHandle.get<String>(ChatNavArgs.SENDER_ID).orEmpty()
+    private val peerUserId: String = savedStateHandle.get<String>(ChatNavArgs.RECEIVER_ID).orEmpty()
+    private val peerUserName: String = savedStateHandle.get<String>(ChatNavArgs.RECEIVER_NAME).orEmpty()
+    private val peerUserPhoto: String = savedStateHandle.get<String>(ChatNavArgs.RECEIVER_PHOTO).orEmpty()
+
+    private val exchangeId: String? = run {
+        val asInt: Int? = savedStateHandle.get(ChatNavArgs.EXCHANGE_ID)
+        if (asInt != null) asInt.toString() else savedStateHandle.get(ChatNavArgs.EXCHANGE_ID)
     }
 
-    private val conversationId: String = savedStateHandle.get<String>(ARG_CONVERSATION_ID).orEmpty()
-    private val currentUserId: String  = savedStateHandle.get<String>(ARG_SENDER_ID).orEmpty()
-    private val peerUserId: String     = savedStateHandle.get<String>(ARG_RECEIVER_ID).orEmpty()
-    private val peerUserName: String   = savedStateHandle.get<String>(ARG_RECEIVER_NAME).orEmpty()
-    private val peerUserPhoto: String  = savedStateHandle.get<String>(ARG_RECEIVER_PHOTO).orEmpty()
-
-    val messages: StateFlow<List<Chat>> =
-        if (conversationId.isNotBlank())
-            chatRepository.observeConversation(conversationId, currentUserId)
-                .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-        else
-            MutableStateFlow(emptyList<Chat>())
-                .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    private val _messages = MutableStateFlow<List<Chat>>(emptyList())
+    val messages: StateFlow<List<Chat>> get() = _messages
 
     private var subscribed = false
+    private var observeJob: Job? = null
 
     private val _inputText = mutableStateOf(TextFieldValue(""))
     val inputText: State<TextFieldValue> get() = _inputText
 
     init {
         logArgs()
-        reconnect()
+        if (currentCid.isNotBlank()) {
+            attachMessages(currentCid)
+            reconnect()
+        }
     }
 
     private fun logArgs() {
-        Log.d(TAG, "Args -> conversationId=$conversationId, currentUserId=$currentUserId, " +
-                "peerUserId=$peerUserId, peerUserName=$peerUserName, peerUserPhoto=$peerUserPhoto")
-        if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) {
+        Log.d(TAG, "Args -> cid=$currentCid, me=$currentUserId, peer=$peerUserId, name=$peerUserName, exchangeId=$exchangeId")
+        if (currentUserId.isBlank() || peerUserId.isBlank()) {
             Log.w(TAG, "Argumentos incompletos: no se puede suscribir ni enviar mensajes.")
         }
     }
 
-    fun onInputChange(newValue: TextFieldValue) {
-        _inputText.value = newValue
+    private fun attachMessages(cid: String) {
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch {
+            chatRepository.observeConversation(cid, currentUserId).collectLatest { _messages.value = it }
+        }
     }
 
+    fun onInputChange(newValue: TextFieldValue) { _inputText.value = newValue }
     fun getPeerName(): String = peerUserName
     fun getPeerPhoto(): String = peerUserPhoto
 
     fun reconnect() {
         if (subscribed) return
-        if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) return
+        if (currentCid.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) return
         subscribed = true
-        chatRepository.subscribeConversation(conversationId)
-        Log.d(TAG, "Suscrito a /topic/chat.$conversationId")
+        chatRepository.subscribeConversation(currentCid)
+        Log.d(TAG, "Suscrito a /topic/chat.$currentCid")
     }
 
     fun send(text: String) {
         val trimmed = text.trim()
         if (trimmed.isBlank()) return
-        if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) {
-            Log.w(TAG, "No se envía: args incompletos.")
-            return
+        if (currentUserId.isBlank() || peerUserId.isBlank()) { Log.w(TAG, "Args incompletos"); return }
+
+        viewModelScope.launch {
+            if (currentCid.isBlank()) {
+                val cid = chatRepository.openConversation(null, exchangeId)
+                if (cid.isNullOrBlank()) { Log.e(TAG, "No se pudo abrir conversación"); return@launch }
+                currentCid = cid
+                chatRepository.subscribeConversation(currentCid)
+                attachMessages(currentCid)
+            }
+
+            _inputText.value = TextFieldValue("")
+            chatRepository.sendMessage(
+                me = currentUserId,
+                peer = peerUserId,
+                conversationId = currentCid,
+                content = trimmed,
+                exchangeId = exchangeId,
+                type = MessageType.TEXT
+            )
+            Log.d(TAG, "TEXT enviado -> cid=$currentCid, exchangeId=$exchangeId")
         }
-
-        // Garantiza suscripción antes de enviar (por si reconectó el WS)
-        chatRepository.subscribeConversation(conversationId)
-
-        _inputText.value = TextFieldValue("")
-        chatRepository.sendMessage(currentUserId, peerUserId, conversationId, trimmed)
-        Log.d(TAG, "Mensaje enviado (cliente) -> cid=$conversationId")
     }
 
-    override fun onCleared() {
-        super.onCleared()
-    }
+    // ----- Ubicación -----
 
-    fun sendLocationMessage(activity: Activity) {
-        if (conversationId.isBlank() || currentUserId.isBlank() || peerUserId.isBlank()) return
+    fun sendLocationMessage(activity: Activity, label: String? = null) {
+        if (currentUserId.isBlank() || peerUserId.isBlank()) return
 
         val sendWith = { lat: Double?, lng: Double? ->
             if (lat != null && lng != null) {
-                val content = "L0C4t10N: {latitud:$lat, longitud:$lng}"
                 viewModelScope.launch {
-                    chatRepository.sendMessage(currentUserId, peerUserId, conversationId, content)
+                    if (currentCid.isBlank()) {
+                        val cid = chatRepository.openConversation(null, exchangeId)
+                        if (cid.isNullOrBlank()) { Log.e(TAG, "No se pudo abrir conversación"); return@launch }
+                        currentCid = cid
+                        chatRepository.subscribeConversation(currentCid)
+                        attachMessages(currentCid)
+                    }
+                    chatRepository.sendMessage(
+                        me = currentUserId,
+                        peer = peerUserId,
+                        conversationId = currentCid,
+                        content = null,
+                        exchangeId = exchangeId,
+                        type = MessageType.LOCATION,
+                        latitude = lat,
+                        longitude = lng,
+                        locationLabel = label
+                    )
+                    Log.d(TAG, "LOCATION enviado -> cid=$currentCid, exchangeId=$exchangeId ($lat,$lng)")
                 }
             }
         }
 
-        if (isEmulator()) {
-            getCurrentLocationOnce(activity, sendWith)
-            return
-        }
-        checkLocationSettings(activity) {
-            getCurrentLocationOnce(activity, sendWith)
-        }
+        if (isEmulator()) { getCurrentLocationOnce(activity, sendWith); return }
+        checkLocationSettings(activity) { getCurrentLocationOnce(activity, sendWith) }
     }
+
+    // Helpers de ubicación (tu misma lógica de antes) …
 
     fun checkLocationSettings(activity: Activity, onReady: () -> Unit) {
         val locationRequest = createHighAccuracyLocationRequest()
-        val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
-            .setAlwaysShow(true)
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest).setAlwaysShow(true)
         val client = LocationServices.getSettingsClient(activity)
         val task = client.checkLocationSettings(builder.build())
         task.addOnSuccessListener { onReady() }
-        task.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException) {
-                try {
-                    exception.startResolutionForResult(activity, 1001)
-                } catch (_: IntentSender.SendIntentException) { }
+        task.addOnFailureListener { ex ->
+            if (ex is ResolvableApiException) {
+                try { ex.startResolutionForResult(activity, 1001) } catch (_: IntentSender.SendIntentException) { }
             }
         }
     }
 
     @SuppressLint("MissingPermission")
-    fun getCurrentLocationOnce(activity: Activity, onResult: (lat: Double?, lng: Double?) -> Unit) {
+    fun getCurrentLocationOnce(activity: Activity, onResult: (Double?, Double?) -> Unit) {
         val fused = LocationServices.getFusedLocationProviderClient(activity)
         val isEmu = isEmulator()
         val accuracyThreshold = if (isEmu) 5000f else 50f
@@ -157,13 +177,9 @@ class ChatViewModel @Inject constructor(
                     onResult(last.latitude, last.longitude)
                 } else {
                     val cts = com.google.android.gms.tasks.CancellationTokenSource()
-                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
-                        { cts.cancel() },
-                        timeoutMs
-                    )
+                    android.os.Handler(Looper.getMainLooper()).postDelayed({ cts.cancel() }, timeoutMs)
                     fused.getCurrentLocation(
-                        com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
-                        cts.token
+                        com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, cts.token
                     ).addOnSuccessListener { loc ->
                         if (loc != null && (!loc.hasAccuracy() || loc.accuracy <= accuracyThreshold)) {
                             onResult(loc.latitude, loc.longitude)
@@ -183,16 +199,14 @@ class ChatViewModel @Inject constructor(
     @SuppressLint("MissingPermission")
     private fun requestSingleHighAccUpdate(
         fused: com.google.android.gms.location.FusedLocationProviderClient,
-        onResult: (lat: Double?, lng: Double?) -> Unit,
+        onResult: (Double?, Double?) -> Unit,
         timeoutMs: Long,
         accuracyM: Float
     ) {
         @Suppress("DEPRECATION")
         val req = com.google.android.gms.location.LocationRequest.create().apply {
             priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 0L
-            fastestInterval = 0L
-            numUpdates = 1
+            interval = 0L; fastestInterval = 0L; numUpdates = 1
         }
         val cb = object : com.google.android.gms.location.LocationCallback() {
             override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
@@ -200,15 +214,12 @@ class ChatViewModel @Inject constructor(
                 fused.removeLocationUpdates(this)
                 if (loc != null && (!loc.hasAccuracy() || loc.accuracy <= accuracyM)) {
                     onResult(loc.latitude, loc.longitude)
-                } else {
-                    onResult(null, null)
-                }
+                } else onResult(null, null)
             }
         }
         fused.requestLocationUpdates(req, cb, Looper.getMainLooper())
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            fused.removeLocationUpdates(cb)
-            onResult(null, null)
+        android.os.Handler(Looper.getMainLooper()).postDelayed({
+            fused.removeLocationUpdates(cb); onResult(null, null)
         }, timeoutMs)
     }
 
@@ -227,13 +238,9 @@ class ChatViewModel @Inject constructor(
         val b = android.os.Build.BRAND ?: ""
         val d = android.os.Build.DEVICE ?: ""
         val p = android.os.Build.PRODUCT ?: ""
-        return f.startsWith("generic") ||
-                f.lowercase().contains("vbox") ||
-                f.lowercase().contains("test-keys") ||
-                m.contains("Emulator", true) ||
-                m.contains("Android SDK built for x86", true) ||
-                man.contains("Genymotion", true) ||
-                (b.startsWith("generic") && d.startsWith("generic")) ||
+        return f.startsWith("generic") || f.lowercase().contains("vbox") || f.lowercase().contains("test-keys") ||
+                m.contains("Emulator", true) || m.contains("Android SDK built for x86", true) ||
+                man.contains("Genymotion", true) || (b.startsWith("generic") && d.startsWith("generic")) ||
                 p == "google_sdk"
     }
 }
