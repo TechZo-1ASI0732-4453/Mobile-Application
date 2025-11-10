@@ -291,11 +291,12 @@ fun ChatScreen(
 
             items(messages, key = { it.localId }) { message ->
                 if (message.type == MessageType.LOCATION) {
-                    val parsed = parseLocationMessage(message.content)
-                    if (parsed != null) {
-                        val (lat, lng) = parsed
+
+                    val lat = message.latitude
+                    val lng = message.longitude
+                    if (lat != null && lng != null) {
                         LocationMessageItem(
-                            latitude = lat,
+                            latitude = lng,
                             longitude = lng,
                             isMine = message.isMine,
                             isLoading = message.status == SendStatus.SENDING

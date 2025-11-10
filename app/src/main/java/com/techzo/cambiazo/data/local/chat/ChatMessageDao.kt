@@ -66,7 +66,9 @@ interface ChatMessageDao {
                     type       = incoming.type,
                     status     = incoming.status,
                     createdAt  = incoming.createdAt,
-                    exchangeId = incoming.exchangeId
+                    exchangeId = incoming.exchangeId,
+                    latitude      = incoming.latitude,
+                    longitude     = incoming.longitude,
                 )
             )
             return

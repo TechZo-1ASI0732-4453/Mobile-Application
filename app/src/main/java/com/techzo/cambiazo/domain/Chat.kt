@@ -22,6 +22,9 @@ data class Chat(
     val createdAtMillis: Long = System.currentTimeMillis(),
     val isMine: Boolean,
 
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+
     val timestampIso: String = isoFromMillisSafe(createdAtMillis)
 ) {
     companion object {

@@ -57,7 +57,7 @@ class ChatRepository @Inject constructor(
             val list = resp.body().orEmpty()
 
             list.forEach { dto ->
-                upsertIncoming(dto)
+                upsertIncoming(dto, fromSync = true)
             }
         } catch (_: Throwable) {
         }
@@ -103,7 +103,7 @@ class ChatRepository @Inject constructor(
     ) {
         io.launch {
             val cid = if (conversationId.isBlank()) {
-                openConversation(null, exchangeId) ?: return@launch
+                openConversation(exchangeId, exchangeId) ?: return@launch
             } else conversationId
 
             val now = System.currentTimeMillis()
@@ -120,6 +120,8 @@ class ChatRepository @Inject constructor(
                 status = SendStatus.SENDING,
                 createdAt = now,
                 isMine = true,
+                latitude = latitude,
+                longitude = longitude,
                 exchangeId = exchangeId
             )
             messageDao.insert(local)
@@ -153,13 +155,15 @@ class ChatRepository @Inject constructor(
 
     fun disconnectAll() = service.disconnectAll()
 
-    private suspend fun upsertIncoming(dto: ServerChatDto) {
+    private suspend fun upsertIncoming(
+        dto: ServerChatDto,
+        fromSync: Boolean = false
+    ) {
         val currentUserId = Constants.user?.id?.toString() ?: ""
         val ts = DateTimeUtils.parseIsoToEpochMillis(dto.timestamp) ?: System.currentTimeMillis()
 
-        // ACK por id local
         val ackId = dto.id
-        if (!ackId.isNullOrBlank()) {
+        if (!fromSync && !ackId.isNullOrBlank()) {
             try { messageDao.updateStatus(ackId, SendStatus.SENT) } catch (_: Throwable) { }
             if (dto.senderId == currentUserId) return
         }
@@ -180,11 +184,14 @@ class ChatRepository @Inject constructor(
             status = SendStatus.SENT,
             createdAt = ts,
             isMine = dto.senderId == currentUserId,
-            exchangeId = dto.exchangeId
+            exchangeId = dto.exchangeId,
+            latitude = dto.latitude,
+            longitude = dto.longitude,
         )
 
         messageDao.upsertFromServer(incoming, dedupeWindowMs = 60_000L)
     }
+
 
     private fun ChatMessageEntity.toDomain(): Chat =
         Chat(
@@ -198,6 +205,8 @@ class ChatRepository @Inject constructor(
             status = status,
             createdAtMillis = createdAt,
             isMine = isMine,
+            latitude = latitude ,
+            longitude = longitude ,
             timestampIso = DateTimeUtils.toIsoUtcMillis(java.util.Date(createdAt))
         )
 }

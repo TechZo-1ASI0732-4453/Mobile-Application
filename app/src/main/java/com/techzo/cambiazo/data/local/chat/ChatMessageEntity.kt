@@ -25,5 +25,7 @@ data class ChatMessageEntity(
     val status: SendStatus = SendStatus.SENT,
     val createdAt: Long,
     val isMine: Boolean,
-    val exchangeId: String? = null
+    val exchangeId: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )

@@ -58,7 +58,7 @@ class ChatViewModel @Inject constructor(
         if (currentCid.isNotBlank()) {
             viewModelScope.launch {
                 chatRepository.syncConversation(currentCid)
-                attachMessages(currentCid)
+               attachMessages(currentCid)
                 reconnect()
             }
         }
@@ -97,7 +97,7 @@ class ChatViewModel @Inject constructor(
 
         viewModelScope.launch {
             if (currentCid.isBlank()) {
-                val cid = chatRepository.openConversation(null, exchangeId)
+                val cid = chatRepository.openConversation(exchangeId, exchangeId)
                 if (cid.isNullOrBlank()) { Log.e(TAG, "No se pudo abrir conversación"); return@launch }
                 currentCid = cid
                 chatRepository.subscribeConversation(currentCid)
