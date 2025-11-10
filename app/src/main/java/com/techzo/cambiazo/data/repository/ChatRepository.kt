@@ -50,6 +50,18 @@ class ChatRepository @Inject constructor(
             service.subscribeConversation(it.conversationId)
         }
     }
+    suspend fun syncConversation(conversationId: String) {
+        try {
+            val resp = chatRest.getMessages(conversationId)
+            if (!resp.isSuccessful) return
+            val list = resp.body().orEmpty()
+
+            list.forEach { dto ->
+                upsertIncoming(dto)
+            }
+        } catch (_: Throwable) {
+        }
+    }
 
     private suspend fun upsertConversation(ac: ActiveConversationDto) {
         val ts = DateTimeUtils.parseIsoToEpochMillis(ac.updatedAt) ?: System.currentTimeMillis()

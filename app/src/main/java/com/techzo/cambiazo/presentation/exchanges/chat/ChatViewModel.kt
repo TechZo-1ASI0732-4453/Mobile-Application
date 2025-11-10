@@ -56,8 +56,11 @@ class ChatViewModel @Inject constructor(
     init {
         logArgs()
         if (currentCid.isNotBlank()) {
-            attachMessages(currentCid)
-            reconnect()
+            viewModelScope.launch {
+                chatRepository.syncConversation(currentCid)
+                attachMessages(currentCid)
+                reconnect()
+            }
         }
     }
 

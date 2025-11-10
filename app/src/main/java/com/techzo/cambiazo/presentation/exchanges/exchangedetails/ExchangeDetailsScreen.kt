@@ -239,7 +239,7 @@ fun ExchangeDetailsScreen(
                                 .clip(RoundedCornerShape(50.dp))
                                 .background(textBackgroundColor)
                                 .padding(horizontal = 20.dp, vertical = 3.dp)
-                                .clickable {openChat(currentUserId.toString(),otherUserId.toString(),"${primaryIdToChat}-${secondaryIdToChat}",userName,profilePicture)}
+                                .clickable {openChat(currentUserId.toString(),otherUserId.toString(),exchangeId.toString(),userName,profilePicture)}
                             ,
                             fontWeight = FontWeight.Bold, fontSize = 14.sp,
                         )

@@ -173,10 +173,11 @@ sealed class Routes(val route: String) {
         fun createNewRoute(
             userSenderId: String,
             userReceiverId: String,
+            conversationId: String,
             userReceiverName: String,
             userReceiverPhoto: String
         ): String = createRoute(
-            userSenderId, userReceiverId, java.util.UUID.randomUUID().toString(), userReceiverName, userReceiverPhoto
+            userSenderId, userReceiverId, conversationId, userReceiverName, userReceiverPhoto
         )
     }
 }
@@ -356,9 +357,9 @@ fun NavScreen(
                     goToReviewScreen = { userId ->
                         navController.navigate(Routes.Reviews.createRoute(userId.toString()))
                     },
-                    openChat = { userSenderId, userReceiverId, _, userReceiverName, userReceiverPhoto ->
+                    openChat = { userSenderId, userReceiverId, conversationId, userReceiverName, userReceiverPhoto ->
                         navController.navigate(
-                            Routes.Chat.createNewRoute(userSenderId, userReceiverId, userReceiverName, userReceiverPhoto)
+                            Routes.Chat.createNewRoute(userSenderId, userReceiverId, conversationId,userReceiverName, userReceiverPhoto)
                         )
                     },
                     exchangeId = exchange,
