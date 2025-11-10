@@ -2,6 +2,7 @@ package com.techzo.cambiazo.presentation.exchanges.chat.components
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -50,11 +51,11 @@ fun LocationMessageItem(
     val alignment = if (isMine) Arrangement.End else Arrangement.Start
     val color =  Color(if (isMine) 0xFFFFD146 else 0xFFEDEDED)
 
-    val cameraPositionState = rememberCameraPositionState  {
+    val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(lat, lng), 15f)
     }
 
-    val markerState = remember { MarkerState(position = LatLng(lat, lng)) }
+    val markerState = remember(lat, lng) { MarkerState(LatLng(lat, lng)) }
     if (!isMine) Spacer(modifier = Modifier.width(2.dp))
 
     Row(  modifier = Modifier

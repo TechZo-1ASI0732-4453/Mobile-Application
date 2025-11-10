@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.presentation.exchanges.chat
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -296,11 +297,12 @@ fun ChatScreen(
                     val lng = message.longitude
                     if (lat != null && lng != null) {
                         LocationMessageItem(
-                            latitude = lng,
+                            latitude = lat,
                             longitude = lng,
                             isMine = message.isMine,
                             isLoading = message.status == SendStatus.SENDING
                         )
+                        Log.d("Chat", "Location msg -> lat=${lat}, lng=${lng}")
                     } else {
                         LocationSharedPlaceholder(
                             isMine = message.isMine,
