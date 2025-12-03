@@ -23,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,8 +38,7 @@ import com.techzo.cambiazo.data.remote.donations.OngDto
 @Composable
 fun DonationScreen(
     back: () -> Unit = {},
-    onOngClick: (OngDto) -> Unit = {},
-    openDonations: ()-> Unit = {}
+    onOngClick: (String) -> Unit = {},
 ) {
     val viewModel: DonationsViewModel = hiltViewModel()
     val state = viewModel.ongs.value
@@ -95,7 +93,7 @@ fun DonationScreen(
                     }
                     else -> {
                         items(filteredOngs) { ong ->
-                            OngCard(ong = ong, onClick = { onOngClick(ong) })
+                            OngCard(ong = ong, onClick = { onOngClick(ong.id.toString()) })
                             Spacer(modifier = Modifier.height(10.dp))
                         }
                     }

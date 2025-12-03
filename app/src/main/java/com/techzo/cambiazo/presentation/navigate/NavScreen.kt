@@ -46,6 +46,7 @@ import com.techzo.cambiazo.presentation.profile.myreviews.MyReviewsScreen
 import com.techzo.cambiazo.presentation.auth.register.SignUpScreen
 import com.techzo.cambiazo.presentation.auth.register.TyC.TermsAndConditionsScreen
 import com.techzo.cambiazo.presentation.donations.DonationScreen
+import com.techzo.cambiazo.presentation.donations.donationdetail.DonationDetailScreen
 import com.techzo.cambiazo.presentation.exchanges.chat.ChatNavArgs
 import com.techzo.cambiazo.presentation.exchanges.chat.ChatScreen
 import com.techzo.cambiazo.presentation.explorer.review.ReviewScreen
@@ -146,6 +147,9 @@ sealed class Routes(val route: String) {
             val encodedCode = Uri.encode(codeGenerated)
             return "OtpCodeVerificationScreen/$encodedEmail/$encodedCode"
         }
+    }
+    object DonationDetail : Routes("DonationDetailScreen/{ongId}") {
+        fun createDonationDetailsRoute(ongId: String) = "DonationDetailScreen/$ongId"
     }
     object NewPassword:Routes("NewPasswordScreen/{email}"){
         fun createRoute(email: String): String {
@@ -296,9 +300,13 @@ fun NavScreen(
         composable(route = Routes.Donations.route) {
             DonationScreen(
                 back = { navController.popBackStack() },
-                onOngClick = { /* lo que desees hacer al tocar una ONG */ },
-                openDonations = { navController.navigate(Routes.Donations.route) }
-                )
+                onOngClick = {ongId->
+                    navController.navigate(
+                        Routes.DonationDetail.createDonationDetailsRoute(
+                            ongId
+                        )
+                    )},
+            )
         }
 
 
@@ -483,6 +491,12 @@ fun NavScreen(
                 } },
                 activity = activity,
 
+            )
+        }
+
+        composable(route = Routes.DonationDetail.route){
+            DonationDetailScreen(
+                back = {navController.popBackStack()}
             )
         }
 
